@@ -17,7 +17,14 @@
 package org.wso2.is.data.sync.client.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.wso2.is.data.sync.client.datasource.ColumnData;
 
+import java.util.List;
+import java.util.StringJoiner;
+
+import static org.wso2.is.data.sync.client.util.Constant.COLUMN_TYPE_BIGINT;
+import static org.wso2.is.data.sync.client.util.Constant.COLUMN_TYPE_INT;
+import static org.wso2.is.data.sync.client.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.client.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.client.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.client.util.Constant.TRIGGER_NAME_SUFFIX_INSERT;
@@ -54,10 +61,29 @@ public class Util {
         return String.join("_", scheme, type);
     }
 
-    public static boolean isGenerateDDL() {
+    public static String generateColumnList(List<ColumnData> columnData) {
 
-        String executeScriptProperty = System.getProperty(Constant.SYSTEM_PROPERTY_GENERATE_DDL);
-        return executeScriptProperty != null;
+        StringJoiner columnJoiner = new StringJoiner(", ");
+
+        for (ColumnData columnEntry : columnData) {
+            columnJoiner.add(getColumnEntryString(columnEntry));
+        }
+        return columnJoiner.toString();
+    }
+
+    private static String getColumnEntryString(ColumnData columnEntry) {
+
+        String columnEntryString;
+        if (COLUMN_TYPE_TIMESTAMP.equalsIgnoreCase(columnEntry.getType()) ||
+            COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
+            COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
+            columnEntryString = columnEntry.getName() + " " + columnEntry.getType();
+        } else {
+            String columnTemplate = "%s %s (%d)";
+            columnEntryString = String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
+                                            columnEntry.getSize());
+        }
+        return columnEntryString;
     }
 
     private static String getFormattedName(String tableName, String suffix) {
@@ -72,6 +98,4 @@ public class Util {
         }
         return formattedName;
     }
-
-
 }

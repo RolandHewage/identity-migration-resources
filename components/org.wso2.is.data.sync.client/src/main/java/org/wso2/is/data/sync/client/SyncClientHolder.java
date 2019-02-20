@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.internal;
+package org.wso2.is.data.sync.client;
 
-import org.wso2.is.data.sync.client.DefaultSyncClient;
-import org.wso2.is.data.sync.client.SyncClient;
 import org.wso2.is.data.sync.client.impl.oauth.OAuthV530V560SyncClient;
 import org.wso2.is.data.sync.client.impl.oauth.OAuthV530V570SyncClient;
 
@@ -31,7 +29,7 @@ public class SyncClientHolder {
     public SyncClientHolder() {
 
         syncClients.add(new OAuthV530V560SyncClient());
-        syncClients.add(new OAuthV530V570SyncClient());
+        //syncClients.add(new OAuthV530V570SyncClient());
         syncClients.add(new DefaultSyncClient());
     }
 

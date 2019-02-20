@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.database;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+import javax.sql.DataSource;
 
-/**
- * Represents exception in
- */
-public class SyncClientException extends MigrationClientException {
+public class DataSourceEntry {
 
-    public SyncClientException(String message) {
-        super(message);
+    private DataSource dataSource;
+    private String type;
+
+    public DataSourceEntry(DataSource dataSource, String type) {
+
+        this.dataSource = dataSource;
+        this.type = type;
     }
 
-    public SyncClientException(String message, Throwable cause) {
-        super(message, cause);
+    public DataSource getDataSource() {
+
+        return dataSource;
     }
 
-    public SyncClientException(String errorCode, String message) {
-        super(errorCode, message);
-    }
-
-    public SyncClientException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
+    public String getType() {
+        return type;
     }
 }

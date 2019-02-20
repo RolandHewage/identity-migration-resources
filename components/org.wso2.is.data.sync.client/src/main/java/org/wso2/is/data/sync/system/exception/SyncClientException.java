@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.exception;
 
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 

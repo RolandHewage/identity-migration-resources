@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.datasource;
+package org.wso2.is.data.sync.system.database;
 
-import org.wso2.is.data.sync.client.util.Constant;
+import org.wso2.is.data.sync.system.exception.SyncClientException;
+import org.wso2.is.data.sync.system.util.Constant;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -24,26 +25,27 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_DB2;
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_H2;
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_MSSQL;
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_MYSQL;
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_ORACLE;
-import static org.wso2.is.data.sync.client.util.Constant.DATA_SOURCE_TYPE_POSGRESQL;
-import static org.wso2.is.data.sync.client.util.Constant.SQL_DELIMITER_DB2_ORACLE;
-import static org.wso2.is.data.sync.client.util.Constant.SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_DB2;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_H2;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MSSQL;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MYSQL;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_ORACLE;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSGRESQL;
+import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_DB2_ORACLE;
+import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
 
 public class DataSourceManager {
 
-    private static Map<String, DataSourceEntry> dataSourceEntryListSource = new HashMap<>();
-    private static Map<String, DataSourceEntry> dataSourceEntryListTarget = new HashMap<>();
+    private Map<String, DataSourceEntry> dataSourceEntryListSource = new HashMap<>();
+    private Map<String, DataSourceEntry> dataSourceEntryListTarget = new HashMap<>();
 
-    static {
-/*
+    public DataSourceManager() throws SyncClientException {
+
         Map<String, String> sourceMapping = new HashMap<>();
         sourceMapping.put(Constant.SCHEMA_TYPE_IDENTITY, "jdbc/WSO2CarbonDBSource");
 
@@ -51,11 +53,12 @@ public class DataSourceManager {
         targetMapping.put(Constant.SCHEMA_TYPE_IDENTITY, "jdbc/WSO2CarbonDB");
 
         populateDataSourceEntryList(sourceMapping, dataSourceEntryListSource);
-        populateDataSourceEntryList(targetMapping, dataSourceEntryListTarget);*/
+        populateDataSourceEntryList(targetMapping, dataSourceEntryListTarget);
+
     }
 
-    private static void populateDataSourceEntryList(Map<String, String> dataSourceMapping, Map<String,
-            DataSourceEntry> dataSourceEntryList) {
+    private void populateDataSourceEntryList(Map<String, String> dataSourceMapping, Map<String,
+            DataSourceEntry> dataSourceEntryList) throws SyncClientException {
 
         for (Map.Entry<String, String> entry : dataSourceMapping.entrySet()) {
 
@@ -70,17 +73,17 @@ public class DataSourceManager {
                     String type = getDataSourceType(dataSource);
                     dataSourceEntryList.put(schema, new DataSourceEntry(dataSource, type));
                 } catch (SQLException e) {
-                    throw new RuntimeException("Error while creating connection with data source: " + dataSourceName +
-                                               " of schema: " + schema);
+                    throw new SyncClientException("Error while creating connection with data source: " + dataSourceName +
+                                                  " of schema: " + schema);
                 }
             } catch (NamingException e) {
-                throw new RuntimeException("Error while data source lookup for: " + dataSourceName + " of schema: "
+                throw new SyncClientException("Error while data source lookup for: " + dataSourceName + " of schema: "
                                            + schema);
             }
         }
     }
 
-    private static String getDataSourceType(DataSource dataSource) throws SQLException {
+    private String getDataSourceType(DataSource dataSource) throws SQLException, SyncClientException {
 
         String type;
         try (Connection connection = dataSource.getConnection()) {
@@ -99,85 +102,56 @@ public class DataSourceManager {
             } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_POSGRESQL + ".*")) {
                 type = "postgresql";
             } else {
-                throw new RuntimeException("Unsupported data source type: " + databaseProductName);
+                throw new SyncClientException("Unsupported data source type: " + databaseProductName);
             }
         }
         return type;
     }
 
-    public static String getDataSourceType(String schema) {
+    public String getDataSourceType(String schema) {
 
         return DATA_SOURCE_TYPE_MYSQL;
         //return dataSourceEntryListSource.get(schema).getType();
     }
 
-    public static Connection getSourceConnection(String schema) {
+    public DataSource getSourceDataSource(String schema) {
 
+        return dataSourceEntryListSource.get(schema).getDataSource();
+    }
 
-        // dataSourceEntryListSource.get(schema).getDataSource();
-/*        DataSource dataSource;
-        Context ctx;
-        Connection connection = null;
+    public DataSource getTargetDataSource(String schema) {
+
+        return dataSourceEntryListTarget.get(schema).getDataSource();
+    }
+
+    public Connection getSourceConnection(String schema) throws SyncClientException {
+
+        DataSource dataSource;
+        Connection connection;
         try {
-            ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup("jdbc/WSO2CarbonDB");
+            dataSource = dataSourceEntryListSource.get(schema).getDataSource();
+            connection = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
+        }
+        return connection;
+    }
 
+    public Connection getTargetConnection(String schema) throws SyncClientException {
+
+        DataSource dataSource;
+        Connection connection;
+        try {
+            dataSource = dataSourceEntryListTarget.get(schema).getDataSource();
             connection = dataSource.getConnection();
 
-        } catch (NamingException e) {
-            e.printStackTrace();
         } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
-
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost/carbon?user=root&password=root");
-        } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SyncClientException("Error occurred while creating connection for target schema: " + schema);
         }
         return connection;
     }
 
-    public static Connection getTestSource() {
-
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost/carbon?user=root&password=root");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
-
-    }
-
-    public static Connection getTargetConnection(String schema) {
-
-/*        DataSource dataSource;
-        Context ctx;
-        Connection connection = null;
-        try {
-            ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup("jdbc/WSO2CarbonDBSource");
-
-            connection = dataSource.getConnection();
-
-        } catch (NamingException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
-
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost/carbonnew?user=root&password=root");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
-    }
-
-    public static String getSqlDelimiter(String schema) {
+    public String getSqlDelimiter(String schema) {
 
         String dataSourceType = getDataSourceType(schema);
         if ("oracle".equals(dataSourceType) || "db2".equals(dataSourceType)) {
@@ -186,13 +160,18 @@ public class DataSourceManager {
         return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
     }
 
-    public static String getDDLPrefix(String schema) {
+    public String getDDLPrefix(String schema) {
 
         return "DELIMITER //" + System.lineSeparator() + System.lineSeparator();
     }
 
-    public static String getDDLSuffix(String schema) {
+    public String getDDLSuffix(String schema) {
 
         return System.lineSeparator() + System.lineSeparator() + "DELIMITER ;";
+    }
+
+    public String getSchema(String tableName) {
+
+        return Constant.SCHEMA_TYPE_IDENTITY;
     }
 }

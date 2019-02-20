@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.util;
+package org.wso2.is.data.sync.system.util;
 
 public class Constant {
 
@@ -46,9 +46,7 @@ public class Constant {
     public static final String COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
     public static final String COLUMN_TYPE_INT = "INT";
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
-    public static final String COLUMN_TYPE_CHAR = "CHAR";
-    public static final String COLUMN_TYPE_VARCHAR = "VARCHAR";
-    public static final String COLUMN_TYPE_BLOB = "BLOB";
+    public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_MAX_SYNC_ID = "MAX_SYNC_ID";
 
     public static final String SUPPORTED_START_VERSION_V530 = "5.3.0";
@@ -57,4 +55,13 @@ public class Constant {
 
     public static final String SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES = "//";
     public static final String SQL_DELIMITER_DB2_ORACLE = "/";
+
+    public static final String ENTRY_FILED_OPERATION_INSERT = "INSERT";
+    public static final String ENTRY_FILED_OPERATION_UPDATE = "UPDATE";
+    public static final String ENTRY_FILED_OPERATION_DELETE = "DELETE";
+
+    public static final String COLUMN_ACCESS_TOKEN = "ACCESS_TOKEN";
+    public static final String COLUMN_REFRESH_TOKEN = "REFRESH_TOKEN";
+    public static final String COLUMN_ACCESS_TOKEN_HASH = "ACCESS_TOKEN_HASH";
+    public static final String COLUMN_REFRESH_TOKEN_HASH = "REFRESH_TOKEN_HASH";
 }

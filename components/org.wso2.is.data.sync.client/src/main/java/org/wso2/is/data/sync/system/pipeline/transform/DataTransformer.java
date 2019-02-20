@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.pipeline.transform;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+import org.wso2.is.data.sync.system.exception.SyncClientException;
+import org.wso2.is.data.sync.system.pipeline.JournalEntry;
+import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 
-/**
- * Represents exception in
- */
-public class SyncClientException extends MigrationClientException {
+import java.util.List;
 
-    public SyncClientException(String message) {
-        super(message);
-    }
+public interface DataTransformer {
 
-    public SyncClientException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    List<JournalEntry> transform(List<JournalEntry> journalEntryList, PipelineContext context)
+            throws SyncClientException;
 
-    public SyncClientException(String errorCode, String message) {
-        super(errorCode, message);
-    }
-
-    public SyncClientException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
-    }
 }

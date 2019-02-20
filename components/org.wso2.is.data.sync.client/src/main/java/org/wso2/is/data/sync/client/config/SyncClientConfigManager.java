@@ -36,12 +36,10 @@ public class SyncClientConfigManager {
 
         if (syncTables != null) {
             List<String> tables = Arrays.asList(syncTables.split(","));
-            if (tables != null && tables.size() > 0) {
+            if (tables.size() > 0) {
                 syncTableList.addAll(tables);
             }
         }
-
-//        syncTableList.add("IDN_OAUTH2_ACCESS_TOKEN_SCOPE");
         return syncTableList;
     }
 

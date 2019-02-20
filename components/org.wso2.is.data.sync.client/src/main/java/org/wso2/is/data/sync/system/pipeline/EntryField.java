@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.pipeline;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+public class EntryField<T> {
 
-/**
- * Represents exception in
- */
-public class SyncClientException extends MigrationClientException {
+    private T value;
 
-    public SyncClientException(String message) {
-        super(message);
+    public EntryField(T value) {
+
+        this.value = value;
     }
 
-    public SyncClientException(String message, Throwable cause) {
-        super(message, cause);
+    public T getValue() {
+
+        return value;
     }
 
-    public SyncClientException(String errorCode, String message) {
-        super(errorCode, message);
-    }
+    public void setValue(T value) {
 
-    public SyncClientException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
+        this.value = value;
     }
 }

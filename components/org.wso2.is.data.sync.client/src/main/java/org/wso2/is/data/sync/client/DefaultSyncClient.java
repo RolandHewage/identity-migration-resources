@@ -20,6 +20,7 @@ import org.wso2.is.data.sync.client.config.SyncClientConfigManager;
 import org.wso2.is.data.sync.client.datasource.ColumnData;
 import org.wso2.is.data.sync.client.datasource.DataSourceManager;
 import org.wso2.is.data.sync.client.datasource.SQLStatement;
+import org.wso2.is.data.sync.client.datasource.TableMetaData;
 import org.wso2.is.data.sync.client.exception.SyncClientException;
 import org.wso2.is.data.sync.client.util.Constant;
 
@@ -27,16 +28,38 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_CREATE_SYNC_VERSION_TABLE_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_CREATE_TRIGGER_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_DROP_TABLE_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_DROP_TRIGGER_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_INSERT_SYNC_ID_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_SELECT_MAX_SYNC_ID_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_SELECT_SYNC_ID_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_SELECT_TARGET_SYNC_ENTRY_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_UPDATE_SYNC_VERSION_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY;
+import static org.wso2.is.data.sync.client.datasource.SQLQueryProvider.getQuery;
+import static org.wso2.is.data.sync.client.util.Constant.COLUMN_NAME_MAX_SYNC_ID;
+import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_COLUMN_NAME;
+import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_COLUMN_SIZE;
+import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_TYPE_NAME;
 import static org.wso2.is.data.sync.client.util.Constant.SQL_STATEMENT_TYPE_SOURCE;
 import static org.wso2.is.data.sync.client.util.Constant.SQL_STATEMENT_TYPE_TARGET;
+import static org.wso2.is.data.sync.client.util.Util.generateColumnList;
 import static org.wso2.is.data.sync.client.util.Util.getInsertTriggerName;
 import static org.wso2.is.data.sync.client.util.Util.getSyncTableName;
 import static org.wso2.is.data.sync.client.util.Util.getSyncVersionTableName;
@@ -46,16 +69,19 @@ public class DefaultSyncClient implements SyncClient {
 
     protected SyncClientConfigManager configManager = new SyncClientConfigManager();
 
+    @Override
     public String getSyncSourceVersion() {
 
         return configManager.getStartVersion();
     }
 
+    @Override
     public String getSyncTargetVersion() {
 
         return configManager.getEndVersion();
     }
 
+    @Override
     public void syncData(String tableName) throws SyncClientException {
 
         ExecutorService dataSyncExecutor = Executors.newSingleThreadExecutor();
@@ -63,134 +89,28 @@ public class DefaultSyncClient implements SyncClient {
         dataSyncExecutor.execute(() -> {
 
             Thread.currentThread().setName("sync-executor-" + tableName);
+
             try {
+
                 String syncVersionTableName = getSyncVersionTableName(tableName);
-                int targetSyncId = 0;
-                int sourceMaxSyncId = 0;
-                try (Connection connection = DataSourceManager.getTargetConnection(getSchema(tableName))) {
-
-                    String sql = "SELECT SYNC_ID FROM " + syncVersionTableName;
-                    try (PreparedStatement ps1 = connection.prepareStatement(sql)) {
-                        try (ResultSet rs = ps1.executeQuery()) {
-                            // If the SYNC_VERSION table is empty, set SYNC_ID to 0;
-                            if (!rs.next()) {
-                                sql = "INSERT INTO " + syncVersionTableName + " (SYNC_ID) VALUES (?)";
-                                try (PreparedStatement ps2 = connection.prepareStatement(sql)) {
-                                    ps2.setInt(1, 0);
-                                    ps2.executeUpdate();
-                                }
-                            } else {
-                                targetSyncId = rs.getInt("SYNC_ID");
-                            }
-                        }
-                    }
-                } catch (SQLException e) {
-                    throw new SyncClientException("Error while retrieving table metadata of target table: " +
-                                                  syncVersionTableName, e);
-                }
-
                 String syncTableName = getSyncTableName(tableName);
-                List<ColumnData> columnDataList = getColumnData(tableName);
-                List<String> primaryKeys = getPrimaryKeys(tableName);
-                List<String> nonPrimaryKeys = new ArrayList<>();
 
-                StringJoiner columnJoiner = new StringJoiner(", ");
-                StringJoiner valueJoiner = new StringJoiner(", ");
-                StringJoiner updateJoiner = new StringJoiner(" AND ");
-                StringJoiner searchJoiner = new StringJoiner(" AND ");
-
-                populateStringJoiners(columnDataList, primaryKeys, nonPrimaryKeys, columnJoiner, valueJoiner,
-                                      updateJoiner, searchJoiner);
-
-                String columnString = columnJoiner.toString();
-                String valueString = valueJoiner.toString();
-                String updateString = updateJoiner.toString();
-                String searchString = searchJoiner.toString();
-
+                TableMetaData tableMetaData = new TableMetaData.Builder().setColumnData(getColumnData(tableName))
+                                                                         .setPrimaryKeys(getPrimaryKeys(tableName))
+                                                                         .build();
                 while (true) {
-
                     boolean canSleep;
-                    targetSyncId = getTargetSyncId(tableName, syncVersionTableName, targetSyncId);
-                    sourceMaxSyncId = getSourceMaxSyncId(tableName, syncVersionTableName, sourceMaxSyncId,
-                                                         syncTableName);
+                    int targetSyncId = getOrInsertDefaultTargetSyncId(tableName, syncVersionTableName);
+                    int sourceMaxSyncId = getSourceMaxSyncId(tableName, syncTableName);
 
                     System.out.println("For table: " + tableName + " source max sync ID: " + sourceMaxSyncId + " " +
                                        "target sync ID: " + targetSyncId);
+
                     if (sourceMaxSyncId > targetSyncId) {
 
-                        try (Connection sourceCon = DataSourceManager.getSourceConnection(getSchema(tableName))) {
-                            String sql = "SELECT MAX(SYNC_ID), " + columnString + " FROM " + syncTableName + " WHERE " +
-                                         "SYNC_ID > ? AND SYNC_ID < ? GROUP BY " + String.join(",", primaryKeys) + " " +
-                                         "ORDER BY SYNC_ID ASC ";
-
-                            try (PreparedStatement ps1 = sourceCon.prepareStatement(sql)) {
-                                ps1.setInt(1, targetSyncId);
-                                ps1.setInt(2, targetSyncId + configManager.getBatchSize());
-
-                                //System.out.println("1: " + ps1.toString());
-                                try (ResultSet rs = ps1.executeQuery()) {
-                                    if (rs.first()) {
-                                        rs.beforeFirst();
-                                        sql = "SELECT " + columnString + " FROM " + tableName + " WHERE " + searchString;
-                                        try (Connection targetCon = DataSourceManager.getTargetConnection(
-                                                getSchema(tableName))) {
-                                            String sqlUpdate = "UPDATE " + tableName + " SET " + updateString + " WHERE " +
-                                                               searchString;
-                                            String sqlInsert = "INSERT INTO " + tableName + " (" + columnString + ") " +
-                                                               "VALUES (" + valueString + ")";
-                                            targetCon.setAutoCommit(false);
-                                            try (PreparedStatement psTargetUpdate = targetCon.prepareStatement(sqlUpdate);
-                                                 PreparedStatement psTargetInsert = targetCon.prepareStatement(sqlInsert)) {
-                                                int lastSyncId = -1;
-                                                while (rs.next()) {
-                                                    try (PreparedStatement ps2 = targetCon.prepareStatement(sql)) {
-                                                        for (int i = 0; i < primaryKeys.size(); i++) {
-                                                            ps2.setObject(i + 1, rs.getObject(primaryKeys.get(i)));
-                                                        }
-                                                        // System.out.println("2: " + ps2.toString());
-                                                        try (ResultSet rs1 = ps2.executeQuery()) {
-                                                            if (rs1.next()) {
-                                                                setPreparedStatementForUpdate(primaryKeys,
-                                                                                              nonPrimaryKeys, rs,
-                                                                                              psTargetUpdate);
-                                                                System.out.println("Updating entry: " + psTargetUpdate);
-                                                                psTargetUpdate.addBatch();
-                                                            } else {
-                                                                setPreparedStatementForInsert(columnDataList, rs,
-                                                                                              psTargetInsert);
-                                                                psTargetInsert.addBatch();
-                                                                System.out.println("Inserting entry " + psTargetInsert);
-                                                            }
-                                                            lastSyncId = rs.getInt(1);
-                                                        }
-                                                    }
-                                                }
-                                                int[] insertResults = psTargetInsert.executeBatch();
-                                                int[] updateResults = psTargetUpdate.executeBatch();
-
-                                                if (isUpdateSuccessful(insertResults, updateResults)) {
-                                                    targetCon.rollback();
-
-                                                } else {
-                                                    updateSyncVersion(syncVersionTableName, targetCon, lastSyncId);
-                                                    targetCon.commit();
-                                                }
-
-                                                canSleep = insertResults.length == 0 && updateResults.length == 0;
-//                                                System.out.println("3: " + Arrays.toString(insertResults));
-//                                                System.out.println("4: " + Arrays.toString(updateResults));
-//                                                System.out.println("5: last sync ID: " + lastSyncId);
-                                            }
-                                        }
-                                    } else {
-                                        canSleep = true;
-                                    }
-                                }
-                            }
-                        } catch (SQLException e) {
-                            throw new SyncClientException("Error while retrieving table metadata of target table: " +
-                                                          syncVersionTableName, e);
-                        }
+                        List<Map<String, Object>> results = getSyncDataList(tableName, syncTableName, tableMetaData,
+                                                                            targetSyncId);
+                        canSleep = syncToTarget(tableName, syncVersionTableName, tableMetaData, results);
                     } else {
                         System.out.println("No data to sync for: " + tableName);
                         canSleep = true;
@@ -205,70 +125,162 @@ public class DefaultSyncClient implements SyncClient {
                     }
                 }
             } catch (SyncClientException e) {
-                //TODO
-                e.printStackTrace();
+                throw new RuntimeException("Error occurred while executing the sync task for table:" + tableName);
             }
         });
     }
 
-    private void updateSyncVersion(String syncVersionTableName, Connection targetCon, int lastSyncId)
-            throws SQLException {
-        String updateSyncVersion = "UPDATE " + syncVersionTableName + " SET " +
-                                   "SYNC_ID = ?";
-        try (PreparedStatement ps = targetCon.prepareStatement
-                (updateSyncVersion)) {
-            ps.setInt(1, lastSyncId);
-            ps.executeUpdate();
-        }
-    }
+    protected boolean syncToTarget(String tableName, String syncVersionTableName, TableMetaData metaData,
+                                 List<Map<String, Object>> results) throws SyncClientException {
 
-    private boolean isUpdateSuccessful(int[] insertResults, int[] updateResults) {
-        return Arrays.stream(insertResults)
-                     .anyMatch(value -> value == PreparedStatement.EXECUTE_FAILED) ||
-               Arrays.stream(updateResults)
-                  .anyMatch(value -> value == PreparedStatement.EXECUTE_FAILED);
-    }
+        boolean canSleep;
+        try (Connection targetCon = DataSourceManager.getTargetConnection(getSchema(tableName))) {
 
-    private void setPreparedStatementForInsert(List<ColumnData> columnDataList, ResultSet rs,
-                                               PreparedStatement psTargetInsert) throws SQLException {
-        for (int i = 0; i < columnDataList.size(); i++) {
-            psTargetInsert.setObject(i + 1, rs.getObject(
-                    columnDataList.get(i).getName()));
-        }
-    }
+            String sqlUpdate = getTargetUpdateQuery(tableName, metaData);
+            String sqlInsert = getTargetInsertQuery(tableName, metaData);
 
-    private void setPreparedStatementForUpdate(List<String> primaryKeys, List<String> nonPrimaryKeys, ResultSet rs,
-                                               PreparedStatement psTargetUpdate) throws SQLException {
-        for (int i = 0; i < nonPrimaryKeys.size(); i++) {
-            psTargetUpdate.setObject(i + 1, rs.getObject(
-                    nonPrimaryKeys.get(i)));
-        }
-        for (int i = 0; i < primaryKeys.size(); i++) {
-            psTargetUpdate.setObject(nonPrimaryKeys.size() + 1 +
-                                     i, rs.getObject(primaryKeys.get(i)));
-        }
-    }
+            targetCon.setAutoCommit(false);
+            try (PreparedStatement psUpdate = targetCon.prepareStatement(sqlUpdate);
+                 PreparedStatement psInsert = targetCon.prepareStatement(sqlInsert)) {
 
-    private void populateStringJoiners(List<ColumnData> columnDataList, List<String> primaryKeys,
-                                       List<String> nonPrimaryKeys, StringJoiner columnJoiner, StringJoiner valueJoiner,
-                                       StringJoiner updateJoiner, StringJoiner searchJoiner) {
-        for (ColumnData columnData : columnDataList) {
+                int lastSyncId = -1;
+                for (Map<String, Object> result : results) {
+                    String sql = getTargetSearchQuery(tableName, metaData);
 
-            String columnName = columnData.getName();
-            columnJoiner.add(columnName);
-            valueJoiner.add("?");
+                    try (PreparedStatement ps2 = targetCon.prepareStatement(sql)) {
 
-            if (!primaryKeys.contains(columnName)) {
-                updateJoiner.add(String.format("%s = ?", columnName));
-                nonPrimaryKeys.add(columnName);
+                        setPSForSelectTarget(metaData, result, ps2);
+                        // System.out.println("2: " + ps2.toString());
+                        try (ResultSet rs1 = ps2.executeQuery()) {
+                            if (rs1.next()) {
+                                setPSForUpdateTarget(metaData, result, psUpdate);
+                                System.out.println("Updating entry: " + psUpdate);
+                                psUpdate.addBatch();
+                            } else {
+                                setPSForInsertTarget(metaData, result, psInsert);
+                                psInsert.addBatch();
+                                System.out.println("Inserting entry: " + psInsert);
+                            }
+                            lastSyncId = (Integer) result.get(COLUMN_NAME_MAX_SYNC_ID);
+                        }
+                    }
+                }
+                if (lastSyncId > 0) {
+                    int[] insertResults = psInsert.executeBatch();
+                    int[] updateResults = psUpdate.executeBatch();
+
+                    if (isUpdateSuccessful(insertResults, updateResults)) {
+                        updateSyncVersion(syncVersionTableName, targetCon, lastSyncId);
+                        targetCon.commit();
+                    } else {
+                        targetCon.rollback();
+                    }
+
+                    canSleep = insertResults.length == 0 && updateResults.length == 0;
+                } else {
+                    canSleep = true;
+                    targetCon.rollback();
+                }
+//                                                System.out.println("3: " + Arrays.toString(insertResults));
+//                                                System.out.println("4: " + Arrays.toString(updateResults));
+//                                                System.out.println("5: last sync ID: " + lastSyncId);
             }
+        } catch (SQLException e) {
+            throw new SyncClientException("Error while obtaining sync data from of target schema: "
+                                          + getSchema(tableName), e);
         }
+        return canSleep;
+    }
 
-        for (String primaryKey : primaryKeys) {
-            searchJoiner.add(String.format("%s = ?", primaryKey));
+    protected void setPSForSelectTarget(TableMetaData metaData, Map<String, Object> result, PreparedStatement ps2)
+            throws SQLException {
+
+        List<String> primaryKeys = metaData.getPrimaryKeys();
+        for (int i = 0; i < primaryKeys.size(); i++) {
+            ps2.setObject(i + 1, result.get(primaryKeys.get(i)));
         }
     }
 
+    protected String getTargetSearchQuery(String tableName, TableMetaData metaData) {
+
+        // SELECT %s FROM %s WHERE %s
+        String sql = getQuery(SQL_TEMPLATE_SELECT_TARGET_SYNC_ENTRY_KEY);
+        sql = String.format(sql, metaData.getColumns(), tableName, metaData.getSearchFilter());
+        return sql;
+    }
+
+    protected String getTargetInsertQuery(String tableName, TableMetaData metaData) {
+
+        // INSERT INTO %s (%s) VALUES (%s)
+        String sqlInsert = getQuery(SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY);
+        sqlInsert = String.format(sqlInsert, tableName, metaData.getColumns(), metaData.getParameters());
+        return sqlInsert;
+    }
+
+    protected String getTargetUpdateQuery(String tableName, TableMetaData metaData) {
+
+        // UPDATE %s SET %s WHERE %s
+        String sqlUpdate = getQuery(SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY);
+        sqlUpdate = String.format(sqlUpdate, tableName, metaData.getUpdateFilter(), metaData
+                .getSearchFilter());
+        return sqlUpdate;
+    }
+
+    protected List<Map<String, Object>> getSyncDataList(String tableName, String syncTableName, TableMetaData
+            tableMetaData, int targetSyncId) throws SyncClientException {
+
+        // SELECT MAX(SYNC_ID) AS MAX_SYNC_ID, %s FROM %s WHERE SYNC_ID > ? AND SYNC_ID < ? GROUP
+        // BY %s ORDER BY SYNC_ID ASC
+        String sql = getQuery(SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY);
+        sql = String.format(sql, tableMetaData.getColumns(), syncTableName,
+                            String.join(",", tableMetaData.getPrimaryKeys()));
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        String schema = getSchema(tableName);
+        try (Connection sourceCon = DataSourceManager.getSourceConnection(schema)) {
+            try (PreparedStatement ps = sourceCon.prepareStatement(sql)) {
+                ps.setInt(1, targetSyncId);
+                ps.setInt(2, targetSyncId + configManager.getBatchSize());
+
+                //System.out.println("1: " + ps.toString());
+                try (ResultSet rs = ps.executeQuery()) {
+
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+                    List<String> columnNames = new ArrayList<>();
+
+                    for (int i = 0; i < columnCount; i++) {
+                        columnNames.add(metaData.getColumnName(i + 1));
+                    }
+                    while (rs.next()) {
+                        Map<String, Object> resultEntry = new HashMap<>();
+                        for (String columnName : columnNames) {
+                            resultEntry.put(columnName, rs.getObject(columnName));
+                        }
+                        results.add(resultEntry);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new SyncClientException("Error while obtaining sync data from table: " + syncTableName + " of " +
+                                              "schema: " + schema, e);
+            }
+        } catch (SQLException e) {
+            throw new SyncClientException("Error while obtaining a connection from schema: " + schema, e);
+        }
+        return results;
+    }
+
+    @Override
+    public boolean canSyncData(String tableName) throws SyncClientException {
+        return true;
+    }
+
+    @Override
+    public String getSchema(String tableName) throws SyncClientException {
+        return Constant.SCHEMA_TYPE_IDENTITY;
+    }
+
+    @Override
     public List<SQLStatement> generateSyncScripts(String tableName) throws SyncClientException {
 
         List<SQLStatement> scripts = new ArrayList<>();
@@ -283,14 +295,48 @@ public class DefaultSyncClient implements SyncClient {
         return scripts;
     }
 
-    @Override
-    public boolean canSyncData(String tableName) throws SyncClientException {
-        return true;
+    protected void updateSyncVersion(String syncVersionTableName, Connection targetCon, int lastSyncId)
+            throws SQLException {
+
+        // UPDATE %s SET SYNC_ID = ?
+        String updateSyncVersion = getQuery(SQL_TEMPLATE_UPDATE_SYNC_VERSION_KEY);
+        updateSyncVersion = String.format(updateSyncVersion, syncVersionTableName);
+        try (PreparedStatement ps = targetCon.prepareStatement
+                (updateSyncVersion)) {
+            ps.setInt(1, lastSyncId);
+            ps.executeUpdate();
+        }
     }
 
-    @Override
-    public String getSchema(String tableName) throws SyncClientException {
-        return Constant.SCHEMA_TYPE_IDENTITY;
+    private boolean isUpdateSuccessful(int[] insertResults, int[] updateResults) {
+
+        return Arrays.stream(insertResults)
+                     .noneMatch(value -> value == PreparedStatement.EXECUTE_FAILED) &&
+               Arrays.stream(updateResults)
+                  .noneMatch(value -> value == PreparedStatement.EXECUTE_FAILED);
+    }
+
+    protected void setPSForInsertTarget(TableMetaData metaData, Map<String, Object> rs, PreparedStatement
+            psTargetInsert) throws SQLException, SyncClientException {
+
+        List<ColumnData> columnDataList = metaData.getColumnDataList();
+        for (int i = 0; i < columnDataList.size(); i++) {
+            psTargetInsert.setObject(i + 1, rs.get(columnDataList.get(i).getName()));
+        }
+    }
+
+    protected void setPSForUpdateTarget(TableMetaData metaData, Map<String, Object> rs, PreparedStatement psTargetUpdate)
+            throws SQLException, SyncClientException {
+
+        List<String> primaryKeys = metaData.getPrimaryKeys();
+        List<String> nonPrimaryKeys = metaData.getNonPrimaryKeys();
+
+        for (int i = 0; i < nonPrimaryKeys.size(); i++) {
+            psTargetUpdate.setObject(i + 1, rs.get(nonPrimaryKeys.get(i)));
+        }
+        for (int i = 0; i < primaryKeys.size(); i++) {
+            psTargetUpdate.setObject(nonPrimaryKeys.size() + 1 + i, rs.get(primaryKeys.get(i)));
+        }
     }
 
     private List<ColumnData> getColumnData(String tableName) throws SyncClientException {
@@ -304,9 +350,9 @@ public class DefaultSyncClient implements SyncClient {
 
             try(ResultSet resultSet = metaData.getColumns(null, null, tableName, null)) {
                 while (resultSet.next()) {
-                    String name = resultSet.getString("COLUMN_NAME");
-                    String type = resultSet.getString("TYPE_NAME");
-                    int size = resultSet.getInt("COLUMN_SIZE");
+                    String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
+                    String type = resultSet.getString(JDBC_META_DATA_TYPE_NAME);
+                    int size = resultSet.getInt(JDBC_META_DATA_COLUMN_SIZE);
 
                     ColumnData columnData = new ColumnData(name, type, size);
                     columnDataList.add(columnData);
@@ -344,7 +390,9 @@ public class DefaultSyncClient implements SyncClient {
 
         String schema = getSchema(tableName);
         String dataSourceType = DataSourceManager.getDataSourceType(schema);
-        String sql = "DROP TABLE IF EXISTS " + getSyncTableName(tableName);
+        // DROP TABLE IF EXISTS %s
+        String sql = getQuery(SQL_TEMPLATE_DROP_TABLE_MYSQL_KEY);
+        sql = String.format(sql, getSyncTableName(tableName));
 
         return new SQLStatement(schema, sql, SQL_STATEMENT_TYPE_SOURCE);
     }
@@ -355,17 +403,11 @@ public class DefaultSyncClient implements SyncClient {
         String schema = getSchema(tableName);
         String dataSourceType = DataSourceManager.getDataSourceType(schema);
 
-        StringJoiner columnJoiner = new StringJoiner(", ");
+        // CREATE TABLE % (SYNC_ID INT NOT NULL AUTO_INCREMENT, %s, PRIMARY KEY (SYNC_ID))
+        String createSyncTableSql = getQuery(SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL_KEY);
+        createSyncTableSql = String.format(createSyncTableSql, getSyncTableName(tableName), generateColumnList
+                (columnData));
 
-        for (ColumnData columnEntry : columnData) {
-            // COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE)
-            String columnTemplate = "%s %s(%d)";
-            columnJoiner.add(String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
-                                           columnEntry.getSize()));
-        }
-
-        String createSyncTableSql = "CREATE TABLE " + getSyncTableName(tableName) + " (SYNC_ID INT NOT " +
-                                    "NULL AUTO_INCREMENT, " + columnJoiner.toString() + ", PRIMARY KEY (SYNC_ID))";
         return new SQLStatement(schema, createSyncTableSql, SQL_STATEMENT_TYPE_SOURCE);
     }
 
@@ -373,8 +415,10 @@ public class DefaultSyncClient implements SyncClient {
 
         String schema = getSchema(tableName);
         String dataSourceType = DataSourceManager.getDataSourceType(schema);
-        String createSyncVersionTableSql = "CREATE TABLE IF NOT EXISTS " + getSyncVersionTableName(tableName) +
-                                           " (SYNC_ID INT)";
+
+        // CREATE TABLE IF NOT EXISTS %s (SYNC_ID INT)
+        String createSyncVersionTableSql = getQuery(SQL_TEMPLATE_CREATE_SYNC_VERSION_TABLE_MYSQL_KEY);
+        createSyncVersionTableSql = String.format(createSyncVersionTableSql, getSyncVersionTableName(tableName));
 
         return new SQLStatement(schema, createSyncVersionTableSql, SQL_STATEMENT_TYPE_TARGET);
     }
@@ -392,9 +436,11 @@ public class DefaultSyncClient implements SyncClient {
             columnJoiner.add(columnEntry.getName());
             columnValueJoiner.add("NEW." + columnEntry.getName());
         }
-        String createTriggerSql = "CREATE TRIGGER %s BEFORE %s ON " + tableName + " FOR EACH ROW BEGIN INSERT " +
-                                    "INTO " + getSyncTableName(tableName) + " (" + columnJoiner.toString() + ") VALUES (" +
-                                    columnValueJoiner.toString() + "); END";
+
+        // CREATE TRIGGER %%s BEFORE %%s ON %s FOR EACH ROW BEGIN INSERT INTO %s (%s) VALUES (%s); END
+        String createTriggerSql = getQuery(SQL_TEMPLATE_CREATE_TRIGGER_MYSQL_KEY);
+        createTriggerSql = String.format(createTriggerSql, tableName, getSyncTableName(tableName), columnJoiner
+                .toString(), columnValueJoiner.toString());
 
         String insertTriggerSql = String.format(createTriggerSql, getInsertTriggerName(tableName), "INSERT");
         String updateTriggerSql = String.format(createTriggerSql, getUpdateTriggerName(tableName), "UPDATE");
@@ -411,7 +457,8 @@ public class DefaultSyncClient implements SyncClient {
         String dataSourceType = DataSourceManager.getDataSourceType(schema);
         List<SQLStatement> triggerSqlStatements = new ArrayList<>();
 
-        String dropTriggerSql = "DROP TRIGGER IF EXISTS %s";
+        // DROP TRIGGER IF EXISTS %s
+        String dropTriggerSql = getQuery(SQL_TEMPLATE_DROP_TRIGGER_MYSQL_KEY);
 
         String dropInsertTriggerSql = String.format(dropTriggerSql, getInsertTriggerName(tableName));
         String dropUpdateTriggerSql = String.format(dropTriggerSql, getUpdateTriggerName(tableName));
@@ -421,12 +468,14 @@ public class DefaultSyncClient implements SyncClient {
         return triggerSqlStatements;
     }
 
-    private int getSourceMaxSyncId(String tableName, String syncVersionTableName, int sourceMaxSyncId,
-                                   String syncTableName) throws SyncClientException {
+    protected int getSourceMaxSyncId(String tableName, String syncTableName) throws SyncClientException {
 
+        int sourceMaxSyncId = 0;
         try (Connection connection = DataSourceManager.getSourceConnection(getSchema(tableName))) {
 
-            String sql = "SELECT MAX(SYNC_ID) FROM " + syncTableName;
+            // SELECT MAX(SYNC_ID) FROM %s
+            String sql = getQuery(SQL_TEMPLATE_SELECT_MAX_SYNC_ID_KEY);
+            sql = String.format(sql, syncTableName);
             try (PreparedStatement ps1 = connection.prepareStatement(sql)) {
                 try (ResultSet rs = ps1.executeQuery()) {
                     // If the SYNC_VERSION table is empty, set SYNC_ID to 0;
@@ -437,21 +486,33 @@ public class DefaultSyncClient implements SyncClient {
             }
         } catch (SQLException e) {
             throw new SyncClientException("Error while retrieving table metadata of target table: " +
-                                          syncVersionTableName, e);
+                                          syncTableName, e);
         }
         return sourceMaxSyncId;
     }
 
-    private int getTargetSyncId(String tableName, String syncVersionTableName, int targetSyncId)
+    protected int getOrInsertDefaultTargetSyncId(String tableName, String syncVersionTableName)
             throws SyncClientException {
 
+        int targetSyncId = 0;
         try (Connection connection = DataSourceManager.getTargetConnection(getSchema(tableName))) {
 
-            String sql = "SELECT SYNC_ID FROM " + syncVersionTableName;
+            // SELECT SYNC_ID FROM %s
+            String sql = getQuery(SQL_TEMPLATE_SELECT_SYNC_ID_KEY);
+            sql = String.format(sql, syncVersionTableName);
+
             try (PreparedStatement ps1 = connection.prepareStatement(sql)) {
                 try (ResultSet rs = ps1.executeQuery()) {
                     // If the SYNC_VERSION table is empty, set SYNC_ID to 0;
-                    if (rs.next()) {
+                    if (!rs.next()) {
+                        // INSERT INTO %s (SYNC_ID) VALUES (?)
+                        sql = getQuery(SQL_TEMPLATE_INSERT_SYNC_ID_KEY);
+                        sql = String.format(sql, syncVersionTableName);
+                        try (PreparedStatement ps2 = connection.prepareStatement(sql)) {
+                            ps2.setInt(1, 0);
+                            ps2.executeUpdate();
+                        }
+                    } else {
                         targetSyncId = rs.getInt("SYNC_ID");
                     }
                 }

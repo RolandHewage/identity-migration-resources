@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.database.ddl;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+public class MySQLDDLGenerator implements DDLGenerator {
 
-/**
- * Represents exception in
- */
-public class SyncClientException extends MigrationClientException {
+    @Override
+    public String generate(Table table) {
 
-    public SyncClientException(String message) {
-        super(message);
+        return null;
     }
 
-    public SyncClientException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    @Override
+    public String generate(Trigger trigger) {
 
-    public SyncClientException(String errorCode, String message) {
-        super(errorCode, message);
-    }
-
-    public SyncClientException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
+        return null;
     }
 }

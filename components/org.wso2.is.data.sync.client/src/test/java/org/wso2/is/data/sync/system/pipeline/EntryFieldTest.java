@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.client.exception;
+package org.wso2.is.data.sync.system.pipeline;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
-/**
- * Represents exception in
- */
-public class SyncClientException extends MigrationClientException {
+public class EntryFieldTest {
 
-    public SyncClientException(String message) {
-        super(message);
+    @Test
+    public void testGetValue() throws Exception {
+
+        EntryField entryField = new EntryField<>(6);
+        Assert.assertTrue(entryField.getValue() instanceof Integer);
+        Assert.assertTrue(entryField.getValue().equals(6));
     }
 
-    public SyncClientException(String message, Throwable cause) {
-        super(message, cause);
+    @Test
+    public void testSetValue() throws Exception {
+
+        EntryField<Integer> entryField = new EntryField<>(6);
+        entryField.setValue(7);
+        Assert.assertTrue(entryField.getValue().equals(7));
     }
 
-    public SyncClientException(String errorCode, String message) {
-        super(errorCode, message);
-    }
-
-    public SyncClientException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
-    }
 }

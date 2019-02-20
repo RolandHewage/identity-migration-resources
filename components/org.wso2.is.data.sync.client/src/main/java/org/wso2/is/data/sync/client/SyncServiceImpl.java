@@ -16,11 +16,11 @@
 
 package org.wso2.is.data.sync.client;
 
+import org.wso2.carbon.identity.core.migrate.DataSyncService;
 import org.wso2.is.data.sync.client.config.SyncClientConfigManager;
 import org.wso2.is.data.sync.client.datasource.DataSourceManager;
 import org.wso2.is.data.sync.client.datasource.SQLStatement;
 import org.wso2.is.data.sync.client.exception.SyncClientException;
-import org.wso2.is.data.sync.client.internal.SyncClientHolder;
 import org.wso2.is.data.sync.client.util.Constant;
 
 import java.io.IOException;
@@ -39,25 +39,19 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.client.util.Util.getScripId;
-import static org.wso2.is.data.sync.client.util.Util.isGenerateDDL;
 
-public class SyncService {
+public class SyncServiceImpl implements DataSyncService {
 
     private SyncClientConfigManager configManager = new SyncClientConfigManager();
     private Map<String, SyncClient> syncClientList = new HashMap<>();
 
     public static void main(String[] args) throws SyncClientException {
 
-        SyncService syncService = new SyncService();
-
-        if (System.getProperty("syncData") != null) {
-            syncService.syncData();
-        } else if (System.getProperty("prepareSync") != null) {
-            syncService.generateScripts();
-        }
+        SyncServiceImpl syncService = new SyncServiceImpl();
+        syncService.generateScripts(false);
     }
 
-    public SyncService() throws SyncClientException {
+    public SyncServiceImpl() throws SyncClientException {
 
         List<String> syncTableList = configManager.getSyncTableList();
         List<SyncClient> syncClients = new SyncClientHolder().getSyncClients();
@@ -81,13 +75,13 @@ public class SyncService {
         }
     }
 
-    public void generateScripts() throws SyncClientException {
+    public void generateScripts(boolean ddlOnly) throws SyncClientException {
 
         List<SQLStatement> sqlStatementList = aggregateScripts();
 
         Map<String, List<String>> scripts = aggregateDDL(sqlStatementList);
 
-        if (isGenerateDDL()) {
+        if (ddlOnly) {
             for (Map.Entry<String, List<String>> entry : scripts.entrySet()) {
 
                 String schema = entry.getKey();
