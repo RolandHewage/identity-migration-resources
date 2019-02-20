@@ -16,9 +16,12 @@
 
 package org.wso2.is.data.sync.system.database.ddl;
 
-public interface DDLGenerator {
+public class DDLGenerator {
 
-    String generate(Table table);
+    private DatabaseDialect databaseDialect;
 
-    String generate(Trigger trigger);
+    // Trigger
+
+    // Table
+
 }

@@ -31,9 +31,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_COLUMN_NAME;
-import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_COLUMN_SIZE;
-import static org.wso2.is.data.sync.client.util.Constant.JDBC_META_DATA_TYPE_NAME;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_NAME;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_SIZE;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_TYPE_NAME;
 
 public class DataSyncPipelineTest {
 

@@ -18,9 +18,14 @@ package org.wso2.is.data.sync.system.database.ddl;
 
 public class MySQLDatabaseDialect implements DatabaseDialect {
 
-    @Override
-    public DDLGenerator getDDLGenerator() {
 
-        return new MySQLDDLGenerator();
+    public String generate(Table table) {
+
+        return null;
+    }
+
+    public String generate(Trigger trigger) {
+
+        return null;
     }
 }

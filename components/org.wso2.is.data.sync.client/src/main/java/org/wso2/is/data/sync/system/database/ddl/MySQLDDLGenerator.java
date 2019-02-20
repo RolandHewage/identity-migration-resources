@@ -16,17 +16,7 @@
 
 package org.wso2.is.data.sync.system.database.ddl;
 
-public class MySQLDDLGenerator implements DDLGenerator {
+public class MySQLDDLGenerator {
 
-    @Override
-    public String generate(Table table) {
 
-        return null;
-    }
-
-    @Override
-    public String generate(Trigger trigger) {
-
-        return null;
-    }
 }

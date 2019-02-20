@@ -25,8 +25,6 @@ import org.wso2.is.data.sync.system.pipeline.DataSyncPipeline;
 import org.wso2.is.data.sync.system.pipeline.PipelineConfiguration;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformerFactory;
-import org.wso2.is.data.sync.system.pipeline.transform.FooTable540Transformer;
-import org.wso2.is.data.sync.system.pipeline.transform.FooTable550Transformer;
 import org.wso2.is.data.sync.system.pipeline.transform.v550.OAuthTokenDataTransformerV550;
 import org.wso2.is.data.sync.system.pipeline.transform.v570.OAuthTokenDataTransformerV570;
 
@@ -102,8 +100,6 @@ public class SyncService {
 
     private void initiateDataTransformers() {
 
-        dataTransformers.add(new FooTable550Transformer());
-        dataTransformers.add(new FooTable540Transformer());
         dataTransformers.add(new OAuthTokenDataTransformerV550());
         dataTransformers.add(new OAuthTokenDataTransformerV570());
     }

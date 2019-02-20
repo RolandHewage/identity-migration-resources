@@ -44,10 +44,12 @@ public class Constant {
     public static final String JDBC_META_DATA_TYPE_NAME = "TYPE_NAME";
     public static final String JDBC_META_DATA_COLUMN_SIZE = "COLUMN_SIZE";
     public static final String COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
+    public static final String COLUMN_TYPE_CHAR = "CHAR";
+    public static final String COLUMN_TYPE_VARCHAR = "VARCHAR";
+    public static final String COLUMN_TYPE_BLOB = "BLOB";
     public static final String COLUMN_TYPE_INT = "INT";
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
-    public static final String COLUMN_NAME_MAX_SYNC_ID = "MAX_SYNC_ID";
 
     public static final String SUPPORTED_START_VERSION_V530 = "5.3.0";
     public static final String SUPPORTED_END_VERSION_V560 = "5.6.0";

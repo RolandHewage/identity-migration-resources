@@ -18,8 +18,4 @@ package org.wso2.is.data.sync.system.database.ddl;
 
 public class ANSIDatabaseDialect implements DatabaseDialect {
 
-    @Override
-    public DDLGenerator getDDLGenerator() {
-        return null;
-    }
 }

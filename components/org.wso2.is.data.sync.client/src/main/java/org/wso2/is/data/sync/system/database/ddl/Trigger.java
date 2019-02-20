@@ -16,5 +16,12 @@
 
 package org.wso2.is.data.sync.system.database.ddl;
 
+import org.wso2.is.data.sync.system.database.TableMetaData;
+
 public class Trigger {
+
+    private String sourceTable;
+    private String triggerPolicy; //AFTER UPDATE
+    private TableMetaData tmd;
+    private String selectionPolicy; //FOR EACH row
 }

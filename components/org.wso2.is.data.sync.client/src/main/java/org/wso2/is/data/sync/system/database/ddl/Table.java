@@ -16,7 +16,10 @@
 
 package org.wso2.is.data.sync.system.database.ddl;
 
+import org.wso2.is.data.sync.system.database.TableMetaData;
+
 public class Table {
 
-
+    private String name;
+    private TableMetaData tmd;
 }
