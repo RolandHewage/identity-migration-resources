@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.system.database.ddl;
+package org.wso2.is.data.sync.system.database.dialect;
 
-public class MySQLDDLGenerator {
+import org.wso2.is.data.sync.system.exception.SyncClientException;
 
+import java.util.List;
 
+public interface DatabaseDialect {
+
+    List<String> generateCreateTrigger(Trigger trigger) throws SyncClientException;
+
+    List<String> generateCreateTable(Table table) throws SyncClientException;
+
+    List<String> generateDropTrigger(String name) throws SyncClientException;
+
+    List<String> generateDropTable(String name) throws SyncClientException;
 }

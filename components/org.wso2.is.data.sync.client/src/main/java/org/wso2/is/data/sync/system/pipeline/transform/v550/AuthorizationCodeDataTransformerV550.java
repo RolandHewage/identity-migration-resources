@@ -17,8 +17,6 @@
 package org.wso2.is.data.sync.system.pipeline.transform.v550;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
@@ -26,24 +24,20 @@ import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.VersionAdvice;
-import org.wso2.is.data.sync.system.pipeline.transform.model.TokenInfo;
+import org.wso2.is.data.sync.system.pipeline.transform.model.AuthorizationCodeInfo;
 import org.wso2.is.data.sync.system.util.OAuth2Util;
 
 import java.util.List;
 
 import static org.wso2.is.data.sync.system.util.CommonUtil.getObjectValueFromEntry;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.hashTokens;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedTokens;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForToken;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE_HASH;
+import static org.wso2.is.data.sync.system.util.OAuth2Util.hashAuthorizationCode;
+import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedAuthorizationCode;
+import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForCode;
 
-@VersionAdvice(version = "5.5.0", tableName = "IDN_OAUTH2_ACCESS_TOKEN")
-public class OAuthTokenDataTransformerV550 implements DataTransformer {
-
-    private Log log = LogFactory.getLog(OAuthTokenDataTransformerV550.class);
+@VersionAdvice(version = "5.5.0", tableName = "IDN_OAUTH2_AUTHORIZATION_CODE")
+public class AuthorizationCodeDataTransformerV550 implements DataTransformer {
 
     @Override
     public List<JournalEntry> transform(List<JournalEntry> journalEntryList, PipelineContext context)
@@ -55,32 +49,32 @@ public class OAuthTokenDataTransformerV550 implements DataTransformer {
 
             for (JournalEntry entry : journalEntryList) {
 
-                String accessToken = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN);
-                String refreshToken = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN);
-                String accessTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN_HASH);
-                String refreshTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN_HASH);
+                String authorizationCode = (String) getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE);
+                String authorizationCodeHash = (String) getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE_HASH);
 
-                TokenInfo tokenInfo = new TokenInfo(accessToken, refreshToken, accessTokenHash, refreshTokenHash);
+                AuthorizationCodeInfo authorizationCodeInfo = new AuthorizationCodeInfo(authorizationCode,
+                                                                                        authorizationCodeHash);
 
                 if (encryptionWithTransformationEnabled) {
                     try {
-                        transformEncryptedTokens(tokenInfo);
-                        if (StringUtils.isBlank(accessTokenHash)) {
-                            hashTokens(tokenInfo);
+                        transformEncryptedAuthorizationCode(authorizationCodeInfo);
+                        if (StringUtils.isBlank(authorizationCodeHash)) {
+                            hashAuthorizationCode(authorizationCodeInfo);
                         }
-                        updateJournalEntryForToken(entry, tokenInfo);
+                        updateJournalEntryForCode(entry, authorizationCodeInfo);
                     } catch (CryptoException e) {
-                        throw new SyncClientException("Error while transforming encrypted tokens", e);
+                        throw new SyncClientException("Error while transforming encrypted authorization codes", e);
                     }
                 } else if (!tokenEncryptionEnabled) {
-                    if (StringUtils.isBlank(accessTokenHash)) {
-                        hashTokens(tokenInfo);
-                        updateJournalEntryForToken(entry, tokenInfo);
+                    if (StringUtils.isBlank(authorizationCodeHash)) {
+                        hashAuthorizationCode(authorizationCodeInfo);
+                        updateJournalEntryForCode(entry, authorizationCodeInfo);
                     }
                 }
             }
         } catch (IdentityOAuth2Exception e) {
-            throw new SyncClientException("Error while checking token encryption server configurations", e);
+            throw new SyncClientException("Error while checking authorization code encryption server configurations",
+                                          e);
         }
         return journalEntryList;
     }

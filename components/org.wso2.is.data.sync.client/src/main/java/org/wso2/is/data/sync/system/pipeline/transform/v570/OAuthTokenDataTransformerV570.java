@@ -33,20 +33,22 @@ import org.wso2.is.data.sync.system.util.OAuth2Util;
 
 import java.util.List;
 
+import static org.wso2.is.data.sync.system.util.CommonUtil.getObjectValueFromEntry;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
+import static org.wso2.is.data.sync.system.util.Constant.PROPERTY_NAME_ALGORITHM;
+import static org.wso2.is.data.sync.system.util.Constant.PROPERTY_NAME_HASH;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.hashTokens;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedTokens;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntry;
+import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForToken;
 
 @VersionAdvice(version = "5.7.0", tableName = "IDN_OAUTH2_ACCESS_TOKEN")
 public class OAuthTokenDataTransformerV570 implements DataTransformer{
 
     private static String hashingAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
-    private static final String ALGORITHM = "algorithm";
-    private static final String HASH = "hash";
+
     @Override
     public List<JournalEntry> transform(List<JournalEntry> journalEntryList, PipelineContext context)
             throws SyncClientException {
@@ -57,10 +59,10 @@ public class OAuthTokenDataTransformerV570 implements DataTransformer{
 
             for (JournalEntry entry : journalEntryList) {
 
-                String accessToken = (String) getEntryValue(entry, COLUMN_ACCESS_TOKEN);
-                String refreshToken = (String) getEntryValue(entry, COLUMN_REFRESH_TOKEN);
-                String accessTokenHash = (String) getEntryValue(entry, COLUMN_ACCESS_TOKEN_HASH);
-                String refreshTokenHash = (String) getEntryValue(entry, COLUMN_REFRESH_TOKEN_HASH);
+                String accessToken = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN);
+                String refreshToken = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN);
+                String accessTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN_HASH);
+                String refreshTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN_HASH);
 
                 TokenInfo tokenInfo = new TokenInfo(accessToken, refreshToken, accessTokenHash, refreshTokenHash);
                 if (encryptionWithTransformationEnabled) {
@@ -71,14 +73,14 @@ public class OAuthTokenDataTransformerV570 implements DataTransformer{
                         } else {
                             reHashWithHashingAlgorithm(tokenInfo, hashingAlgorithm);
                         }
-                        updateJournalEntry(entry, tokenInfo);
+                        updateJournalEntryForToken(entry, tokenInfo);
                     } catch (CryptoException e) {
                         throw new SyncClientException("Error while transforming encrypted tokens", e);
                     }
                 } else if (!tokenEncryptionEnabled) {
                     if (StringUtils.isBlank(accessTokenHash)) {
                         hashTokens(tokenInfo);
-                        updateJournalEntry(entry, tokenInfo);
+                        updateJournalEntryForToken(entry, tokenInfo);
                     } else {
                         reHashWithHashingAlgorithm(tokenInfo, hashingAlgorithm);
                     }
@@ -113,18 +115,8 @@ public class OAuthTokenDataTransformerV570 implements DataTransformer{
     private JSONObject getJsonObjectWithHash(String hashAlgorithm, String accessTokenHash) {
 
         JSONObject tokenHashObject = new JSONObject();
-        tokenHashObject.put(ALGORITHM, hashAlgorithm);
-        tokenHashObject.put(HASH, accessTokenHash);
+        tokenHashObject.put(PROPERTY_NAME_ALGORITHM, hashAlgorithm);
+        tokenHashObject.put(PROPERTY_NAME_HASH, accessTokenHash);
         return tokenHashObject;
-    }
-
-    private Object getEntryValue(JournalEntry entry, String key) {
-
-        EntryField entryField = entry.get(key);
-        Object value = null;
-        if (entryField != null) {
-            value = entryField.getValue();
-        }
-        return value;
     }
 }

@@ -22,9 +22,9 @@ import java.util.StringJoiner;
 
 public class TableMetaData {
 
-    private List<ColumnData> columnDataList;
-    private List<String> primaryKeys;
-    private List<String> nonPrimaryKeys;
+    private List<ColumnData> columnDataList = new ArrayList<>();
+    private List<String> primaryKeys = new ArrayList<>();
+    private List<String> nonPrimaryKeys = new ArrayList<>();
     private String columns;
     private String parameters;
     private String updateFilter;

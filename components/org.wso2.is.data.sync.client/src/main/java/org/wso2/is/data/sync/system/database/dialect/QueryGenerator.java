@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.system.database.ddl;
+package org.wso2.is.data.sync.system.database.dialect;
 
-public class MySQLDatabaseDialect implements DatabaseDialect {
+public class QueryGenerator {
 
 
-    public String generate(Table table) {
-
-        return null;
-    }
-
-    public String generate(Trigger trigger) {
-
-        return null;
-    }
 }

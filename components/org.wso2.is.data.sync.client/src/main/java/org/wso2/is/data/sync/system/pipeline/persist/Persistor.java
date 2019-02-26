@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_TARGET_SYNC_ENTRY_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY;
@@ -42,7 +43,14 @@ import static org.wso2.is.data.sync.system.database.SQLQueryProvider.getQuery;
 import static org.wso2.is.data.sync.system.util.CommonUtil.convertEntryFieldToStatement;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
+import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_DELETE;
+import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_INSERT;
+import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_UPDATE;
 
+/**
+ * The persistence stage of the data sync pipeline.
+ * The list of {@link JournalEntry} provided by the pipeline predecessors will be persisted at this stage.
+ */
 public class Persistor {
 
     private Log log = LogFactory.getLog(Persistor.class);
@@ -66,9 +74,11 @@ public class Persistor {
 
             String sqlUpdate = getTargetUpdateQuery(tableName, tableMetaData);
             String sqlInsert = getTargetInsertQuery(tableName, tableMetaData);
+            String sqlDelete = getTargetDeleteQuery(tableName, tableMetaData);
 
             try (PreparedStatement psUpdate = targetConnection.prepareStatement(sqlUpdate);
-                 PreparedStatement psInsert = targetConnection.prepareStatement(sqlInsert)) {
+                 PreparedStatement psInsert = targetConnection.prepareStatement(sqlInsert);
+                 PreparedStatement psDelete = targetConnection.prepareStatement(sqlDelete)) {
                 for (JournalEntry entry : transformedEntryList) {
                     String sql = getTargetSearchQuery(tableName, tableMetaData);
 
@@ -80,21 +90,44 @@ public class Persistor {
 
                             try {
                                 if (rs.next()) {
-                                    setPSForUpdateTarget(tableMetaData, rowEntry, psUpdate);
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Updating entry: " + psUpdate);
+                                    if (ENTRY_FILED_ACTION_DELETE.equals(entry.getOperation())) {
+                                        setPSForDeleteTarget(tableMetaData, rowEntry, psDelete);
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Deleting entry: " + psUpdate);
+                                        }
+                                    } else if (ENTRY_FILED_ACTION_INSERT.equals(entry.getOperation()) ||
+                                               ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
+
+                                        setPSForUpdateTarget(tableMetaData, rowEntry, psUpdate);
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Updating entry: " + psUpdate);
+                                        }
+                                        psUpdate.executeUpdate();
                                     }
-                                    psUpdate.executeUpdate();
                                 } else {
-                                    setPSForInsertTarget(tableMetaData, rowEntry, psInsert);
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Inserting entry: " + psInsert);
+                                    if (ENTRY_FILED_ACTION_DELETE.equals(entry.getOperation())) {
+
+                                        // Ignore delete operation on none extant target entry.
+                                    } else if (ENTRY_FILED_ACTION_INSERT.equals(entry.getOperation()) ||
+                                               ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
+
+                                        setPSForInsertTarget(tableMetaData, rowEntry, psInsert);
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Inserting entry: " + psInsert);
+                                        }
+                                        psInsert.executeUpdate();
                                     }
-                                    psInsert.executeUpdate();
                                 }
                                 TransactionResult result = new TransactionResult(entry, true);
                                 transactionResults.add(result);
                             } catch (SQLException e) {
+                                log.error("Error occurred while data sync.", e);
+                                log.error(e.getSQLState());
+                                try {
+                                    Thread.sleep(5000);
+                                } catch (InterruptedException e1) {
+                                    //
+                                }
                                 TransactionResult result = new TransactionResult(entry, false, e);
                                 transactionResults.add(result);
                             }
@@ -103,7 +136,7 @@ public class Persistor {
                 }
             }
         } catch (SQLException e) {
-            throw new SyncClientException("Error while obtaining sync data from of target table", e);
+            throw new SyncClientException("Error while obtaining sync data from of target table.", e);
         }
         return transactionResults;
     }
@@ -114,6 +147,14 @@ public class Persistor {
         String sqlInsert = getQuery(SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY);
         sqlInsert = String.format(sqlInsert, tableName, metaData.getColumns(), metaData.getParameters());
         return sqlInsert;
+    }
+
+    protected String getTargetDeleteQuery(String tableName, TableMetaData metaData) {
+
+        // DELETE FROM %s WHERE %s
+        String sqlDelete = getQuery(SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY_KEY);
+        sqlDelete = String.format(sqlDelete, tableName, metaData.getSearchFilter());
+        return sqlDelete;
     }
 
     protected String getTargetUpdateQuery(String tableName, TableMetaData metaData) {
@@ -170,6 +211,17 @@ public class Persistor {
         for (int i = 0; i < primaryKeys.size(); i++) {
             EntryField entryField = fields.get(primaryKeys.get(i));
             convertEntryFieldToStatement(psTargetUpdate, entryField, (nonPrimaryKeys.size() + 1 + i));
+        }
+    }
+
+    protected void setPSForDeleteTarget(TableMetaData metaData, Map<String, EntryField> fields, PreparedStatement
+            psTargetUpdate) throws SQLException, SyncClientException {
+
+        List<String> primaryKeys = metaData.getPrimaryKeys();
+
+        for (int i = 0; i < primaryKeys.size(); i++) {
+            EntryField entryField = fields.get(primaryKeys.get(i));
+            convertEntryFieldToStatement(psTargetUpdate, entryField, i + 1);
         }
     }
 }

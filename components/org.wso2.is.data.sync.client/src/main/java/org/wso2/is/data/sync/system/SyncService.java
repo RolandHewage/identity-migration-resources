@@ -20,16 +20,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.config.Configuration;
 import org.wso2.is.data.sync.system.database.DataSourceManager;
+import org.wso2.is.data.sync.system.database.dialect.DDLGenerator;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.DataSyncPipeline;
 import org.wso2.is.data.sync.system.pipeline.PipelineConfiguration;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformerFactory;
+import org.wso2.is.data.sync.system.pipeline.transform.v550.AuthorizationCodeDataTransformerV550;
 import org.wso2.is.data.sync.system.pipeline.transform.v550.OAuthTokenDataTransformerV550;
+import org.wso2.is.data.sync.system.pipeline.transform.v570.AuthorizationCodeDataTransformerV570;
 import org.wso2.is.data.sync.system.pipeline.transform.v570.OAuthTokenDataTransformerV570;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -37,30 +39,30 @@ public class SyncService {
 
     private Configuration configuration;
     private DataSourceManager dataSourceManager;
-    private List<String> syncTableList = new ArrayList<>();
     private List<DataTransformer> dataTransformers = new ArrayList<>();
+    private DDLGenerator ddlGenerator;
+    private List<SyncDataTask> syncDataTaskList = new ArrayList<>();
+    private List<String> syncTables = new ArrayList<>();
+
     private Log log = LogFactory.getLog(SyncService.class);
 
     public SyncService() throws SyncClientException {
 
-        configuration = new Configuration("5.3.0", "5.7.0");
-        configuration.setBatchSize(5);
-
-        String syncTables = System.getProperty("syncTables");
-        if (syncTables != null) {
-            List<String> tables = Arrays.asList(syncTables.split(","));
-            if (tables.size() > 0) {
-                syncTableList.addAll(tables);
-            }
-        }
-
-        this.dataSourceManager = new DataSourceManager();
+        configuration = new Configuration.ConfigurationBuilder().build();
+        this.dataSourceManager = new DataSourceManager(configuration);
         initiateDataTransformers();
+        syncTables = configuration.getSyncTables();
+        this.ddlGenerator = new DDLGenerator(syncTables, dataSourceManager);
+    }
+
+    public List<SyncDataTask> getSyncDataTaskList() {
+
+        return syncDataTaskList;
     }
 
     public void run() throws SyncClientException {
 
-        for (String table : syncTableList) {
+        for (String table : syncTables) {
 
             String schema = dataSourceManager.getSchema(table);
             DataSource sourceDataSource = dataSourceManager.getSourceDataSource(schema);
@@ -71,30 +73,13 @@ public class SyncService {
                                                                                     sourceDataSource, targetDataSource);
             DataSyncPipeline dataSyncPipeline = new DataSyncPipeline(factory, pipelineConfiguration);
             dataSyncPipeline.build();
-            int syncInterval = configuration.getSyncInterval();
+            long syncInterval = configuration.getSyncInterval();
 
-            Thread thread = new Thread(() -> {
-                try {
-                    while (true) {
-                        boolean complete = dataSyncPipeline.processBatch();
-                        if (complete) {
-                            try {
-                                log.info("Batch processing for table: " + table + " completed. Sleeping the thread " +
-                                         "for: " + syncInterval + "ms.");
-                                Thread.sleep(syncInterval);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException("Error occurred while attempting to sleep the thread: " +
-                                                           Thread.currentThread().getName());
-                            }
-                        }
-                    }
-                } catch (SyncClientException e) {
-                    throw new RuntimeException("Error occurred while data syncing on table: " + table + ", schema: "
-                                               + schema);
-                }
-            });
-            thread.setName(table + "-table-sync-thread");
+            SyncDataTask syncDataTask = new SyncDataTask(dataSyncPipeline, table, schema, syncInterval);
+            String threadName = table + "-table-sync-thread";
+            Thread thread = new Thread(syncDataTask, threadName);
             thread.start();
+            syncDataTaskList.add(syncDataTask);
         }
     }
 
@@ -102,5 +87,12 @@ public class SyncService {
 
         dataTransformers.add(new OAuthTokenDataTransformerV550());
         dataTransformers.add(new OAuthTokenDataTransformerV570());
+        dataTransformers.add(new AuthorizationCodeDataTransformerV550());
+        dataTransformers.add(new AuthorizationCodeDataTransformerV570());
+    }
+
+    public void generateScripts(boolean ddlOnly) throws SyncClientException {
+
+        ddlGenerator.generateScripts(ddlOnly);
     }
 }

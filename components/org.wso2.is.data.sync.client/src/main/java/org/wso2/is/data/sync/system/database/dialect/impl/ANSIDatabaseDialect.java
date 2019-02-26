@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.wso2.is.data.sync.system.database.ddl;
+package org.wso2.is.data.sync.system.database.dialect.impl;
 
-import org.wso2.is.data.sync.system.database.TableMetaData;
+import org.wso2.is.data.sync.system.database.dialect.DatabaseDialect;
 
-public class Table {
+public abstract class ANSIDatabaseDialect implements DatabaseDialect {
 
-    private String name;
-    private TableMetaData tmd;
+
 }

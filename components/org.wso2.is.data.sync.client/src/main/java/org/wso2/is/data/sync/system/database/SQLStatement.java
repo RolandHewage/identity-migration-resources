@@ -16,23 +16,27 @@
 
 package org.wso2.is.data.sync.system.database;
 
-public class ColumnData {
+public class SQLStatement {
 
-    private String name;
+    private String scheme;
+    private String statement;
     private String type;
-    private int size;
-    private boolean autoIncrement;
 
-    public ColumnData(String name, String type, int size) {
+    public SQLStatement(String scheme, String statement, String type) {
 
-        this.name = name;
-        this.type = type;
-        this.size = size;
+        this.scheme = scheme;
+        this.statement = statement;
+        this.type = type; //SOURCE | TARGET
     }
 
-    public String getName() {
+    public String getScheme() {
 
-        return name;
+        return scheme;
+    }
+
+    public String getStatement() {
+
+        return statement;
     }
 
     public String getType() {
@@ -40,18 +44,13 @@ public class ColumnData {
         return type;
     }
 
-    public int getSize() {
+    @Override
+    public String toString() {
 
-        return size;
-    }
-
-    public boolean isAutoIncrement() {
-
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(boolean autoIncrement) {
-
-        this.autoIncrement = autoIncrement;
+        return "SQLStatement{" +
+               "scheme='" + scheme + '\'' +
+               ", statement='" + statement + '\'' +
+               ", type='" + type + '\'' +
+               '}';
     }
 }

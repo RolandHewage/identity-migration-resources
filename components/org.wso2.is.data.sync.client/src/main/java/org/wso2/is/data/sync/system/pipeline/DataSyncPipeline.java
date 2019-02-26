@@ -40,6 +40,7 @@ public class DataSyncPipeline {
     private DataTransformerFactory dataTransformerFactory;
     private PipelineConfiguration pipelineConfiguration;
     private Log log = LogFactory.getLog(DataSyncPipeline.class);
+    private boolean active = true;
 
 
     public DataSyncPipeline(DataTransformerFactory dataTransformerFactory, PipelineConfiguration
@@ -71,7 +72,8 @@ public class DataSyncPipeline {
                     throw new SyncClientException("Error while creating target connection from data source for schema: "
                                                   + schema);
                 }
-                PipelineContext context = new PipelineContext(sourceConnection, targetConnection, pipelineConfiguration);
+                PipelineContext context = new PipelineContext(sourceConnection, targetConnection,
+                                                              pipelineConfiguration);
 
                 List<JournalEntry> journalEntryList = batchProcessor.pollJournal(context);
                 List<JournalEntry> transform = dataTransformer.transform(journalEntryList, context);
@@ -80,11 +82,20 @@ public class DataSyncPipeline {
 
                 if (batchComplete) {
                     try {
-
                         targetConnection.commit();
+                        sourceConnection.commit();
                     } catch (SQLException e) {
                         batchComplete = false;
                         log.error("Error while committing sync transaction on table: " + pipelineConfiguration
+                                .getTableName(), e);
+                    }
+                } else {
+                    try {
+                        targetConnection.rollback();
+                        sourceConnection.rollback();
+                    } catch (SQLException e) {
+                        batchComplete = false;
+                        log.error("Error while rolling back sync transaction on table: " + pipelineConfiguration
                                 .getTableName(), e);
                     }
                 }
@@ -101,7 +112,7 @@ public class DataSyncPipeline {
                     log.error("Error while closing connection of schema: " + schema, e);
                 }
             }
-        } while (!complete);
+        } while (!complete && active);
         return true;
     }
 
@@ -114,5 +125,10 @@ public class DataSyncPipeline {
                                                                   configuration.getTargetVersion());
         batchProcessor = new BatchProcessor();
         resultHandler = new ResultHandler();
+    }
+
+    public void exit() {
+
+        this.active = false;
     }
 }

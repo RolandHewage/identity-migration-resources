@@ -25,12 +25,15 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.EntryField;
 import org.wso2.is.data.sync.system.pipeline.JournalEntry;
+import org.wso2.is.data.sync.system.pipeline.transform.model.AuthorizationCodeInfo;
 import org.wso2.is.data.sync.system.pipeline.transform.model.TokenInfo;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.wso2.carbon.core.util.CryptoUtil.getDefaultCryptoUtil;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
 
@@ -94,6 +97,29 @@ public class OAuth2Util {
         return tokenInfo;
     }
 
+    public static AuthorizationCodeInfo hashAuthorizationCode(AuthorizationCodeInfo authorizationCodeInfo) throws
+            SyncClientException {
+
+        TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
+        String authorizationCode;
+
+        String decryptedAuthorizationCode = authorizationCodeInfo.getDecryptedAuthorizationCode();
+        if (decryptedAuthorizationCode != null) {
+            authorizationCode = decryptedAuthorizationCode;
+        } else {
+            authorizationCode = authorizationCodeInfo.getAuthorizationCode();
+        }
+
+        try {
+            String authorizationCodeHash = tokenPersistenceProcessor.getProcessedAuthzCode(authorizationCode);
+            authorizationCodeInfo.setAuthorizationCodeHash(authorizationCodeHash);
+        } catch (IdentityOAuth2Exception e) {
+            throw new SyncClientException("Error while hashing access/refresh token with " +
+                                          "HashingPersistenceProcessor.", e);
+        }
+        return authorizationCodeInfo;
+    }
+
     public static TokenInfo transformEncryptedTokens(TokenInfo tokenInfo) throws CryptoException, SyncClientException {
 
         String accessToken = tokenInfo.getAccessToken();
@@ -137,12 +163,44 @@ public class OAuth2Util {
         return tokenInfo;
     }
 
-    public static void updateJournalEntry(JournalEntry entry, TokenInfo tokenInfo) {
+    public static AuthorizationCodeInfo transformEncryptedAuthorizationCode(AuthorizationCodeInfo authorizationCodeInfo)
+            throws CryptoException, SyncClientException {
+
+        String authorizationCode = authorizationCodeInfo.getAuthorizationCode();
+        if (!isBase64DecodeAndIsSelfContainedCipherText(authorizationCode)) {
+            byte[] decryptedAuthorizationCode = getDefaultCryptoUtil().base64DecodeAndDecrypt(authorizationCode, "RSA");
+            String newEncryptedAuthorizationCode = getDefaultCryptoUtil().encryptAndBase64Encode
+                    (decryptedAuthorizationCode);
+
+            String decryptedAuthorizationCodeStr = new String(decryptedAuthorizationCode, UTF_8);
+
+            authorizationCodeInfo.setAuthorizationCode(newEncryptedAuthorizationCode);
+            authorizationCodeInfo.setDecryptedAuthorizationCode(decryptedAuthorizationCodeStr);
+
+        } else if (isBase64DecodeAndIsSelfContainedCipherText(authorizationCode)) {
+
+            byte[] decryptedAccessToken = getDefaultCryptoUtil().base64DecodeAndDecrypt(authorizationCode);
+
+            String decryptedAuthorizationCodeStr = new String(decryptedAccessToken, UTF_8);
+            authorizationCodeInfo.setAuthorizationCode(authorizationCode);
+            authorizationCodeInfo.setDecryptedAuthorizationCode(decryptedAuthorizationCodeStr);
+        }
+        return authorizationCodeInfo;
+    }
+
+    public static void updateJournalEntryForToken(JournalEntry entry, TokenInfo tokenInfo) {
 
         entry.addEntryField(COLUMN_ACCESS_TOKEN, new EntryField<>(tokenInfo.getAccessToken()));
         entry.addEntryField(COLUMN_REFRESH_TOKEN, new EntryField<>(tokenInfo.getRefreshToken()));
         entry.addEntryField(COLUMN_ACCESS_TOKEN_HASH, new EntryField<>(tokenInfo.getAccessTokenHash()));
         entry.addEntryField(COLUMN_REFRESH_TOKEN_HASH, new EntryField<>(tokenInfo.getRefreshTokenHash()));
+    }
+
+    public static void updateJournalEntryForCode(JournalEntry entry, AuthorizationCodeInfo authorizationCodeInfo) {
+
+        entry.addEntryField(COLUMN_AUTHORIZATION_CODE, new EntryField<>(authorizationCodeInfo.getAuthorizationCode()));
+        entry.addEntryField(COLUMN_AUTHORIZATION_CODE_HASH, new EntryField<>(authorizationCodeInfo
+                                                                                 .getAuthorizationCodeHash()));
     }
 }
 

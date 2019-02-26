@@ -43,7 +43,15 @@ import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncTableName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncVersionTableName;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_ACTION;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_SYNC_ID;
 
+/**
+ * Initial step of the data sync pipeline.
+ *
+ * The batch processor prepares a list of {@link JournalEntry} by polling a journal instance in the source database.
+ *
+ */
 public class BatchProcessor {
 
     private Log log = LogFactory.getLog(BatchProcessor.class);
@@ -86,7 +94,7 @@ public class BatchProcessor {
 
 
         List<JournalEntry> journalEntryList = new ArrayList<>();
-        // SELECT MAX(SYNC_ID) AS MAX_SYNC_ID, %s FROM %s WHERE SYNC_ID > ? AND SYNC_ID < ? GROUP
+        // SELECT SYNC_ID, %s FROM %s WHERE SYNC_ID > ? AND SYNC_ID < ? GROUP
         // BY %s ORDER BY SYNC_ID ASC
         String sql = getQuery(SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY);
         sql = String.format(sql, tableMetaData.getColumns(), syncTableName);
@@ -102,8 +110,10 @@ public class BatchProcessor {
                         String columnName = columnData.getName();
                         entry.addEntryField(columnName, entryField);
                     }
-                    EntryField<Integer> entryField = new EntryField<>(rs.getInt("MAX_SYNC_ID"));
-                    entry.addEntryField("SYNC_ID", entryField);
+                    EntryField<Integer> syncIdEntry = new EntryField<>(rs.getInt(COLUMN_NAME_SYNC_ID));
+                    entry.addEntryField(COLUMN_NAME_SYNC_ID, syncIdEntry);
+
+                    entry.setOperation(rs.getString(COLUMN_NAME_ACTION));
                     journalEntryList.add(entry);
                 }
             }

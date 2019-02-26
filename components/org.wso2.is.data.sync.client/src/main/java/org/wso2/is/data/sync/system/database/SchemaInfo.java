@@ -16,23 +16,21 @@
 
 package org.wso2.is.data.sync.system.database;
 
-public class ColumnData {
+import java.util.List;
 
-    private String name;
+public class SchemaInfo {
+
     private String type;
-    private int size;
-    private boolean autoIncrement;
+    private String sourceJndiName;
+    private String targetJndiName;
+    private List<String> tableList;
 
-    public ColumnData(String name, String type, int size) {
+    public SchemaInfo(String type, String sourceJndiName, String targetJndiName, List<String> tableList) {
 
-        this.name = name;
         this.type = type;
-        this.size = size;
-    }
-
-    public String getName() {
-
-        return name;
+        this.sourceJndiName = sourceJndiName;
+        this.targetJndiName = targetJndiName;
+        this.tableList = tableList;
     }
 
     public String getType() {
@@ -40,18 +38,18 @@ public class ColumnData {
         return type;
     }
 
-    public int getSize() {
+    public String getSourceJndiName() {
 
-        return size;
+        return sourceJndiName;
     }
 
-    public boolean isAutoIncrement() {
+    public String getTargetJndiName() {
 
-        return autoIncrement;
+        return targetJndiName;
     }
 
-    public void setAutoIncrement(boolean autoIncrement) {
+    public List<String> getTableList() {
 
-        this.autoIncrement = autoIncrement;
+        return tableList;
     }
 }

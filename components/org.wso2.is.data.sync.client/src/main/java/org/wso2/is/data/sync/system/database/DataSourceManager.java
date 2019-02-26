@@ -16,16 +16,17 @@
 
 package org.wso2.is.data.sync.system.database;
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.is.data.sync.system.config.Configuration;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
-import org.wso2.is.data.sync.system.util.Constant;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -35,52 +36,71 @@ import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_H2;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MSSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MYSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_ORACLE;
-import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSGRESQL;
+import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSTGRESQL;
+import static org.wso2.is.data.sync.system.util.Constant.DELIMITER;
+import static org.wso2.is.data.sync.system.util.Constant.DELIMITER_COMMA;
+import static org.wso2.is.data.sync.system.util.Constant.DELIMITER_DOUBLE_SLASH;
 import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_DB2_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
 
 public class DataSourceManager {
 
-    private Map<String, DataSourceEntry> dataSourceEntryListSource = new HashMap<>();
-    private Map<String, DataSourceEntry> dataSourceEntryListTarget = new HashMap<>();
+    private Map<String, DataSourceEntry> sourceEntryList = new HashMap<>();
+    private Map<String, DataSourceEntry> targetEntryList = new HashMap<>();
+    private List<SchemaInfo> schemaInfoList = new ArrayList<>();
 
-    public DataSourceManager() throws SyncClientException {
+    public DataSourceManager(Configuration configuration) throws SyncClientException {
 
-        Map<String, String> sourceMapping = new HashMap<>();
-        sourceMapping.put(Constant.SCHEMA_TYPE_IDENTITY, "jdbc/WSO2CarbonDBSource");
-
-        Map<String, String> targetMapping = new HashMap<>();
-        targetMapping.put(Constant.SCHEMA_TYPE_IDENTITY, "jdbc/WSO2CarbonDB");
-
-        populateDataSourceEntryList(sourceMapping, dataSourceEntryListSource);
-        populateDataSourceEntryList(targetMapping, dataSourceEntryListTarget);
-
+        schemaInfoList = configuration.getSchemaInfoList();
+        populateDataSourceEntryList(schemaInfoList, sourceEntryList, targetEntryList);
     }
 
-    private void populateDataSourceEntryList(Map<String, String> dataSourceMapping, Map<String,
-            DataSourceEntry> dataSourceEntryList) throws SyncClientException {
+    private void populateDataSourceEntryList(List<SchemaInfo> schemaInfoList,
+                                             Map<String, DataSourceEntry> sourceEntryList,
+                                             Map<String, DataSourceEntry> targetEntryList)
+            throws SyncClientException {
 
-        for (Map.Entry<String, String> entry : dataSourceMapping.entrySet()) {
+        for (SchemaInfo schemaInfo : schemaInfoList) {
 
-            String schema = entry.getKey();
-            String dataSourceName = entry.getValue();
+            String sourceJndiName = schemaInfo.getSourceJndiName();
+            String targetJndiName = schemaInfo.getTargetJndiName();
+            String schemaType = schemaInfo.getType();
 
+            DataSource sourceDataSource = initializeDataSource(sourceJndiName);
+            DataSource targetDataSource = initializeDataSource(targetJndiName);
+
+            String sourceDataSourceType;
             try {
-                InitialContext ctx = new InitialContext();
-                DataSource dataSource = (DataSource) ctx.lookup(dataSourceName);
-
-                try {
-                    String type = getDataSourceType(dataSource);
-                    dataSourceEntryList.put(schema, new DataSourceEntry(dataSource, type));
-                } catch (SQLException e) {
-                    throw new SyncClientException("Error while creating connection with data source: " + dataSourceName +
-                                                  " of schema: " + schema);
-                }
-            } catch (NamingException e) {
-                throw new SyncClientException("Error while data source lookup for: " + dataSourceName + " of schema: "
-                                           + schema);
+                sourceDataSourceType = getDataSourceType(sourceDataSource);
+            } catch (SQLException e) {
+                throw new SyncClientException("Error while creating connection with data source: " +
+                                              sourceJndiName + " of schema: " + schemaType);
             }
+
+            String targetDataSourceType;
+            try {
+                targetDataSourceType = getDataSourceType(sourceDataSource);
+            } catch (SQLException e) {
+                throw new SyncClientException("Error while creating connection with data source: " +
+                                              targetJndiName + " of schema: " + schemaType);
+            }
+
+            sourceEntryList.put(schemaType, new DataSourceEntry(sourceDataSource, sourceDataSourceType));
+            targetEntryList.put(schemaType, new DataSourceEntry(targetDataSource, targetDataSourceType));
         }
+    }
+
+    private DataSource initializeDataSource(String jndiName) throws SyncClientException {
+
+        DataSource dataSource;
+        try {
+            InitialContext ctx = new InitialContext();
+            dataSource = (DataSource) ctx.lookup(jndiName);
+
+        } catch (NamingException e) {
+            throw new SyncClientException("Error while data source lookup for: " + jndiName);
+        }
+        return dataSource;
     }
 
     private String getDataSourceType(DataSource dataSource) throws SQLException, SyncClientException {
@@ -90,17 +110,17 @@ public class DataSourceManager {
             DatabaseMetaData metaData = connection.getMetaData();
             String databaseProductName = metaData.getDatabaseProductName();
             if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_MYSQL + ".*")) {
-                type = "mysql";
+                type = DATA_SOURCE_TYPE_MYSQL;
             } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_ORACLE + ".*")) {
-                type = "oracle";
+                type = DATA_SOURCE_TYPE_ORACLE;
             } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_MSSQL + ".*")) {
-                type = "mssql";
+                type = DATA_SOURCE_TYPE_MSSQL;
             } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_H2 + ".*")) {
-                type = "h2";
+                type = DATA_SOURCE_TYPE_H2;
             } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_DB2 + ".*")) {
-                type = "db2";
-            } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_POSGRESQL + ".*")) {
-                type = "postgresql";
+                type = DATA_SOURCE_TYPE_DB2;
+            } else if (databaseProductName.matches("(?i).*" + DATA_SOURCE_TYPE_POSTGRESQL + ".*")) {
+                type = DATA_SOURCE_TYPE_POSTGRESQL;
             } else {
                 throw new SyncClientException("Unsupported data source type: " + databaseProductName);
             }
@@ -110,51 +130,35 @@ public class DataSourceManager {
 
     public String getDataSourceType(String schema) {
 
-        return DATA_SOURCE_TYPE_MYSQL;
-        //return dataSourceEntryListSource.get(schema).getType();
+        return sourceEntryList.get(schema).getType();
     }
 
     public DataSource getSourceDataSource(String schema) {
 
-        return dataSourceEntryListSource.get(schema).getDataSource();
+        return sourceEntryList.get(schema).getDataSource();
     }
 
     public DataSource getTargetDataSource(String schema) {
 
-        return dataSourceEntryListTarget.get(schema).getDataSource();
+        return targetEntryList.get(schema).getDataSource();
     }
 
-    public Connection getSourceConnection(String schema) throws SyncClientException {
+    public Connection getSourceConnection(String schema) throws SQLException {
 
-        DataSource dataSource;
-        Connection connection;
-        try {
-            dataSource = dataSourceEntryListSource.get(schema).getDataSource();
-            connection = dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
-        }
-        return connection;
+        DataSource dataSource = sourceEntryList.get(schema).getDataSource();
+        return dataSource.getConnection();
     }
 
-    public Connection getTargetConnection(String schema) throws SyncClientException {
+    public Connection getTargetConnection(String schema) throws SQLException {
 
-        DataSource dataSource;
-        Connection connection;
-        try {
-            dataSource = dataSourceEntryListTarget.get(schema).getDataSource();
-            connection = dataSource.getConnection();
-
-        } catch (SQLException e) {
-            throw new SyncClientException("Error occurred while creating connection for target schema: " + schema);
-        }
-        return connection;
+        DataSource dataSource = targetEntryList.get(schema).getDataSource();
+        return dataSource.getConnection();
     }
 
     public String getSqlDelimiter(String schema) {
 
         String dataSourceType = getDataSourceType(schema);
-        if ("oracle".equals(dataSourceType) || "db2".equals(dataSourceType)) {
+        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType) || DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
             return SQL_DELIMITER_DB2_ORACLE;
         }
         return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
@@ -162,16 +166,34 @@ public class DataSourceManager {
 
     public String getDDLPrefix(String schema) {
 
-        return "DELIMITER //" + System.lineSeparator() + System.lineSeparator();
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getDataSourceType(schema))) {
+
+            return DELIMITER + " " + DELIMITER_DOUBLE_SLASH + System.lineSeparator() + System.lineSeparator();
+        }
+        return StringUtils.EMPTY;
     }
 
     public String getDDLSuffix(String schema) {
 
-        return System.lineSeparator() + System.lineSeparator() + "DELIMITER ;";
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getDataSourceType(schema))) {
+            return System.lineSeparator() + System.lineSeparator() + DELIMITER + " " + DELIMITER_COMMA;
+        }
+        return StringUtils.EMPTY;
     }
 
-    public String getSchema(String tableName) {
+    public String getSchema(String tableName) throws SyncClientException {
 
-        return Constant.SCHEMA_TYPE_IDENTITY;
+        for (SchemaInfo schemaInfo : schemaInfoList) {
+
+            if (isTableExistInSchemaInfo(tableName, schemaInfo)) {
+                return schemaInfo.getType();
+            }
+        }
+        throw new SyncClientException("Could not find a matching schema for: " + tableName);
+    }
+
+    private boolean isTableExistInSchemaInfo(String tableName, SchemaInfo schemaInfo) {
+
+        return schemaInfo.getTableList().stream().anyMatch(s -> s.equalsIgnoreCase(tableName));
     }
 }

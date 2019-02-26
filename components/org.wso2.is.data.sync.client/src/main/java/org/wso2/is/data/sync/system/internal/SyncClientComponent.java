@@ -21,12 +21,21 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.is.data.sync.system.SyncDataTask;
 import org.wso2.is.data.sync.system.SyncService;
+import org.wso2.is.data.sync.system.config.Configuration.ConfigurationBuilder;
+
+import java.util.List;
+
+import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_GENERATE_DDL;
+import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_PREPARE_SYNC;
+import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_DATA;
 
 @Component(
         name = "org.wso2.carbon.is.sync.client",
@@ -36,19 +45,46 @@ public class SyncClientComponent {
 
     private Log log = LogFactory.getLog(SyncClientComponent.class);
     private RealmService realmService;
+    private SyncService syncService;
 
+    /**
+     * -DsyncData - Enable data sync related operations.
+     * -DprepareSync - creates the sync triggers and tables.
+     * -DgenerateDDL - (works with -DprepareSync) only generates DDLs and write to a file.
+     *
+     *  For additional configurations, see {@link ConfigurationBuilder}
+     *
+     * @param context ComponentContext.
+     */
     @Activate
     protected void activate(ComponentContext context) {
 
         try {
 
-            String dataSync = System.getProperty("syncData");
-            if (dataSync != null) {
-                SyncService syncService = new SyncService();
+            String dataSync = System.getProperty(JVM_PROPERTY_SYNC_DATA);
+            String prepareSync = System.getProperty(JVM_PROPERTY_PREPARE_SYNC);
+
+            if (prepareSync != null) {
+                syncService = new SyncService();
+                String generateDDL = System.getProperty(JVM_PROPERTY_GENERATE_DDL);
+                syncService.generateScripts(generateDDL != null);
+            } else if (dataSync != null) {
+                syncService = new SyncService();
                 syncService.run();
             }
         } catch (Throwable e) {
             log.error("Error occurred while running data sync client.", e);
+        }
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+        if (syncService != null) {
+            List<SyncDataTask> syncDataTaskList = syncService.getSyncDataTaskList();
+            for (SyncDataTask syncDataTask : syncDataTaskList) {
+                syncDataTask.shutdown();
+            }
         }
     }
 

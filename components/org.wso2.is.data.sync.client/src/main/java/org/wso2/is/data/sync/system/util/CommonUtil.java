@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.is.data.sync.system.database.ColumnData;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.EntryField;
+import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -42,6 +43,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
+import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_INSERT;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_UPDATE;
 import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_NAME;
@@ -72,6 +74,11 @@ public class CommonUtil {
     public static String getUpdateTriggerName(String tableName) {
 
         return getFormattedName(tableName, TRIGGER_NAME_SUFFIX_UPDATE);
+    }
+
+    public static String getDeleteTriggerName(String tableName) {
+
+        return getFormattedName(tableName, TRIGGER_NAME_SUFFIX_DELETE);
     }
 
     public static String getScripId(String scheme, String type) {
@@ -201,5 +208,15 @@ public class CommonUtil {
             throw new SyncClientException("Error while retrieving table primary metadata of source table: " + tableName,
                                           e);
         }
+    }
+
+    public static Object getObjectValueFromEntry(JournalEntry entry, String key) {
+
+        EntryField entryField = entry.get(key);
+        Object value = null;
+        if (entryField != null) {
+            value = entryField.getValue();
+        }
+        return value;
     }
 }

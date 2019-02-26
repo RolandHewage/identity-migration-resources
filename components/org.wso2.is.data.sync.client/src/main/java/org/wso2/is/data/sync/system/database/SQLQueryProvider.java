@@ -32,7 +32,7 @@ public class SQLQueryProvider {
 
     public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY =
             "SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL";
-    public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL = "SELECT SYNC_ID AS MAX_SYNC_ID, %s " +
+    public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL = "SELECT SYNC_ID, %s " +
                                                                             "FROM %s WHERE SYNC_ID > ? AND SYNC_ID < " +
                                                                             "? ORDER BY SYNC_ID ASC";
 
@@ -41,6 +41,9 @@ public class SQLQueryProvider {
 
     public static final String SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY = "SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY";
     public static final String SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY = "UPDATE %s SET %s WHERE %s";
+
+    public static final String SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY_KEY = "SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY";
+    public static final String SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY = "DELETE FROM %s WHERE %s";
 
     public static final String SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY = "SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY";
     public static final String SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY = "INSERT INTO %s (%s) VALUES (%s)";
@@ -61,11 +64,12 @@ public class SQLQueryProvider {
                                                                               "(SYNC_ID INT)";
 
     public static final String SQL_TEMPLATE_CREATE_TRIGGER_MYSQL_KEY = "SQL_TEMPLATE_CREATE_TRIGGER_MYSQL";
-    public static final String SQL_TEMPLATE_CREATE_TRIGGER_MYSQL = "CREATE TRIGGER %%s BEFORE %%s ON %s FOR EACH ROW " +
+    public static final String SQL_TEMPLATE_CREATE_TRIGGER_MYSQL = "CREATE TRIGGER %s %s %s ON %s %s " +
                                                                    "BEGIN INSERT INTO %s (%s) VALUES (%s); END";
 
     public static final String SQL_TEMPLATE_DROP_TRIGGER_MYSQL_KEY = "SQL_TEMPLATE_DROP_TRIGGER_MYSQL";
     public static final String SQL_TEMPLATE_DROP_TRIGGER_MYSQL = "DROP TRIGGER IF EXISTS %s";
+    public static final String SQL_TEMPLATE_DROP_TRIGGER_ORACLE = "DROP TRIGGER %s";
 
     private static Map<String, String> queryHolder = new HashMap<>();
 
@@ -76,8 +80,9 @@ public class SQLQueryProvider {
         queryHolder.put(SQL_TEMPLATE_INSERT_SYNC_ID_KEY, SQL_TEMPLATE_INSERT_SYNC_ID);
         queryHolder.put(SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY, SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL);
         queryHolder.put(SQL_TEMPLATE_SELECT_TARGET_SYNC_ENTRY_KEY, SQL_TEMPLATE_SELECT_TARGET_SYNC_ENTRY);
-        queryHolder.put(SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY, SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY);
         queryHolder.put(SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY_KEY, SQL_TEMPLATE_INSERT_TARGET_SYNC_ENTRY);
+        queryHolder.put(SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY_KEY, SQL_TEMPLATE_UPDATE_TARGET_SYNC_ENTRY);
+        queryHolder.put(SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY_KEY, SQL_TEMPLATE_DELETE_TARGET_SYNC_ENTRY);
         queryHolder.put(SQL_TEMPLATE_UPDATE_SYNC_VERSION_KEY, SQL_TEMPLATE_UPDATE_SYNC_VERSION);
         queryHolder.put(SQL_TEMPLATE_DROP_TABLE_MYSQL_KEY, SQL_TEMPLATE_DROP_TABLE_MYSQL);
         queryHolder.put(SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL_KEY, SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL);
