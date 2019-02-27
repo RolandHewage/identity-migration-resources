@@ -56,6 +56,7 @@ public class Constant {
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_ACTION = "ACTION";
+    public static final String JDBC_META_DATA_COLUMN_DEF = "COLUMN_DEF";
 
     public static final String TABLE_ATTRIBUTE_PRIMARY_KEY = "PRIMARY KEY";
 

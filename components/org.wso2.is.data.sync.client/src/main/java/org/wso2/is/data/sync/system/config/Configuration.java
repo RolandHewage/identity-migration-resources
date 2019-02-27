@@ -145,8 +145,8 @@ public class Configuration {
             Configuration configuration = new Configuration();
 
             setVersionInfo(configuration);
-            setSyncTableList(configuration);
             setSchemaInfo(configuration);
+            setSyncTableList(configuration);
 
             long syncInterval = DEFAULT_SYNC_INTERVAL;
             String syncIntervalStr = getProperty(JVM_PROPERTY_SYNC_INTERVAL, false);
@@ -232,10 +232,10 @@ public class Configuration {
             configuration.setSchemaInfoList(schemaInfoList);
         }
 
-        private void addToSchemaInfoList(List<SchemaInfo> schemaInfoList, SchemaInfo umSchemaInfo) {
+        private void addToSchemaInfoList(List<SchemaInfo> schemaInfoList, SchemaInfo schemaInfo) {
 
-            if (nonNull(umSchemaInfo)) {
-                schemaInfoList.add(umSchemaInfo);
+            if (nonNull(schemaInfo)) {
+                schemaInfoList.add(schemaInfo);
             }
         }
 

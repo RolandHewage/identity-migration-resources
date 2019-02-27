@@ -58,7 +58,7 @@ public class SyncDataTask implements Runnable {
             }
         } catch (SyncClientException e) {
             throw new RuntimeException("Error occurred while data syncing on table: " + table + ", schema: "
-                                       + schema);
+                                       + schema, e);
         }
     }
 
