@@ -32,7 +32,7 @@ public class SQLQueryProvider {
 
     public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY =
             "SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL";
-    public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL = "SELECT SYNC_ID, %s " +
+    public static final String SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL = "SELECT SYNC_ID, %s, ACTION " +
                                                                             "FROM %s WHERE SYNC_ID > ? AND SYNC_ID < " +
                                                                             "? ORDER BY SYNC_ID ASC";
 

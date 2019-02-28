@@ -54,8 +54,10 @@ import static org.wso2.is.data.sync.system.util.CommonUtil.getScripId;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncTableName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncVersionTableName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getUpdateTriggerName;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_ACTION;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_SYNC_ID;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_DB2;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_H2;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MSSQL;
@@ -104,7 +106,7 @@ public class DDLGenerator {
                 String sqlDelimiter = dataSourceManager.getSqlDelimiter(schema);
                 String delimiter = sqlDelimiter + System.lineSeparator() + System.lineSeparator();
                 StringJoiner joiner = new StringJoiner(delimiter, dataSourceManager.getDDLPrefix(schema),
-                                                       sqlDelimiter + dataSourceManager.getDDLSuffix(schema));
+                        sqlDelimiter + dataSourceManager.getDDLSuffix(schema));
 
                 for (String sqlStatement : sqlStatements) {
                     joiner.add(sqlStatement);
@@ -154,7 +156,7 @@ public class DDLGenerator {
                     } catch (SQLException e) {
                         sourceConnection.rollback();
                         throw new SyncClientException("Error while executing SQL statements on source schema: " +
-                                                      schema, e);
+                                schema, e);
                     }
                 } catch (SQLException e) {
                     throw new SyncClientException("Error while creating a connection on source schema: " + schema, e);
@@ -247,14 +249,14 @@ public class DDLGenerator {
                 String deleteTriggerName = getDeleteTriggerName(tableName);
 
                 Trigger onInsertTrigger = new Trigger(insertTriggerName, tableName, targetTableName,
-                                                      SYNC_OPERATION_INSERT, tableMetaData,
-                                                      SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
+                        SYNC_OPERATION_INSERT, tableMetaData,
+                        SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
                 Trigger onUpdateTrigger = new Trigger(updateTriggerName, tableName, targetTableName,
-                                                      SYNC_OPERATION_UPDATE, tableMetaData,
-                                                      SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
+                        SYNC_OPERATION_UPDATE, tableMetaData,
+                        SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
                 Trigger onDeleteTrigger = new Trigger(deleteTriggerName, tableName, targetTableName,
-                                                      SYNC_OPERATION_DELETE, tableMetaData,
-                                                      SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
+                        SYNC_OPERATION_DELETE, tableMetaData,
+                        SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
 
                 List<String> dropInsertTriggerSQL = databaseDialect.generateDropTrigger(insertTriggerName);
                 List<String> dropUpdateTriggerSQL = databaseDialect.generateDropTrigger(updateTriggerName);
@@ -270,7 +272,7 @@ public class DDLGenerator {
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onUpdateTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onDeleteTriggerSQL);
 
-            }  catch (SQLException e) {
+            } catch (SQLException e) {
                 throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
             }
         }
@@ -279,6 +281,7 @@ public class DDLGenerator {
 
     private void addStatementsToStatementList(String schema, String statementType, List<SQLStatement> sqlStatementList,
                                               List<String> statements) {
+
         if (Objects.nonNull(statements)) {
             statements.forEach(s -> sqlStatementList.add(new SQLStatement(schema, s, statementType)));
         }
@@ -295,11 +298,11 @@ public class DDLGenerator {
 
             List<String> createSyncTableSQL = getCreateSyncTableStatement(tableName, schema, databaseDialect);
             List<String> createSyncVersionTableStatement = getCreateSyncVersionTableStatement(tableName,
-                                                                                              databaseDialect);
+                    databaseDialect);
 
             addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, createSyncTableSQL);
             addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_TARGET, sqlStatementList,
-                                         createSyncVersionTableStatement);
+                    createSyncVersionTableStatement);
         }
         return sqlStatementList;
     }
@@ -358,14 +361,19 @@ public class DDLGenerator {
             ColumnData syncIdColumn = new ColumnData(COLUMN_NAME_SYNC_ID, COLUMN_TYPE_INT, 11);
             syncIdColumn.setAutoIncrement(true);
             columnData.add(syncIdColumn);
+
+            ColumnData actionColumn = new ColumnData(COLUMN_NAME_ACTION, COLUMN_TYPE_VARCHAR, 15);
+            actionColumn.setAutoIncrement(false);
+            columnData.add(actionColumn);
+
             List<String> primaryKeys = Collections.singletonList(COLUMN_NAME_SYNC_ID);
             TableMetaData tableMetaData = new TableMetaData.Builder().setColumnData(columnData)
-                                                                     .setPrimaryKeys(primaryKeys)
-                                                                     .build();
+                    .setPrimaryKeys(primaryKeys)
+                    .build();
             String syncTableName = getSyncTableName(tableName);
             Table table = new Table(syncTableName, tableMetaData);
             return databaseDialect.generateCreateTable(table);
-        }  catch (SQLException e) {
+        } catch (SQLException e) {
             throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
         }
     }
@@ -378,8 +386,8 @@ public class DDLGenerator {
         columnData.add(syncIdColumn);
         List<String> primaryKeys = Collections.singletonList(COLUMN_NAME_SYNC_ID);
         TableMetaData tableMetaData = new TableMetaData.Builder().setColumnData(columnData)
-                                                                 .setPrimaryKeys(primaryKeys)
-                                                                 .build();
+                .setPrimaryKeys(primaryKeys)
+                .build();
         String syncVersionTableName = getSyncVersionTableName(tableName);
         Table table = new Table(syncVersionTableName, tableMetaData);
 

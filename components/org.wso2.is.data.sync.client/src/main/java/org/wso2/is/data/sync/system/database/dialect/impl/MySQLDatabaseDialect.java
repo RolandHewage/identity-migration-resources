@@ -132,14 +132,20 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
             COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
 
             // Let the database assign default sizes for the filtered column.
-            // Column format: "COLUMN_NAME COLUMN_TYPE".
+            // Column format: "COLUMN_NAME COLUMN_TYPE DEFAULT DEFAULT_VALUE".
             columnEntryString = columnEntry.getName() + " " + columnEntry.getType();
+            if (columnEntry.getDefaultValue() !=  null) {
+                columnEntryString = columnEntryString + " DEFAULT " + columnEntry.getDefaultValue();
+            }
         } else {
             // Setting the columns size for other columns.
             // Column format: "COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE) eg: VARCHAR".
             String columnTemplate = "%s %s (%d)";
             columnEntryString = String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
                                               columnEntry.getSize());
+            if (columnEntry.getDefaultValue() !=  null) {
+                columnEntryString = columnEntryString + " DEFAULT '" + columnEntry.getDefaultValue() + "'";
+            }
         }
 
         if (columnEntry.isAutoIncrement()) {

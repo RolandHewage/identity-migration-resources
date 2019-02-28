@@ -41,6 +41,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_CHAR;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_DEF;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
@@ -51,6 +52,7 @@ import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_S
 import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_TYPE_NAME;
 
 public class CommonUtil {
+
 
     private CommonUtil() {
 
@@ -169,6 +171,8 @@ public class CommonUtil {
         }
     }
 
+
+
     public static List<ColumnData> getColumnData(String tableName, Connection connection) throws SyncClientException {
 
         try {
@@ -180,8 +184,10 @@ public class CommonUtil {
                     String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
                     String type = resultSet.getString(JDBC_META_DATA_TYPE_NAME);
                     int size = resultSet.getInt(JDBC_META_DATA_COLUMN_SIZE);
+                    String columnDefaultVal =  resultSet.getString(JDBC_META_DATA_COLUMN_DEF);
 
                     ColumnData columnData = new ColumnData(name, type, size);
+                    columnData.setDefaultValue(columnDefaultVal);
                     columnDataList.add(columnData);
                 }
             }
