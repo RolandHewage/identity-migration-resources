@@ -19,8 +19,8 @@ package org.wso2.is.data.sync.system.pipeline.result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.pipeline.PipelineContext;
-import org.wso2.is.data.sync.system.util.Constant;
 import org.wso2.is.data.sync.system.util.CommonUtil;
+import org.wso2.is.data.sync.system.util.Constant;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

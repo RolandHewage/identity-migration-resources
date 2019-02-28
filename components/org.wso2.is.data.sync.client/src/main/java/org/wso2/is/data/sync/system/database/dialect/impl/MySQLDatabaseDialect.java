@@ -38,6 +38,9 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.SYNC_OPERATION_DELETE;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_ATTRIBUTE_PRIMARY_KEY;
 
+/**
+ * Produces MySQL specific database dialects.
+ */
 public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
 
     @Override

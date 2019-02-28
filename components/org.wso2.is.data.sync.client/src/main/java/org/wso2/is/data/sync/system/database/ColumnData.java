@@ -16,6 +16,9 @@
 
 package org.wso2.is.data.sync.system.database;
 
+/**
+ * Model of a table column.
+ */
 public class ColumnData {
 
     private String name;

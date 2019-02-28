@@ -22,8 +22,20 @@ import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 
 import java.util.List;
 
+/**
+ * This interface represents a data transformer between two product versions. The implementations of this class will
+ * be able to transform a journal entry from one format to another before persisting the data for data syncing.
+ */
 public interface DataTransformer {
 
+    /**
+     * Transform journal entries from one format to another.
+     *
+     * @param journalEntryList List of {@link JournalEntry} objects to be transformed.
+     * @param context Context of the current data sync pipeline
+     * @return Transformed list of {@link JournalEntry}.
+     * @throws SyncClientException If error occurs while data transformation.
+     */
     List<JournalEntry> transform(List<JournalEntry> journalEntryList, PipelineContext context)
             throws SyncClientException;
 

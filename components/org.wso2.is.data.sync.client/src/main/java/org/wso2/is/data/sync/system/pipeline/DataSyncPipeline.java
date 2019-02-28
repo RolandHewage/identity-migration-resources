@@ -31,6 +31,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Represent the model for data sync related operation. The modeling is done a four part pipeline.
+ *
+ * 1. Batch processing of data to be synced.
+ * 2. Data transformation of the processed data batch.
+ * 3. Persisting the transformed data.
+ * 4. Validating the data persistence results.
+ *
+ * Once all the steps of the pipeline is completed and the data persistence results are successful, the pipeline will
+ * commit the transaction for the processed batch.
+ */
 public class DataSyncPipeline {
 
     private Persistor persistor;
@@ -50,6 +61,11 @@ public class DataSyncPipeline {
         this.pipelineConfiguration = pipelineConfiguration;
     }
 
+    /**
+     * Processes a journal entries from the source and sync them to the target in batches.
+     * @return True if there are no more data available in the journal to be synced.
+     * @throws SyncClientException If an error occurs while syncing data.
+     */
     public boolean processBatch() throws SyncClientException {
 
         boolean complete;
@@ -116,6 +132,9 @@ public class DataSyncPipeline {
         return true;
     }
 
+    /**
+     * Builds the data sync pipeline for a given table.
+     */
     public void build() {
 
         persistor = new Persistor();

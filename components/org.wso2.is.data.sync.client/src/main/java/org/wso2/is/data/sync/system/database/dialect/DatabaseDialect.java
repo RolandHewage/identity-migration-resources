@@ -20,13 +20,51 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
 
+/**
+ * Interface for database dialects. SQL statements relate to database operations are exposed through this.
+ * To perform a given operation, different database flavors may use different type of SQL statements. This interface
+ * can be used to provide implementations of different database flavors which provide database flavor specific SQL
+ * statements.
+ */
 public interface DatabaseDialect {
 
+    /**
+     *
+     * Generate SQL statements for creating a trigger.
+     *
+     * @param trigger Trigger model containing trigger information.
+     * @return List of SQL statements related to trigger creation.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
     List<String> generateCreateTrigger(Trigger trigger) throws SyncClientException;
 
+    /**
+     *
+     * Generate SQL statements for creating a table.
+     *
+     * @param table Table model containing table information.
+     * @return List of SQL statements related to table creation.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
     List<String> generateCreateTable(Table table) throws SyncClientException;
 
+    /**
+     *
+     * Generate SQL statements for deleting a trigger.
+     *
+     * @param name Name of the trigger to be dropped.
+     * @return List of SQL statements related to trigger deletion.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
     List<String> generateDropTrigger(String name) throws SyncClientException;
 
+    /**
+     *
+     * Generate SQL statements for deleting a table.
+     *
+     * @param name Name of the table to be dropped.
+     * @return List of SQL statements related to table deletion.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
     List<String> generateDropTable(String name) throws SyncClientException;
 }

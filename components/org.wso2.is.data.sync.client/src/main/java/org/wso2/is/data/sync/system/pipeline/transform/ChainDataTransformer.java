@@ -23,6 +23,9 @@ import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 public class ChainDataTransformer implements DataTransformer {
 
     private List<DataTransformer> dataTransformers = new ArrayList<>();

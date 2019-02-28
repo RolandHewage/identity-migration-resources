@@ -18,6 +18,10 @@ package org.wso2.is.data.sync.system.database;
 
 import java.util.List;
 
+/**
+ * Model of a schema. This includes the type of the schema (um, identity, reg, consent), JNDI names of source and
+ * target data sources and the table list of the schema.
+ */
 public class SchemaInfo {
 
     private String type;

@@ -24,6 +24,11 @@ import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 
 import java.util.List;
 
+/**
+ * This data transformer will be used when there are no custom {@link DataTransformer} instances are registered for a
+ * data sync table. This transformer will return the received {@link JournalEntry} data without doing any
+ * transformation.
+ */
 public class PassThroughDataTransformer implements DataTransformer {
 
     private Log log = LogFactory.getLog(PassThroughDataTransformer.class);

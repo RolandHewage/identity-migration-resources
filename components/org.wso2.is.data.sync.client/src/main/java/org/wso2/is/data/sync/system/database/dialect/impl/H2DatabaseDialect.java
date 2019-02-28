@@ -22,6 +22,9 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
 
+/**
+ * Produces H2 specific database dialects.
+ */
 public class H2DatabaseDialect extends ANSIDatabaseDialect {
 
     @Override

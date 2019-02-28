@@ -31,6 +31,9 @@ import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLAT
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_ACTION;
 import static org.wso2.is.data.sync.system.util.Constant.SYNC_OPERATION_DELETE;
 
+/**
+ * Produces Oracle specific database dialects.
+ */
 public class OracleDatabaseDialect extends ANSIDatabaseDialect {
 
     @Override

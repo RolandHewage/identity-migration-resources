@@ -18,6 +18,9 @@ package org.wso2.is.data.sync.system.database;
 
 import javax.sql.DataSource;
 
+/**
+ * Represents a SQL data source and the DB flavour related to the data source (eg: mysql, oracle).
+ */
 public class DataSourceEntry {
 
     private DataSource dataSource;

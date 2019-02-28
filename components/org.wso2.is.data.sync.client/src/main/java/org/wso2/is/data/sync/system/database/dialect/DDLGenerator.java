@@ -72,6 +72,9 @@ import static org.wso2.is.data.sync.system.util.Constant.SYNC_OPERATION_INSERT;
 import static org.wso2.is.data.sync.system.util.Constant.SYNC_OPERATION_UPDATE;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_TIMING_AFTER;
 
+/**
+ * Generates DDLs triggers and tables for data syncing.
+ */
 public class DDLGenerator {
 
     private List<String> syncTableList;

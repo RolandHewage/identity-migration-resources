@@ -46,6 +46,7 @@ public class Constant {
 
     public static final String JDBC_META_DATA_COLUMN_NAME = "COLUMN_NAME";
     public static final String JDBC_META_DATA_TYPE_NAME = "TYPE_NAME";
+    public static final String JDBC_META_DATA_COLUMN_DEF = "COLUMN_DEF";
     public static final String JDBC_META_DATA_COLUMN_SIZE = "COLUMN_SIZE";
     public static final String COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
     public static final String COLUMN_TYPE_CHAR = "CHAR";
@@ -56,7 +57,6 @@ public class Constant {
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_ACTION = "ACTION";
-    public static final String JDBC_META_DATA_COLUMN_DEF = "COLUMN_DEF";
 
     public static final String TABLE_ATTRIBUTE_PRIMARY_KEY = "PRIMARY KEY";
 

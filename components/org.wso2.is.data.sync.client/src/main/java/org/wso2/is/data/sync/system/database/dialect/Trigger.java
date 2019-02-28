@@ -18,6 +18,9 @@ package org.wso2.is.data.sync.system.database.dialect;
 
 import org.wso2.is.data.sync.system.database.TableMetaData;
 
+/**
+ * Model of a database trigger. This model holds meta data related to a trigger.
+ */
 public class Trigger {
 
     private String name;

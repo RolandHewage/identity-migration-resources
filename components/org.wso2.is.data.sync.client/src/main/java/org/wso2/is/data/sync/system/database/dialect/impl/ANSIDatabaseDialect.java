@@ -18,6 +18,12 @@ package org.wso2.is.data.sync.system.database.dialect.impl;
 
 import org.wso2.is.data.sync.system.database.dialect.DatabaseDialect;
 
+/**
+ * Produces ANSI SQL specific database dialects. Database flavor specific dialects should be written exetending this
+ * class.
+ *
+ * Common SQL dialects for all database flavors are specified withing this class.
+ */
 public abstract class ANSIDatabaseDialect implements DatabaseDialect {
 
 

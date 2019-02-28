@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+/**
+ * Contains meta data related to a database table. This class holds information on, table columns, primary keys,
+ * filtering strings based on primary and non primary columns.
+ */
 public class TableMetaData {
 
     private List<ColumnData> columnDataList = new ArrayList<>();
@@ -30,6 +34,21 @@ public class TableMetaData {
     private String updateFilter;
     private String searchFilter;
 
+    /**
+     *
+     * Constructor for {@link TableMetaData} object.
+     *
+     * @param columnDataList List of {@link ColumnData} of the table.
+     * @param primaryKeys List of strings representing the primary key column names.
+     * @param nonPrimaryKeys List of strings representing non primary key column names.
+     * @param columns Sting containing comma column names of the table.
+     * @param parameters Sting containing bindings for the prepared statement which matches the number of columns of
+     *                   the table.
+     * @param updateFilter Sting containing comma separated of non primary key columns which can be used in update
+     *                     statements.
+     * @param searchFilter Sting containing comma separated of primary key columns which can be used for search
+     *                     statements.
+     */
     private TableMetaData(List<ColumnData> columnDataList, List<String> primaryKeys,
                          List<String> nonPrimaryKeys, String columns, String parameters, String updateFilter,
                          String searchFilter) {

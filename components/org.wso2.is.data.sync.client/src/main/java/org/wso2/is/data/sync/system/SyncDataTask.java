@@ -21,6 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.DataSyncPipeline;
 
+/**
+ * This is an implementation of {@link Runnable} which executes batch processing. Each task will be executed
+ * parallel and process data for a particular table
+ */
 public class SyncDataTask implements Runnable {
 
     private DataSyncPipeline dataSyncPipeline;

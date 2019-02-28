@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class holds information on the mapping between schema and tables.
+ */
 public class SchemaTableMapping {
 
     private List<String> identityMapping = new ArrayList<>(Arrays.asList("FIDO_DEVICE_STORE",

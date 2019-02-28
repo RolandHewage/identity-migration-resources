@@ -20,10 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * The factory class for building {@link DataTransformer} instances associates for a sync pipeline based on the sync
+ * table associated with the pipeline.
+ */
 public class DataTransformerFactory {
 
     private Log log = LogFactory.getLog(DataTransformerFactory.class);
@@ -34,6 +37,15 @@ public class DataTransformerFactory {
         this.dataTransformers = dataTransformers;
     }
 
+    /**
+     * Builds and return an instance of {@link ChainDataTransformer} which contains an ordered list of data
+     * transformers required for the data sync pipeline.
+     *
+     * @param tableName Name of the data sync table.
+     * @param sourceVersion Data sync source product version.
+     * @param targetVersion Data sync target product version.
+     * @return Instance of a ChainDataTransformer;
+     */
     public DataTransformer buildTransformer(String tableName, String sourceVersion, String targetVersion) {
 
         ChainDataTransformer chainDataTransformer = new ChainDataTransformer();

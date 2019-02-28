@@ -22,6 +22,9 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
 
+/**
+ * Produces MSSQL specific database dialects.
+ */
 public class MSSQLDatabaseDialect extends ANSIDatabaseDialect {
 
     @Override
