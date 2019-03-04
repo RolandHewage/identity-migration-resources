@@ -51,8 +51,10 @@ public class SyncDataTask implements Runnable {
                 boolean complete = dataSyncPipeline.processBatch();
                 if (complete) {
                     try {
-                        log.info("Batch processing for table: " + table + " completed. Sleeping the thread " +
-                                 "for: " + syncInterval + "ms.");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Batch processing for table: " + table + " completed. Sleeping the thread " +
+                                    "for: " + syncInterval + "ms.");
+                        }
                         Thread.sleep(syncInterval);
                     } catch (InterruptedException e) {
                         throw new RuntimeException("Error occurred while attempting to sleep the thread: " +

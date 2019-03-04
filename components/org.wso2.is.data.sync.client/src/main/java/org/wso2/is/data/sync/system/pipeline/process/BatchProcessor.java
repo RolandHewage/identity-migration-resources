@@ -75,8 +75,10 @@ public class BatchProcessor {
         int targetSyncId = getOrInsertDefaultTargetSyncId(targetConnection, syncVersionTableName);
         int sourceMaxSyncId = getSourceMaxSyncId(syncTableName, sourceConnection);
 
-        log.info("For table: " + tableName + " source max sync ID: " + sourceMaxSyncId + " " +
-                 "target sync ID: " + targetSyncId);
+        if (log.isDebugEnabled()) {
+            log.info("For table: " + tableName + " source max sync ID: " + sourceMaxSyncId + " " +
+                    "target sync ID: " + targetSyncId);
+        }
 
         if (sourceMaxSyncId > targetSyncId) {
             log.info("Fetching sync data for table: " + tableName + " from source table: " + syncTableName);
