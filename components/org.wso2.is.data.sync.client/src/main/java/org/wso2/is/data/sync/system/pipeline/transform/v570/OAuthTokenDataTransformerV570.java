@@ -23,7 +23,6 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
-import org.wso2.is.data.sync.system.pipeline.EntryField;
 import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
@@ -45,7 +44,7 @@ import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedTok
 import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForToken;
 
 @VersionAdvice(version = "5.7.0", tableName = "IDN_OAUTH2_ACCESS_TOKEN")
-public class OAuthTokenDataTransformerV570 implements DataTransformer{
+public class OAuthTokenDataTransformerV570 implements DataTransformer {
 
     private static String hashingAlgorithm = OAuthServerConfiguration.getInstance().getHashAlgorithm();
 

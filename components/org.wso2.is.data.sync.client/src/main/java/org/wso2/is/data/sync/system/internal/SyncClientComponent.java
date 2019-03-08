@@ -31,10 +31,15 @@ import org.wso2.is.data.sync.system.SyncDataTask;
 import org.wso2.is.data.sync.system.SyncService;
 import org.wso2.is.data.sync.system.config.Configuration.ConfigurationBuilder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_GENERATE_DDL;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_PREPARE_SYNC;
+import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_CONFIG_FILE_PATH;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_DATA;
 
 @Component(
@@ -64,12 +69,22 @@ public class SyncClientComponent {
             String dataSync = System.getProperty(JVM_PROPERTY_SYNC_DATA);
             String prepareSync = System.getProperty(JVM_PROPERTY_PREPARE_SYNC);
 
+            String configFilePath = System.getProperty(JVM_PROPERTY_CONFIG_FILE_PATH);
+
+            Properties properties = new Properties();
+            File configFile = new File(configFilePath);
+            if (configFile.exists()) {
+                try (InputStream inputStream = new FileInputStream(configFile)) {
+                    properties.load(inputStream);
+                }
+            }
+
             if (prepareSync != null) {
-                syncService = new SyncService();
+                syncService = new SyncService(properties);
                 String generateDDL = System.getProperty(JVM_PROPERTY_GENERATE_DDL);
                 syncService.generateScripts(generateDDL != null);
             } else if (dataSync != null) {
-                syncService = new SyncService();
+                syncService = new SyncService(properties);
                 syncService.run();
             }
         } catch (Throwable e) {

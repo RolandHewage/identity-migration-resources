@@ -86,6 +86,7 @@ public class Constant {
     public static final String PROPERTY_NAME_HASH = "hash";
     public static final String PROPERTY_NAME_ALGORITHM = "algorithm";
 
+    public static final String JVM_PROPERTY_CONFIG_FILE_PATH = "configFile";
     public static final String JVM_PROPERTY_PREPARE_SYNC = "prepareSync";
     public static final String JVM_PROPERTY_GENERATE_DDL = "generateDDL";
     public static final String JVM_PROPERTY_SYNC_DATA = "syncData";

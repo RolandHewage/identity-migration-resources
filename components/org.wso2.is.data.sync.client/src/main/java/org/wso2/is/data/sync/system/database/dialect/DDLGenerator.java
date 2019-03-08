@@ -106,10 +106,17 @@ public class DDLGenerator {
                 String schema = entry.getKey();
                 List<String> sqlStatements = entry.getValue();
 
-                String sqlDelimiter = dataSourceManager.getSqlDelimiter(schema);
+                String[] split = schema.split("_");
+
+                String schemaType = split[0];
+                String sqlDelimiter = isSource(split[1]) ? dataSourceManager.getSourceSqlDelimiter(schemaType) :
+                        dataSourceManager.getTargetSqlDelimiter(schemaType);
                 String delimiter = sqlDelimiter + System.lineSeparator() + System.lineSeparator();
-                StringJoiner joiner = new StringJoiner(delimiter, dataSourceManager.getDDLPrefix(schema),
-                        sqlDelimiter + dataSourceManager.getDDLSuffix(schema));
+                String ddlPrefix = isSource(split[1]) ? dataSourceManager.getSourceDDLPrefix(schemaType) :
+                        dataSourceManager.getTargetDDLPrefix(schemaType);
+                String ddlSuffix = isSource(split[1]) ? dataSourceManager.getSourceDDLSuffix(schemaType) :
+                        dataSourceManager.getTargetDDLSuffix(schemaType);
+                StringJoiner joiner = new StringJoiner(delimiter, ddlPrefix, ddlSuffix);
 
                 for (String sqlStatement : sqlStatements) {
                     joiner.add(sqlStatement);
@@ -190,6 +197,11 @@ public class DDLGenerator {
         }
     }
 
+    private boolean isSource(String s) {
+
+        return "source".equals(s);
+    }
+
     private void addToStatementMap(Map<String, List<SQLStatement>> statements, SQLStatement sqlStatement) {
 
         if (statements.containsKey(sqlStatement.getScheme())) {
@@ -237,7 +249,7 @@ public class DDLGenerator {
         for (String tableName : syncTableList) {
 
             String schema = dataSourceManager.getSchema(tableName);
-            String dataSourceType = dataSourceManager.getDataSourceType(schema);
+            String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
             try (Connection sourceConnection = dataSourceManager.getSourceConnection(schema)) {
 
@@ -296,7 +308,7 @@ public class DDLGenerator {
         for (String tableName : syncTableList) {
 
             String schema = dataSourceManager.getSchema(tableName);
-            String dataSourceType = dataSourceManager.getDataSourceType(schema);
+            String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
 
             List<String> createSyncTableSQL = getCreateSyncTableStatement(tableName, schema, databaseDialect);
@@ -316,7 +328,7 @@ public class DDLGenerator {
         for (String tableName : syncTableList) {
 
             String schema = dataSourceManager.getSchema(tableName);
-            String dataSourceType = dataSourceManager.getDataSourceType(schema);
+            String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
 
             String insertTriggerName = getInsertTriggerName(tableName);
@@ -341,7 +353,7 @@ public class DDLGenerator {
         for (String tableName : syncTableList) {
 
             String schema = dataSourceManager.getSchema(tableName);
-            String dataSourceType = dataSourceManager.getDataSourceType(schema);
+            String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
             String syncTableName = getSyncTableName(tableName);
             String syncVersionTableName = getSyncVersionTableName(tableName);
