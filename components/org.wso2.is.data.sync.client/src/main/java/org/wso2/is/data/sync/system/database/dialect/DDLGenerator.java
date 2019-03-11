@@ -50,7 +50,6 @@ import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getDeleteTriggerName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getInsertTriggerName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
-import static org.wso2.is.data.sync.system.util.CommonUtil.getScripId;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncTableName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncVersionTableName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getUpdateTriggerName;
@@ -98,102 +97,101 @@ public class DDLGenerator {
     public void generateScripts(boolean ddlOnly) throws SyncClientException {
 
         List<SQLStatement> sqlStatementList = generateSyncScripts();
-        Map<String, List<String>> scripts = aggregateDDL(sqlStatementList);
+
+        Map<String, List<SQLStatement>> sourceStatements = new LinkedHashMap<>();
+        Map<String, List<SQLStatement>> targetStatements = new LinkedHashMap<>();
+
+        for (SQLStatement sqlStatement : sqlStatementList) {
+
+            if (SQL_STATEMENT_TYPE_SOURCE.equals(sqlStatement.getType())) {
+                addToStatementMap(sourceStatements, sqlStatement);
+            } else {
+                addToStatementMap(targetStatements, sqlStatement);
+            }
+        }
 
         if (ddlOnly) {
-            for (Map.Entry<String, List<String>> entry : scripts.entrySet()) {
-
-                String schema = entry.getKey();
-                List<String> sqlStatements = entry.getValue();
-
-                String[] split = schema.split("_");
-
-                String schemaType = split[0];
-                String sqlDelimiter = isSource(split[1]) ? dataSourceManager.getSourceSqlDelimiter(schemaType) :
-                        dataSourceManager.getTargetSqlDelimiter(schemaType);
-                String delimiter = sqlDelimiter + System.lineSeparator() + System.lineSeparator();
-                String ddlPrefix = isSource(split[1]) ? dataSourceManager.getSourceDDLPrefix(schemaType) :
-                        dataSourceManager.getTargetDDLPrefix(schemaType);
-                String ddlSuffix = isSource(split[1]) ? dataSourceManager.getSourceDDLSuffix(schemaType) :
-                        dataSourceManager.getTargetDDLSuffix(schemaType);
-                StringJoiner joiner = new StringJoiner(delimiter, ddlPrefix, ddlSuffix);
-
-                for (String sqlStatement : sqlStatements) {
-                    joiner.add(sqlStatement);
-                }
-
-                String script = joiner.toString();
-
-                String scriptPath = "";
-                Path path = Paths.get(scriptPath, schema + ".sql");
-                log.info("Writing file to: " + path.toAbsolutePath());
-
-                byte[] strToBytes = script.getBytes();
-
-                try {
-                    Files.write(path, strToBytes);
-                } catch (IOException e) {
-                    throw new SyncClientException("Error while generating script: " + path.toString(), e);
-                }
-            }
-        } else {
-
-            Map<String, List<SQLStatement>> sourceStatements = new LinkedHashMap<>();
-            Map<String, List<SQLStatement>> targetStatements = new LinkedHashMap<>();
-
-            for (SQLStatement sqlStatement : sqlStatementList) {
-
-                if (SQL_STATEMENT_TYPE_SOURCE.equals(sqlStatement.getType())) {
-                    addToStatementMap(sourceStatements, sqlStatement);
-                } else {
-                    addToStatementMap(targetStatements, sqlStatement);
-                }
-            }
 
             for (String schema : sourceStatements.keySet()) {
-
-                try (Connection sourceConnection = dataSourceManager.getSourceConnection(schema)) {
-                    sourceConnection.setAutoCommit(false);
-                    try (Statement statement = sourceConnection.createStatement()) {
-                        List<SQLStatement> sqlStatements = sourceStatements.get(schema);
-                        for (SQLStatement sqlStatement : sqlStatements) {
-                            log.info("Queuing source statement for batch operation: " + sqlStatement
-                                    .getStatement());
-                            statement.addBatch(sqlStatement.getStatement());
-                        }
-                        statement.executeBatch();
-                        sourceConnection.commit();
-                    } catch (SQLException e) {
-                        sourceConnection.rollback();
-                        throw new SyncClientException("Error while executing SQL statements on source schema: " +
-                                schema, e);
-                    }
-                } catch (SQLException e) {
-                    throw new SyncClientException("Error while creating a connection on source schema: " + schema, e);
-                }
+                String sqlDelimiter = dataSourceManager.getSourceSqlDelimiter(schema);
+                String ddlPrefix = dataSourceManager.getSourceDDLPrefix(schema);
+                String ddlSuffix = dataSourceManager.getSourceDDLSuffix(schema);
+                writeSqlFile(sourceStatements, schema, sqlDelimiter, ddlPrefix, ddlSuffix, SQL_STATEMENT_TYPE_SOURCE);
             }
 
             for (String schema : targetStatements.keySet()) {
-                try (Connection targetConnection = dataSourceManager.getTargetConnection(schema)) {
-                    targetConnection.setAutoCommit(false);
-                    try (Statement statement = targetConnection.createStatement()) {
-                        List<SQLStatement> sqlStatements = targetStatements.get(schema);
-                        for (SQLStatement sqlStatement : sqlStatements) {
+                String sqlDelimiter = dataSourceManager.getTargetSqlDelimiter(schema);
+                String ddlPrefix = dataSourceManager.getTargetDDLPrefix(schema);
+                String ddlSuffix = dataSourceManager.getTargetDDLSuffix(schema);
+                writeSqlFile(sourceStatements, schema, sqlDelimiter, ddlPrefix, ddlSuffix, SQL_STATEMENT_TYPE_TARGET);
+            }
+        } else {
 
-                            System.out.println("Queuing target statement for batch operation: " + sqlStatement
-                                    .getStatement());
-                            statement.addBatch(sqlStatement.getStatement());
-                        }
-                        statement.executeBatch();
-                        targetConnection.commit();
-                    } catch (SQLException e) {
-                        targetConnection.rollback();
-                        throw new SyncClientException("Error while creating a connection on target schema: " + schema);
-                    }
+            for (Map.Entry<String, List<SQLStatement>> entry : sourceStatements.entrySet()) {
+                try (Connection connection = dataSourceManager.getSourceConnection(entry.getKey())) {
+                    executeDDLOnDataSource(entry.getKey(), entry.getValue(), connection, SQL_STATEMENT_TYPE_SOURCE);
                 } catch (SQLException e) {
-                    throw new SyncClientException("Error while executing SQL statements on target schema: " + schema);
+                    throw new SyncClientException(
+                            "Error while creating a connection on " + SQL_STATEMENT_TYPE_SOURCE + " schema: " +
+                                    entry.getKey(), e);
                 }
             }
+
+            for (Map.Entry<String, List<SQLStatement>> entry : targetStatements.entrySet()) {
+                try (Connection connection = dataSourceManager.getTargetConnection(entry.getKey())) {
+                    executeDDLOnDataSource(entry.getKey(), entry.getValue(), connection, SQL_STATEMENT_TYPE_TARGET);
+                } catch (SQLException e) {
+                    throw new SyncClientException(
+                            "Error while creating a connection on " + SQL_STATEMENT_TYPE_TARGET + " schema: " +
+                                    entry.getKey(), e);
+                }
+            }
+        }
+    }
+
+    private void executeDDLOnDataSource(String schema, List<SQLStatement> sqlStatements, Connection connection,
+                                        String sqlStatementTypeSource) throws SQLException, SyncClientException {
+
+        connection.setAutoCommit(false);
+        try (Statement statement = connection.createStatement()) {
+            for (SQLStatement sqlStatement : sqlStatements) {
+                log.info("Queuing " +
+                        sqlStatementTypeSource + " statement for batch operation: " + sqlStatement.getStatement());
+                statement.addBatch(sqlStatement.getStatement());
+            }
+            statement.executeBatch();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new SyncClientException(
+                    "Error while executing SQL statements on " + sqlStatementTypeSource + " schema: " +
+                            schema, e);
+        }
+    }
+
+    private void writeSqlFile(Map<String, List<SQLStatement>> sourceStatements, String schema, String sqlDelimiter,
+                              String ddlPrefix, String ddlSuffix, String dataSourceType) throws SyncClientException {
+
+        String delimiter = sqlDelimiter + System.lineSeparator() + System.lineSeparator();
+        StringJoiner joiner = new StringJoiner(delimiter, ddlPrefix, sqlDelimiter + ddlSuffix);
+
+        List<SQLStatement> sqlStatements = sourceStatements.get(schema);
+        for (SQLStatement sqlStatement : sqlStatements) {
+            joiner.add(sqlStatement.getStatement());
+        }
+
+        String script = joiner.toString();
+
+        String scriptPath = "";
+        Path path = Paths.get(scriptPath, schema + "_" + dataSourceType + ".sql");
+        log.info("Writing file to: " + path.toAbsolutePath());
+
+        byte[] strToBytes = script.getBytes();
+
+        try {
+            Files.write(path, strToBytes);
+        } catch (IOException e) {
+            throw new SyncClientException("Error while generating script: " + path.toString(), e);
         }
     }
 
@@ -219,28 +217,6 @@ public class DDLGenerator {
         scripts.addAll(generateTables());
 
         return scripts;
-    }
-
-    private Map<String, List<String>> aggregateDDL(List<SQLStatement> sqlStatementList) throws SyncClientException {
-
-        Map<String, List<String>> dataSyncScripts = new LinkedHashMap<>();
-
-        for (SQLStatement sqlStatement : sqlStatementList) {
-
-            String schema = sqlStatement.getScheme();
-            String type = sqlStatement.getType();
-            String statement = sqlStatement.getStatement();
-
-            String scriptId = getScripId(schema, type);
-            if (dataSyncScripts.containsKey(scriptId)) {
-                dataSyncScripts.get(scriptId).add(statement);
-            } else {
-                List<String> statements = new ArrayList<>();
-                statements.add(statement);
-                dataSyncScripts.put(scriptId, statements);
-            }
-        }
-        return dataSyncScripts;
     }
 
     public List<SQLStatement> generateTriggers() throws SyncClientException {
