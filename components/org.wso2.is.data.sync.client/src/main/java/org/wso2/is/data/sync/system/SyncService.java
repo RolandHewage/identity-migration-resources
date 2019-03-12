@@ -33,6 +33,7 @@ import org.wso2.is.data.sync.system.pipeline.transform.v570.OAuthTokenDataTransf
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.sql.DataSource;
 
 public class SyncService {
@@ -42,13 +43,13 @@ public class SyncService {
     private List<DataTransformer> dataTransformers = new ArrayList<>();
     private DDLGenerator ddlGenerator;
     private List<SyncDataTask> syncDataTaskList = new ArrayList<>();
-    private List<String> syncTables = new ArrayList<>();
+    private List<String> syncTables;
 
     private Log log = LogFactory.getLog(SyncService.class);
 
-    public SyncService() throws SyncClientException {
+    public SyncService(Properties properties) throws SyncClientException {
 
-        configuration = new Configuration.ConfigurationBuilder().build();
+        configuration = new Configuration.ConfigurationBuilder().build(properties);
         this.dataSourceManager = new DataSourceManager(configuration);
         initiateDataTransformers();
         syncTables = configuration.getSyncTables();

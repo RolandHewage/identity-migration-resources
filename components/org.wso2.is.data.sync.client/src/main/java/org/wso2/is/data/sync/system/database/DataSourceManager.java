@@ -128,9 +128,14 @@ public class DataSourceManager {
         return type;
     }
 
-    public String getDataSourceType(String schema) {
+    public String getSourceDataSourceType(String schema) {
 
         return sourceEntryList.get(schema).getType();
+    }
+
+    public String getTargetDataSourceType(String schema) {
+
+        return targetEntryList.get(schema).getType();
     }
 
     public DataSource getSourceDataSource(String schema) {
@@ -155,27 +160,53 @@ public class DataSourceManager {
         return dataSource.getConnection();
     }
 
-    public String getSqlDelimiter(String schema) {
+    public String getSourceSqlDelimiter(String schema) {
 
-        String dataSourceType = getDataSourceType(schema);
+        String dataSourceType = getSourceDataSourceType(schema);
         if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType) || DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
             return SQL_DELIMITER_DB2_ORACLE;
         }
         return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
     }
 
-    public String getDDLPrefix(String schema) {
+    public String getTargetSqlDelimiter(String schema) {
 
-        if (DATA_SOURCE_TYPE_MYSQL.equals(getDataSourceType(schema))) {
+        String dataSourceType = getTargetDataSourceType(schema);
+        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType) || DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
+            return SQL_DELIMITER_DB2_ORACLE;
+        }
+        return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
+    }
+
+    public String getSourceDDLPrefix(String schema) {
+
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getSourceDataSourceType(schema))) {
 
             return DELIMITER + " " + DELIMITER_DOUBLE_SLASH + System.lineSeparator() + System.lineSeparator();
         }
         return StringUtils.EMPTY;
     }
 
-    public String getDDLSuffix(String schema) {
+    public String getTargetDDLPrefix(String schema) {
 
-        if (DATA_SOURCE_TYPE_MYSQL.equals(getDataSourceType(schema))) {
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getTargetDataSourceType(schema))) {
+
+            return DELIMITER + " " + DELIMITER_DOUBLE_SLASH + System.lineSeparator() + System.lineSeparator();
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public String getSourceDDLSuffix(String schema) {
+
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getSourceDataSourceType(schema))) {
+            return System.lineSeparator() + System.lineSeparator() + DELIMITER + " " + DELIMITER_COMMA;
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public String getTargetDDLSuffix(String schema) {
+
+        if (DATA_SOURCE_TYPE_MYSQL.equals(getTargetDataSourceType(schema))) {
             return System.lineSeparator() + System.lineSeparator() + DELIMITER + " " + DELIMITER_COMMA;
         }
         return StringUtils.EMPTY;

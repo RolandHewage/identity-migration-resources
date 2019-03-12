@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -140,21 +141,21 @@ public class Configuration {
 
         private Log log = LogFactory.getLog(ConfigurationBuilder.class);
 
-        public Configuration build() throws SyncClientException {
+        public Configuration build(Properties properties) throws SyncClientException {
 
             Configuration configuration = new Configuration();
 
-            setVersionInfo(configuration);
-            setSchemaInfo(configuration);
-            setSyncTableList(configuration);
+            setVersionInfo(configuration, properties);
+            setSchemaInfo(configuration, properties);
+            setSyncTableList(configuration, properties);
 
             long syncInterval = DEFAULT_SYNC_INTERVAL;
-            String syncIntervalStr = getProperty(JVM_PROPERTY_SYNC_INTERVAL, false);
+            String syncIntervalStr = getProperty(JVM_PROPERTY_SYNC_INTERVAL, false, properties);
             try {
                 if (StringUtils.isBlank(syncIntervalStr)) {
                     log.info("Using default sync interval: " + DEFAULT_SYNC_INTERVAL);
                 } else {
-                    syncInterval = Long.parseLong(syncIntervalStr);
+                    syncInterval = Long.parseLong(syncIntervalStr.trim());
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + syncIntervalStr + " for sync interval. Using default sync interval: " +
@@ -164,12 +165,12 @@ public class Configuration {
             configuration.setSyncInterval(syncInterval);
 
             int batchSize = DEFAULT_BATCH_SIZE;
-            String batchSizeStr = getProperty(JVM_PROPERTY_BATCH_SIZE, false);
+            String batchSizeStr = getProperty(JVM_PROPERTY_BATCH_SIZE, false, properties);
             try {
                 if (StringUtils.isBlank(syncIntervalStr)) {
                     log.info("Using default batch size: " + DEFAULT_BATCH_SIZE);
                 } else {
-                    batchSize = Integer.parseInt(batchSizeStr);
+                    batchSize = Integer.parseInt(batchSizeStr.trim());
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + batchSizeStr + " for batch size. Using default batch size: " +
@@ -180,13 +181,14 @@ public class Configuration {
             return configuration;
         }
 
-        private void setSyncTableList(Configuration configuration) throws SyncClientException {
+        private void setSyncTableList(Configuration configuration, Properties properties) throws SyncClientException {
 
-            String syncTables = getProperty(JVM_PROPERTY_SYNC_TABLES, true);
+            String syncTables = getProperty(JVM_PROPERTY_SYNC_TABLES, true, properties);
             List<String> syncTableList = new ArrayList<>();
             if (syncTables != null) {
-                List<String> tables = Arrays.asList(syncTables.split(","));
+                String[] tables = syncTables.split(",");
                 for (String table : tables) {
+                    table = table.trim();
                     if (hasSchemaForTable(table, configuration)) {
                         syncTableList.add(table);
                     } else {
@@ -208,13 +210,14 @@ public class Configuration {
             return false;
         }
 
-        private void setSchemaInfo(Configuration configuration) throws SyncClientException {
+        private void setSchemaInfo(Configuration configuration, Properties properties) throws SyncClientException {
 
             List<SchemaInfo> schemaInfoList = new ArrayList<>();
-            SchemaInfo umSchemaInfo = getSchemaInfo(JVM_PROPERTY_UM_SCHEMA, SCHEMA_TYPE_UM);
-            SchemaInfo regSchemaInfo = getSchemaInfo(JVM_PROPERTY_REG_SCHEMA, SCHEMA_TYPE_REGISTRY);
-            SchemaInfo consentSchemaInfo = getSchemaInfo(JVM_PROPERTY_CONSENT_SCHEMA, SCHEMA_TYPE_CONSENT);
-            SchemaInfo identitySchemaInfo = getSchemaInfo(JVM_PROPERTY_IDENTITY_SCHEMA, SCHEMA_TYPE_IDENTITY);
+            SchemaInfo umSchemaInfo = getSchemaInfo(JVM_PROPERTY_UM_SCHEMA, SCHEMA_TYPE_UM, properties);
+            SchemaInfo regSchemaInfo = getSchemaInfo(JVM_PROPERTY_REG_SCHEMA, SCHEMA_TYPE_REGISTRY, properties);
+            SchemaInfo consentSchemaInfo = getSchemaInfo(JVM_PROPERTY_CONSENT_SCHEMA, SCHEMA_TYPE_CONSENT, properties);
+            SchemaInfo identitySchemaInfo =
+                    getSchemaInfo(JVM_PROPERTY_IDENTITY_SCHEMA, SCHEMA_TYPE_IDENTITY, properties);
 
             if (isNull(umSchemaInfo) && isNull(regSchemaInfo) && isNull(identitySchemaInfo) && isNull
                     (consentSchemaInfo)) {
@@ -239,12 +242,13 @@ public class Configuration {
             }
         }
 
-        private SchemaInfo getSchemaInfo(String propertyName, String schemaType) throws SyncClientException {
+        private SchemaInfo getSchemaInfo(String propertyName, String schemaType, Properties properties)
+                throws SyncClientException {
 
             SchemaInfo schemaInfo = null;
             SchemaTableMapping mapping = new SchemaTableMapping();
             Map<String, List<String>> schemaTableMapping = mapping.getSchemaTableMapping();
-            String schemaValue = getProperty(propertyName, false);
+            String schemaValue = getProperty(propertyName, false, properties);
             String sourceJndi;
             String targetJndi;
 
@@ -258,7 +262,7 @@ public class Configuration {
                                                   "-D" + propertyName + "=<source jndi name>,<target jndi name>");
                 }
                 if (StringUtils.isNotBlank(sourceJndi) && StringUtils.isNotBlank(targetJndi)) {
-                    schemaInfo = new SchemaInfo(schemaType, sourceJndi, targetJndi,
+                    schemaInfo = new SchemaInfo(schemaType, sourceJndi.trim(), targetJndi.trim(),
                                                   schemaTableMapping.get(schemaType));
                 } else {
                     throw new SyncClientException("<source jndi name> and <target jndi name> for Property: " +
@@ -270,18 +274,26 @@ public class Configuration {
             return schemaInfo;
         }
 
-        private void setVersionInfo(Configuration configuration) throws SyncClientException {
+        private void setVersionInfo(Configuration configuration, Properties properties) throws SyncClientException {
 
-            String sourceVersion = getProperty(JVM_PROPERTY_SOURCE_VERSION, true);
-            String targetVersion = getProperty(JVM_PROPERTY_TARGET_VERSION, true);
+            String sourceVersion = getProperty(JVM_PROPERTY_SOURCE_VERSION, true, properties);
+            String targetVersion = getProperty(JVM_PROPERTY_TARGET_VERSION, true, properties);
 
-            configuration.setSourceVersion(sourceVersion);
-            configuration.setTargetVersion(targetVersion);
+            configuration.setSourceVersion(sourceVersion.trim());
+            configuration.setTargetVersion(targetVersion.trim());
         }
 
-        private String getProperty(String propertyName, boolean mandatory) throws SyncClientException {
+            private String getProperty(String propertyName, boolean mandatory, Properties properties)
+                throws SyncClientException {
 
-            String property = System.getProperty(propertyName);
+            String property = properties.getProperty(propertyName);
+            if (StringUtils.isBlank(property)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Property " + propertyName + " is not available in file. Hence loading from system " +
+                            "properties.");
+                }
+                property = System.getProperty(propertyName);
+            }
             if (mandatory && StringUtils.isBlank(property)) {
                 throw new SyncClientException("Mandatory system property: " + property + "is required for data " +
                                               "synchronization operations.");
