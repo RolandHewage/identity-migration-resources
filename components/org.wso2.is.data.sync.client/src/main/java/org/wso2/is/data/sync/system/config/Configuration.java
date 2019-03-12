@@ -155,7 +155,7 @@ public class Configuration {
                 if (StringUtils.isBlank(syncIntervalStr)) {
                     log.info("Using default sync interval: " + DEFAULT_SYNC_INTERVAL);
                 } else {
-                    syncInterval = Long.parseLong(syncIntervalStr);
+                    syncInterval = Long.parseLong(syncIntervalStr.trim());
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + syncIntervalStr + " for sync interval. Using default sync interval: " +
@@ -170,7 +170,7 @@ public class Configuration {
                 if (StringUtils.isBlank(syncIntervalStr)) {
                     log.info("Using default batch size: " + DEFAULT_BATCH_SIZE);
                 } else {
-                    batchSize = Integer.parseInt(batchSizeStr);
+                    batchSize = Integer.parseInt(batchSizeStr.trim());
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + batchSizeStr + " for batch size. Using default batch size: " +
@@ -186,8 +186,9 @@ public class Configuration {
             String syncTables = getProperty(JVM_PROPERTY_SYNC_TABLES, true, properties);
             List<String> syncTableList = new ArrayList<>();
             if (syncTables != null) {
-                List<String> tables = Arrays.asList(syncTables.split(","));
+                String[] tables = syncTables.split(",");
                 for (String table : tables) {
+                    table = table.trim();
                     if (hasSchemaForTable(table, configuration)) {
                         syncTableList.add(table);
                     } else {
@@ -261,7 +262,7 @@ public class Configuration {
                                                   "-D" + propertyName + "=<source jndi name>,<target jndi name>");
                 }
                 if (StringUtils.isNotBlank(sourceJndi) && StringUtils.isNotBlank(targetJndi)) {
-                    schemaInfo = new SchemaInfo(schemaType, sourceJndi, targetJndi,
+                    schemaInfo = new SchemaInfo(schemaType, sourceJndi.trim(), targetJndi.trim(),
                                                   schemaTableMapping.get(schemaType));
                 } else {
                     throw new SyncClientException("<source jndi name> and <target jndi name> for Property: " +
@@ -278,8 +279,8 @@ public class Configuration {
             String sourceVersion = getProperty(JVM_PROPERTY_SOURCE_VERSION, true, properties);
             String targetVersion = getProperty(JVM_PROPERTY_TARGET_VERSION, true, properties);
 
-            configuration.setSourceVersion(sourceVersion);
-            configuration.setTargetVersion(targetVersion);
+            configuration.setSourceVersion(sourceVersion.trim());
+            configuration.setTargetVersion(targetVersion.trim());
         }
 
             private String getProperty(String propertyName, boolean mandatory, Properties properties)
