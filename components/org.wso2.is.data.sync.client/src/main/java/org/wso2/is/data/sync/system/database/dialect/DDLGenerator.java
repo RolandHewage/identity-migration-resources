@@ -123,7 +123,7 @@ public class DDLGenerator {
                 String sqlDelimiter = dataSourceManager.getTargetSqlDelimiter(schema);
                 String ddlPrefix = dataSourceManager.getTargetDDLPrefix(schema);
                 String ddlSuffix = dataSourceManager.getTargetDDLSuffix(schema);
-                writeSqlFile(sourceStatements, schema, sqlDelimiter, ddlPrefix, ddlSuffix, SQL_STATEMENT_TYPE_TARGET);
+                writeSqlFile(targetStatements, schema, sqlDelimiter, ddlPrefix, ddlSuffix, SQL_STATEMENT_TYPE_TARGET);
             }
         } else {
 
@@ -150,13 +150,13 @@ public class DDLGenerator {
     }
 
     private void executeDDLOnDataSource(String schema, List<SQLStatement> sqlStatements, Connection connection,
-                                        String sqlStatementTypeSource) throws SQLException, SyncClientException {
+                                        String sqlStatementType) throws SQLException, SyncClientException {
 
         connection.setAutoCommit(false);
         try (Statement statement = connection.createStatement()) {
             for (SQLStatement sqlStatement : sqlStatements) {
                 log.info("Queuing " +
-                        sqlStatementTypeSource + " statement for batch operation: " + sqlStatement.getStatement());
+                        sqlStatementType + " statement for batch operation: " + sqlStatement.getStatement());
                 statement.addBatch(sqlStatement.getStatement());
             }
             statement.executeBatch();
@@ -164,7 +164,7 @@ public class DDLGenerator {
         } catch (SQLException e) {
             connection.rollback();
             throw new SyncClientException(
-                    "Error while executing SQL statements on " + sqlStatementTypeSource + " schema: " +
+                    "Error while executing SQL statements on " + sqlStatementType + " schema: " +
                             schema, e);
         }
     }
@@ -193,11 +193,6 @@ public class DDLGenerator {
         } catch (IOException e) {
             throw new SyncClientException("Error while generating script: " + path.toString(), e);
         }
-    }
-
-    private boolean isSource(String s) {
-
-        return "source".equals(s);
     }
 
     private void addToStatementMap(Map<String, List<SQLStatement>> statements, SQLStatement sqlStatement) {
