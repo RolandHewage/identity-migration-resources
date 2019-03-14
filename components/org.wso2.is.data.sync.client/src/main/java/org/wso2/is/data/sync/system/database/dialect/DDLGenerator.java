@@ -29,6 +29,7 @@ import org.wso2.is.data.sync.system.database.dialect.impl.MySQLDatabaseDialect;
 import org.wso2.is.data.sync.system.database.dialect.impl.OracleDatabaseDialect;
 import org.wso2.is.data.sync.system.database.dialect.impl.PostgreSQLDatabaseDialect;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
+import org.wso2.is.data.sync.system.util.Constant;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -182,13 +183,14 @@ public class DDLGenerator {
 
         String script = joiner.toString();
 
-        String scriptPath = "";
-        Path path = Paths.get(scriptPath, schema + "_" + dataSourceType + ".sql");
+        String scriptFileName = schema + "_" + dataSourceType + Constant.SQL_FILE_EXTENSION;
+        Path path = Paths.get(Constant.DBSCRIPTS_LOCATION, Constant.SYNC_TOOL_SCRIPT_LOCATION, scriptFileName);
         log.info("Writing file to: " + path.toAbsolutePath());
 
         byte[] strToBytes = script.getBytes();
 
         try {
+            Files.createDirectories(path.getParent());
             Files.write(path, strToBytes);
         } catch (IOException e) {
             throw new SyncClientException("Error while generating script: " + path.toString(), e);

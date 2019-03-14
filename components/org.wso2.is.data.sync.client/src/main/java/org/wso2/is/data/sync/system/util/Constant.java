@@ -106,4 +106,7 @@ public class Constant {
     public static final String DELIMITER = "DELIMITER";
     public static final String DELIMITER_DOUBLE_SLASH = "//";
     public static final String DELIMITER_COMMA = ";";
+    public static final String DBSCRIPTS_LOCATION = "dbscripts";
+    public static final String SYNC_TOOL_SCRIPT_LOCATION = "sync-tool";
+    public static final String SQL_FILE_EXTENSION = ".sql";
 }
