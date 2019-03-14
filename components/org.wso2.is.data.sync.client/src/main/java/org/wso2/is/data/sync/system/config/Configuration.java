@@ -167,7 +167,7 @@ public class Configuration {
             int batchSize = DEFAULT_BATCH_SIZE;
             String batchSizeStr = getProperty(JVM_PROPERTY_BATCH_SIZE, false, properties);
             try {
-                if (StringUtils.isBlank(syncIntervalStr)) {
+                if (StringUtils.isBlank(batchSizeStr)) {
                     log.info("Using default batch size: " + DEFAULT_BATCH_SIZE);
                 } else {
                     batchSize = Integer.parseInt(batchSizeStr.trim());

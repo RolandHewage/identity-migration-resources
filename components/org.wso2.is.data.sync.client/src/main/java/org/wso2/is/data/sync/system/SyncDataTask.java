@@ -30,48 +30,29 @@ public class SyncDataTask implements Runnable {
     private DataSyncPipeline dataSyncPipeline;
     private String table;
     private String schema;
-    private long syncInterval;
-    private boolean active = true;
-    private Log log = LogFactory.getLog(SyncDataTask.class);
+    private static final Log log = LogFactory.getLog(SyncDataTask.class);
 
-    public SyncDataTask(DataSyncPipeline dataSyncPipeline, String table, String schema, long syncInterval) {
+    public SyncDataTask(DataSyncPipeline dataSyncPipeline, String table, String schema) {
 
         this.dataSyncPipeline = dataSyncPipeline;
         this.table = table;
         this.schema = schema;
-        this.syncInterval = syncInterval;
     }
 
     @Override
     public void run() {
 
         try {
-            log.info("Sync task started for table: " + table);
-            while (active) {
-                boolean complete = dataSyncPipeline.processBatch();
-                if (complete) {
-                    try {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Batch processing for table: " + table + " completed. Sleeping the thread " +
-                                    "for: " + syncInterval + "ms.");
-                        }
-                        Thread.sleep(syncInterval);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException("Error occurred while attempting to sleep the thread: " +
-                                                   Thread.currentThread().getName());
-                    }
+            boolean complete =  false;
+            while (!complete) {
+                complete = dataSyncPipeline.processBatch();
+                if (log.isDebugEnabled()) {
+                    log.debug("Batch processing for table: " + table + " is not completed. Trying next batch.");
                 }
             }
         } catch (SyncClientException e) {
-            throw new RuntimeException("Error occurred while data syncing on table: " + table + ", schema: "
-                                       + schema, e);
+            throw new RuntimeException("Error occurred while data syncing on table: " + table + ", schema: " + schema
+                    , e);
         }
-    }
-
-    public void shutdown() {
-
-        log.info("Shutting down sync task for table: " + table);
-        dataSyncPipeline.exit();
-        this.active = false;
     }
 }

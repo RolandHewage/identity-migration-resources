@@ -54,7 +54,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_SYNC_ID;
  */
 public class BatchProcessor {
 
-    private Log log = LogFactory.getLog(BatchProcessor.class);
+    private static final Log log = LogFactory.getLog(BatchProcessor.class);
 
     public List<JournalEntry> pollJournal(PipelineContext context) throws SyncClientException {
 

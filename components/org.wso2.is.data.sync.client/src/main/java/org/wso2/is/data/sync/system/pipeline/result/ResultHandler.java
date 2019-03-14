@@ -32,30 +32,31 @@ import static org.wso2.is.data.sync.system.database.SQLQueryProvider.getQuery;
 
 public class ResultHandler {
 
-    private Log log = LogFactory.getLog(ResultHandler.class);
+    private static final Log log = LogFactory.getLog(ResultHandler.class);
 
     public boolean processResults(List<TransactionResult> transactionResults, PipelineContext context) {
 
-        final boolean[] transactionSuccess = {true};
+        boolean transactionSuccess = true;
 
         if (transactionResults != null && !transactionResults.isEmpty()) {
 
             String tableName = context.getPipelineConfiguration().getTableName();
             String syncTableName = CommonUtil.getSyncTableName(tableName);
             String syncVersionTableName = CommonUtil.getSyncVersionTableName(tableName);
-            transactionResults.forEach(transactionResult -> {
+
+            for (TransactionResult transactionResult : transactionResults) {
                 if (!transactionResult.isSuccess()) {
                     if (log.isDebugEnabled()) {
                         Integer syncId = (Integer) transactionResult.getJournalEntry().get(Constant.COLUMN_NAME_SYNC_ID)
-                                                                    .getValue();
+                                .getValue();
                         log.debug(String.format("Error while syncing data from source table: %s to target table: %s " +
-                                                "with SYNC_ID: %s", syncTableName, tableName, syncId));
+                                "with SYNC_ID: %s", syncTableName, tableName, syncId));
                     }
-                    transactionSuccess[0] = false;
+                    transactionSuccess = false;
                 }
-            });
+            }
 
-            if (transactionSuccess[0]) {
+            if (transactionSuccess) {
                 TransactionResult lastResult = transactionResults.get(transactionResults.size() - 1);
                 Integer lastSyncId = (Integer) lastResult.getJournalEntry().get(Constant.COLUMN_NAME_SYNC_ID)
                                                          .getValue();
@@ -67,7 +68,7 @@ public class ResultHandler {
                 }
             }
         }
-        return transactionSuccess[0];
+        return transactionSuccess;
     }
 
     protected void updateSyncVersion(String syncVersionTable, Connection targetCon, int lastSyncId)

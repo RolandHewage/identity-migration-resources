@@ -50,7 +50,7 @@ public class DataSyncPipeline {
     private ResultHandler resultHandler;
     private DataTransformerFactory dataTransformerFactory;
     private PipelineConfiguration pipelineConfiguration;
-    private Log log = LogFactory.getLog(DataSyncPipeline.class);
+    private static final Log log = LogFactory.getLog(DataSyncPipeline.class);
     private boolean active = true;
 
 
@@ -91,17 +91,17 @@ public class DataSyncPipeline {
                 PipelineContext context = new PipelineContext(sourceConnection, targetConnection,
                                                               pipelineConfiguration);
 
-                List<JournalEntry> journalEntryList = batchProcessor.pollJournal(context);
-                List<JournalEntry> transform = dataTransformer.transform(journalEntryList, context);
-                List<TransactionResult> transactionResults = persistor.persist(transform, context);
-                boolean batchComplete = resultHandler.processResults(transactionResults, context);
+                List<JournalEntry> journalEntryBatch = batchProcessor.pollJournal(context);
+                List<JournalEntry> transformedJournalEntryBatch = dataTransformer.transform(journalEntryBatch, context);
+                List<TransactionResult> transactionResults = persistor.persist(transformedJournalEntryBatch, context);
+                boolean batchProcessingSuccess = resultHandler.processResults(transactionResults, context);
 
-                if (batchComplete) {
+                if (batchProcessingSuccess) {
                     try {
                         targetConnection.commit();
                         sourceConnection.commit();
                     } catch (SQLException e) {
-                        batchComplete = false;
+                        batchProcessingSuccess = false;
                         log.error("Error while committing sync transaction on table: " + pipelineConfiguration
                                 .getTableName(), e);
                     }
@@ -110,12 +110,11 @@ public class DataSyncPipeline {
                         targetConnection.rollback();
                         sourceConnection.rollback();
                     } catch (SQLException e) {
-                        batchComplete = false;
                         log.error("Error while rolling back sync transaction on table: " + pipelineConfiguration
                                 .getTableName(), e);
                     }
                 }
-                complete = batchComplete && transactionResults.isEmpty();
+                complete = transactionResults.isEmpty() || !batchProcessingSuccess;
             } finally {
                 try {
                     if (sourceConnection != null) {

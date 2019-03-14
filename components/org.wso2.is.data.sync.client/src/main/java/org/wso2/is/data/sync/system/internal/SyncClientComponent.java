@@ -27,19 +27,19 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.is.data.sync.system.SyncDataTask;
 import org.wso2.is.data.sync.system.SyncService;
 import org.wso2.is.data.sync.system.config.Configuration.ConfigurationBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_CONFIG_FILE_PATH;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_GENERATE_DDL;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_PREPARE_SYNC;
-import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_CONFIG_FILE_PATH;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_DATA;
 
 @Component(
@@ -48,7 +48,7 @@ import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_DATA;
 )
 public class SyncClientComponent {
 
-    private Log log = LogFactory.getLog(SyncClientComponent.class);
+    private static final Log log = LogFactory.getLog(SyncClientComponent.class);
     private RealmService realmService;
     private SyncService syncService;
 
@@ -57,7 +57,7 @@ public class SyncClientComponent {
      * -DprepareSync - creates the sync triggers and tables.
      * -DgenerateDDL - (works with -DprepareSync) only generates DDLs and write to a file.
      *
-     *  For additional configurations, see {@link ConfigurationBuilder}
+     * For additional configurations, see {@link ConfigurationBuilder}
      *
      * @param context ComponentContext.
      */
@@ -96,9 +96,18 @@ public class SyncClientComponent {
     protected void deactivate(ComponentContext context) {
 
         if (syncService != null) {
-            List<SyncDataTask> syncDataTaskList = syncService.getSyncDataTaskList();
-            for (SyncDataTask syncDataTask : syncDataTaskList) {
-                syncDataTask.shutdown();
+            ScheduledExecutorService executor = syncService.getExecutor();
+            try {
+                executor.shutdown();
+                executor.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                log.error("Table sync task interrupted.");
+            } finally {
+                if (!executor.isTerminated()) {
+                    log.info("Unfinished table sync tasks available. Attempting to force shutdown.");
+                }
+                executor.shutdownNow();
+                log.info("Table sync task shutdown completed.");
             }
         }
     }
