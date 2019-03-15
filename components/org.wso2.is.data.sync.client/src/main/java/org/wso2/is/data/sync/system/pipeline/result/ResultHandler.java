@@ -53,6 +53,7 @@ public class ResultHandler {
                                 "with SYNC_ID: %s", syncTableName, tableName, syncId));
                     }
                     transactionSuccess = false;
+                    break;
                 }
             }
 

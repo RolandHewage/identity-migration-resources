@@ -21,6 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.DataSyncPipeline;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * This is an implementation of {@link Runnable} which executes batch processing. Each task will be executed
  * parallel and process data for a particular table
@@ -30,29 +32,47 @@ public class SyncDataTask implements Runnable {
     private DataSyncPipeline dataSyncPipeline;
     private String table;
     private String schema;
+    private long syncInterval;
+    private volatile boolean active;
     private static final Log log = LogFactory.getLog(SyncDataTask.class);
 
-    public SyncDataTask(DataSyncPipeline dataSyncPipeline, String table, String schema) {
+    public SyncDataTask(DataSyncPipeline dataSyncPipeline, String table, String schema, long syncInterval) {
 
         this.dataSyncPipeline = dataSyncPipeline;
         this.table = table;
         this.schema = schema;
+        this.syncInterval = syncInterval;
+        this.active = true;
     }
 
     @Override
     public void run() {
 
         try {
-            boolean complete =  false;
-            while (!complete) {
-                complete = dataSyncPipeline.processBatch();
-                if (log.isDebugEnabled()) {
-                    log.debug("Batch processing for table: " + table + " is not completed. Trying next batch.");
+            log.info("Sync task started for table: " + table);
+            while (active) {
+                dataSyncPipeline.process();
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Batch processing for table: " + table + " completed. Sleeping the thread " +
+                                "for: " + syncInterval + "ms.");
+                    }
+                    TimeUnit.MILLISECONDS.sleep(syncInterval);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Error occurred while attempting to sleep the thread: " +
+                            Thread.currentThread().getName());
                 }
             }
         } catch (SyncClientException e) {
             throw new RuntimeException("Error occurred while data syncing on table: " + table + ", schema: " + schema
                     , e);
         }
+    }
+
+    public void shutdown() {
+
+        log.info("Shutting down sync task for table: " + table);
+        this.active = false;
+        dataSyncPipeline.exit();
     }
 }

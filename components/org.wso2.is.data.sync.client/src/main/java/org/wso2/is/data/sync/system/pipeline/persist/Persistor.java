@@ -124,11 +124,16 @@ public class Persistor {
                             } catch (SQLException e) {
                                 if (e instanceof SQLIntegrityConstraintViolationException) {
                                     //ignore. this will be recovered.
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("SQL constraint violation occurred while data sync. ", e);
+                                    }
                                 } else {
-                                    log.error("Error occurred while data sync. SQL state: " + e.getSQLState(), e);
+                                    log.error("Error occurred while data sync. ", e);
                                 }
                                 TransactionResult result = new TransactionResult(entry, false, e);
                                 transactionResults.add(result);
+                                // If there is one failure, there is no need to continue processing the other results.
+                                break;
                             }
                         }
                     }

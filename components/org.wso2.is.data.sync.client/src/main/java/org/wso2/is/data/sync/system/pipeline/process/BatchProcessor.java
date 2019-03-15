@@ -102,7 +102,7 @@ public class BatchProcessor {
         sql = String.format(sql, tableMetaData.getColumns(), syncTableName);
         try (PreparedStatement ps = sourceCon.prepareStatement(sql)) {
             ps.setInt(1, targetSyncId);
-            ps.setInt(2, targetSyncId + batchSize);
+            ps.setInt(2, targetSyncId + batchSize +1);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

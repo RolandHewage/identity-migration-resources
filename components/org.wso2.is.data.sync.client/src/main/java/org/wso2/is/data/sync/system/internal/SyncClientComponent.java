@@ -27,12 +27,14 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.core.util.IdentityCoreInitializedEvent;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.is.data.sync.system.SyncDataTask;
 import org.wso2.is.data.sync.system.SyncService;
 import org.wso2.is.data.sync.system.config.Configuration.ConfigurationBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -96,18 +98,9 @@ public class SyncClientComponent {
     protected void deactivate(ComponentContext context) {
 
         if (syncService != null) {
-            ScheduledExecutorService executor = syncService.getExecutor();
-            try {
-                executor.shutdown();
-                executor.awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                log.error("Table sync task interrupted.");
-            } finally {
-                if (!executor.isTerminated()) {
-                    log.info("Unfinished table sync tasks available. Attempting to force shutdown.");
-                }
-                executor.shutdownNow();
-                log.info("Table sync task shutdown completed.");
+            List<SyncDataTask> syncDataTaskList = syncService.getSyncDataTaskList();
+            for (SyncDataTask syncDataTask : syncDataTaskList) {
+                syncDataTask.shutdown();
             }
         }
     }
