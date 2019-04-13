@@ -78,3 +78,4 @@ echo %dbDriver%
 java -jar migIS.one-jar.jar %dbType% %host% %port% %dbName% %user% %password% %dbDriver%
 
 pause
+
