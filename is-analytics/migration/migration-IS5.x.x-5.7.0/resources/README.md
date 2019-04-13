@@ -30,6 +30,7 @@ $./migISAnalytics.sh
 5. Next  add the datasource configuration to the master-datasources.xml file in {IS_ANALYTICS_HOME}/repository/conf/datasources  folder of the old DAS product
 
 	Eg:-
+```
 	<datasource>
             <name>IS_ANALYTICS_DB</name>
             <description>The datasource used for is-analytics persisted data</description>
@@ -51,6 +52,7 @@ $./migISAnalytics.sh
                 </configuration>
             </definition>
     	</datasource>
+```
 
 6. Add the JDBC driver to the {IS_ANALYTICS_HOME}/repository/components/lib folder
 
