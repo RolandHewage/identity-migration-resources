@@ -20,8 +20,7 @@
 <suite name="identity-base-test-suite">
     <test name="identity-base-test-all">
         <classes>
-            <class name="org.wso2.is.data.sync.system.DataSyncPipelineTest" />
-            <class name="org.wso2.is.data.sync.system.DataTransformerFactoryTest" />
+
         </classes>
     </test>
 </suite>

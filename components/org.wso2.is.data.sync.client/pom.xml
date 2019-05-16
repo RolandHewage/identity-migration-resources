@@ -19,70 +19,6 @@
     <url>http://wso2.org</url>
 
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.ws.commons.axiom</groupId>-->
-            <!--<artifactId>axiom-api</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.ws.commons.axiom</groupId>-->
-            <!--<artifactId>axiom-impl</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.ws.commons.axiom.wso2</groupId>-->
-            <!--<artifactId>axiom</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.core.services</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.logging</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.utils</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.framework</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.core</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>commons-logging</groupId>-->
-            <!--<artifactId>commons-logging</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>commons-codec.wso2</groupId>-->
-            <!--<artifactId>commons-codec</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.framework</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.application.mgt</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.framework</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.claim.metadata.mgt</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.governance</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.recovery</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.framework</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.mgt</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.orbit.org.yaml</groupId>-->
-            <!--<artifactId>snakeyaml</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.json.wso2</groupId>-->
-            <!--<artifactId>json</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>-->
-            <!--<artifactId>org.wso2.carbon.identity.oauth</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi.services</artifactId>
@@ -136,34 +72,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>-->
-                <!--&lt;!&ndash; Build an executable JAR &ndash;&gt;-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-jar-plugin</artifactId>-->
-                <!--<version>3.1.0</version>-->
-                <!--<configuration>-->
-                    <!--<archive>-->
-                        <!--<manifest>-->
-                            <!--<addClasspath>true</addClasspath>-->
-                            <!--<classpathPrefix>lib/</classpathPrefix>-->
-                            <!--<mainClass>org.wso2.is.data.sync.client.SyncService</mainClass>-->
-                        <!--</manifest>-->
-                    <!--</archive>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-shade-plugin</artifactId>-->
-                <!--<version>3.1.1</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>shade</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
@@ -204,53 +112,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-dependency-plugin</artifactId>-->
-                <!--<inherited>false</inherited>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>add-sample</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<artifactItems>-->
-                                <!--<artifactItem>-->
-                                    <!--<groupId>org.wso2.orbit.org.yaml</groupId>-->
-                                    <!--<artifactId>snakeyaml</artifactId>-->
-                                    <!--<version>${snakeyaml.version}</version>-->
-                                    <!--<type>jar</type>-->
-                                    <!--<overWrite>true</overWrite>-->
-                                    <!--<outputDirectory>target/</outputDirectory>-->
-                                    <!--<destFileName>snakeyaml-${snakeyaml.version}.jar</destFileName>-->
-                                <!--</artifactItem>-->
-                            <!--</artifactItems>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>migration</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>attached</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<descriptors>-->
-                                <!--<descriptor>src/assembly/migration.xml</descriptor>-->
-                            <!--</descriptors>-->
-                            <!--<finalName>wso2is-migration-client-${project.version}</finalName>-->
-                            <!--<appendAssemblyId>false</appendAssemblyId>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 </project>
