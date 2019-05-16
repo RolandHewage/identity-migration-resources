@@ -34,7 +34,6 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>components/org.wso2.is.migration.client</module>
         <module>components/org.wso2.is.data.sync.client</module>
     </modules>
 
