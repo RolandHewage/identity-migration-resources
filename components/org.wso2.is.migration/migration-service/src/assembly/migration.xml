@@ -23,7 +23,7 @@
     <fileSets>
         <fileSet>
             <directory>../migration-resources</directory>
-            <outputDirectory>wso2is-${pom.version}-migration/migration-resources</outputDirectory>
+            <outputDirectory>wso2is-migration-${pom.version}/migration-resources</outputDirectory>
             <includes>
                 <include>**/*.sql</include>
                 <include>**/*.yaml</include>
