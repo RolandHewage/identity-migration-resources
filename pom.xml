@@ -26,7 +26,8 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>is-migration-client</artifactId>
+    <groupId>identity-migration-resources</groupId>
+    <artifactId>identity-migration-resources</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 IS Migration Client</name>
@@ -35,6 +36,7 @@
 
     <modules>
         <module>components/org.wso2.is.data.sync.client</module>
+        <module>components/org.wso2.is.migration/migration-service</module>
     </modules>
 
     <dependencyManagement>
