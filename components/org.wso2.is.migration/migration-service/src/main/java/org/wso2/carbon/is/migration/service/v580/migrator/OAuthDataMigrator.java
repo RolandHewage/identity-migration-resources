@@ -44,8 +44,14 @@ public class OAuthDataMigrator extends Migrator {
 
         try (Connection connection = getDataSource().getConnection()) {
             connection.setAutoCommit(false);
-            OAuthDAO.getInstance().updateTokensOfLocalUsers(connection);
-            connection.commit();
+            try {
+                OAuthDAO.getInstance().updateTokensOfLocalUsers(connection);
+                connection.commit();
+            } catch (SQLException e1) {
+                connection.rollback();
+                String error = "SQL error while updating tokens of local users";
+                throw new MigrationClientException(error, e1);
+            }
         } catch (SQLException e) {
             String error = "SQL error while updating tokens of local users";
             throw new MigrationClientException(error, e);
@@ -57,9 +63,15 @@ public class OAuthDataMigrator extends Migrator {
         log.info(Constant.MIGRATION_LOG + "Migration starting on Authorization code table");
 
         try (Connection connection = getDataSource().getConnection()) {
-            connection.setAutoCommit(false);
-            OAuthDAO.getInstance().updateAuthCodesOfLocalUsers(connection);
-            connection.commit();
+            try {
+                connection.setAutoCommit(false);
+                OAuthDAO.getInstance().updateAuthCodesOfLocalUsers(connection);
+                connection.commit();
+            } catch (SQLException e1) {
+                connection.rollback();
+                String error = "SQL error while updating authorization codes of local users";
+                throw new MigrationClientException(error, e1);
+            }
         } catch (SQLException e) {
             String error = "SQL error while updating authorization codes of local users";
             throw new MigrationClientException(error, e);

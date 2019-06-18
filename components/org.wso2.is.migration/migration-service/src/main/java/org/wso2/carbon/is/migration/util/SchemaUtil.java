@@ -79,6 +79,11 @@ public class SchemaUtil {
                     connection.commit();
                 }
             } catch (SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("An error occurred while rolling back transactions. ", e1);
+                }
                 log.error("Error while retrieving table metadata for table: " + tableName + " for checking existence " +
                           "of the column:" + columnName, e);
             }

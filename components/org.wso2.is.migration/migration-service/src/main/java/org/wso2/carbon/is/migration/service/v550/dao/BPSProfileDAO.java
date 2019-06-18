@@ -50,7 +50,6 @@ public class BPSProfileDAO {
                         resultSet.getInt("TENANT_ID"),
                         resultSet.getString("PASSWORD")));
             }
-            connection.commit();
         }
         return bpsProfileList;
     }
@@ -63,7 +62,7 @@ public class BPSProfileDAO {
      * @throws SQLException
      */
     public void updateNewPasswords(List<BPSProfile> updatedBpsProfileList, Connection connection) throws SQLException {
-
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BPS_PROFILE_PASSWORD)) {
             for (BPSProfile bpsProfile : updatedBpsProfileList) {
                 preparedStatement.setString(1, bpsProfile.getPassword());
@@ -73,6 +72,8 @@ public class BPSProfileDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
         }
     }
 }

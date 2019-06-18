@@ -66,19 +66,28 @@ public class OAuthDataMigrator extends Migrator {
         try (Connection connection = getDataSource().getConnection()) {
             isTokenHashColumnsAvailable = TokenDAO.getInstance().isTokenHashColumnsAvailable(connection);
             isAuthzCodeHashColumnAvailable = AuthzCodeDAO.getInstance().isAuthzCodeHashColumnAvailable(connection);
-            connection.commit();
         }
         if (!isTokenHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
-                TokenDAO.getInstance().addAccessTokenHashColumn(connection);
-                TokenDAO.getInstance().addRefreshTokenHashColumn(connection);
-                connection.commit();
+                connection.setAutoCommit(false);
+                try {
+                    TokenDAO.getInstance().addAccessTokenHashColumn(connection);
+                    TokenDAO.getInstance().addRefreshTokenHashColumn(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                }
             }
         }
         if (!isAuthzCodeHashColumnAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
-                AuthzCodeDAO.getInstance().addAuthzCodeHashColumns(connection);
-                connection.commit();
+                connection.setAutoCommit(false);
+                try {
+                    AuthzCodeDAO.getInstance().addAuthzCodeHashColumns(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                }
             }
         }
     }
@@ -87,12 +96,16 @@ public class OAuthDataMigrator extends Migrator {
 
         try (Connection connection = getDataSource().getConnection()) {
             isClientSecretHashColumnsAvailable = OAuthDAO.getInstance().isConsumerSecretHashColumnAvailable(connection);
-            connection.commit();
         }
         if (isClientSecretHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
-                OAuthDAO.getInstance().deleteConsumerSecretHashColumn(connection);
-                connection.commit();
+                connection.setAutoCommit(false);
+                try {
+                    OAuthDAO.getInstance().deleteConsumerSecretHashColumn(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                }
             }
         }
     }

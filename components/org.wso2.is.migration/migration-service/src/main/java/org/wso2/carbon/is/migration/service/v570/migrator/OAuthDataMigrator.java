@@ -49,8 +49,14 @@ public class OAuthDataMigrator extends Migrator {
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
                 //persists modified hash values
-                OAuthDAO.getInstance().updateNewTokenHash(updateTokenInfoList, connection);
-                connection.commit();
+                try {
+                    OAuthDAO.getInstance().updateNewTokenHash(updateTokenInfoList, connection);
+                    connection.commit();
+                } catch (SQLException e1) {
+                    connection.rollback();
+                    String error = "Rollback transaction error while updating token hash";
+                    throw new MigrationClientException(error, e1);
+                }
             } catch (SQLException e) {
                 String error = "SQL error while updating token hash";
                 throw new MigrationClientException(error, e);
@@ -73,8 +79,14 @@ public class OAuthDataMigrator extends Migrator {
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
                 // persists modified hash values
-                OAuthDAO.getInstance().updateNewAuthzCodeHash(updatedAuthzCodeInfoList, connection);
-                connection.commit();
+                try {
+                    OAuthDAO.getInstance().updateNewAuthzCodeHash(updatedAuthzCodeInfoList, connection);
+                    connection.commit();
+                } catch (SQLException e1) {
+                    connection.rollback();
+                    String error = "Rollback transaction error while updating authorization code hash";
+                    throw new MigrationClientException(error, e1);
+                }
             } catch (SQLException e) {
                 String error = "SQL error while updating authorization code hash";
                 throw new MigrationClientException(error, e);
@@ -91,7 +103,6 @@ public class OAuthDataMigrator extends Migrator {
         List<OauthTokenInfo> oauthTokenList;
         try (Connection connection = getDataSource().getConnection()) {
             oauthTokenList = OAuthDAO.getInstance().getAllAccessTokens(connection);
-            connection.commit();
         } catch (SQLException e) {
             String error = "SQL error while retrieving token hash";
             throw new MigrationClientException(error, e);
@@ -105,7 +116,6 @@ public class OAuthDataMigrator extends Migrator {
         List<AuthzCodeInfo> authzCodeInfoList;
         try (Connection connection = getDataSource().getConnection()) {
             authzCodeInfoList = OAuthDAO.getInstance().getAllAuthzCodes(connection);
-            connection.commit();
         } catch (SQLException e) {
             String error = "SQL error while retrieving authorization code hash";
             throw new MigrationClientException(error, e);

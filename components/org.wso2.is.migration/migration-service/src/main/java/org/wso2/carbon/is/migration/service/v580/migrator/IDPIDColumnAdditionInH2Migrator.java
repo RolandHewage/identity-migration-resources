@@ -70,16 +70,22 @@ public class IDPIDColumnAdditionInH2Migrator extends Migrator {
     }
 
     private void addIdpColumn(Connection connection, String eachTable) throws SQLException {
-
         connection.setAutoCommit(false);
-        IDPIDColumnAdditionInH2DAO.getInstance().addIdpIdColumn(connection, eachTable, COLUMN_NAME_IDP_ID);
-        connection.commit();
+        try {
+            IDPIDColumnAdditionInH2DAO.getInstance().addIdpIdColumn(connection, eachTable, COLUMN_NAME_IDP_ID);
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+        }
     }
 
     private void updateConAppKey(Connection connection) throws SQLException {
-
         connection.setAutoCommit(false);
-        IDPIDColumnAdditionInH2DAO.getInstance().updateUniqueConstraint(connection);
-        connection.commit();
+        try {
+            IDPIDColumnAdditionInH2DAO.getInstance().updateUniqueConstraint(connection);
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+        }
     }
 }

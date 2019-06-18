@@ -251,7 +251,7 @@
     <properties>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.12.153</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.12.402</carbon.identity.framework.version>
         <carbon.identity.framework.version.range>[5.11.0, 6.0.0]</carbon.identity.framework.version.range>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
         <identity.inbound.auth.oauth.version>6.0.83</identity.inbound.auth.oauth.version>

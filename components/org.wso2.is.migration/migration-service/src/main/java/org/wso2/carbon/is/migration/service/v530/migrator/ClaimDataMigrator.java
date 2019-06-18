@@ -173,6 +173,11 @@ public class ClaimDataMigrator extends Migrator{
             mapAttributesAgainstTenant(report, tenantDialectMappedAttributes);
 
         } catch (SQLException e) {
+            try {
+                umConnection.rollback();
+            } catch (SQLException e1) {
+                log.error("An error occurred while rolling back transactions. ", e1);
+            }
             log.error("Error while validating claim management data", e);
         } finally {
             IdentityDatabaseUtil.closeConnection(umConnection);

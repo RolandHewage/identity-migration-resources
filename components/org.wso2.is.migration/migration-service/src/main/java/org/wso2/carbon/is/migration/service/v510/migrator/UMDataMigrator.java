@@ -91,6 +91,12 @@ public class UMDataMigrator extends Migrator {
             identityConnection.commit();
             umConnection.commit();
         } catch (SQLException e) {
+            try {
+                umConnection.rollback();
+            } catch (SQLException e1) {
+                log.error("An error occurred while rolling back transactions. ", e1);
+            }
+
             log.error("MIGRATION-ERROR-LOGS-038 >> Error while executing the migration.", e);
             if (!isContinueOnError()) {
                 throw new MigrationClientException("Error while executing the migration.", e);

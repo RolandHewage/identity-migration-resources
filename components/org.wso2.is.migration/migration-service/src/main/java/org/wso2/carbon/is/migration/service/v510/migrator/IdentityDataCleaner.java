@@ -109,6 +109,11 @@ public class IdentityDataCleaner extends Migrator {
             }
             identityConnection.commit();
         } catch (SQLException e) {
+            try {
+                identityConnection.rollback();
+            } catch (SQLException e1) {
+                log.error("An error occurred while rolling back transactions. ", e1);
+            }
             log.warn("MIGRATION-LOGS >> Error while cleaning identity data ", e);
             if (!isContinueOnError()) {
                 throw new MigrationClientException("Error while executing the migration.", e);

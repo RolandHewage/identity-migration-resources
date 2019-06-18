@@ -77,6 +77,11 @@ public class SchemaMigrator extends Migrator {
             conn.commit();
             log.info(Constant.MIGRATION_LOG + "Identity DB Migration script executed successfully.");
         } catch (Exception e) {
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                log.error("An error occurred while rolling back transactions. ", e1);
+            }
             log.error(e);
             if (!isContinueOnError()) {
                 throw new MigrationClientException(e.getMessage(), e);

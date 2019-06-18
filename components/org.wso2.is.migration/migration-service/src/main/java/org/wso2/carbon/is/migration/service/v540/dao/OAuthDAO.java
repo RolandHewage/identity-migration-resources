@@ -65,7 +65,6 @@ public class OAuthDAO {
                 consumerApps.add(new OAuthConsumerApp(resultSet.getString("CONSUMER_KEY"),
                         resultSet.getInt("TENANT_ID")));
             }
-            connection.commit();
         }
         return consumerApps;
     }
@@ -79,7 +78,7 @@ public class OAuthDAO {
      */
     public void updateExpiryTimesDefinedForOAuthConsumerApps(Connection connection, List<OAuthConsumerApp>
             updatedConsumerApps) throws SQLException {
-
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXPIRY_TIMES_IN_CONSUMER_APPS)) {
             for (OAuthConsumerApp consumerApp : updatedConsumerApps) {
                 preparedStatement.setLong(1, consumerApp.getUserAccessTokenExpiryTime());
@@ -90,6 +89,8 @@ public class OAuthDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
         }
     }
 
@@ -109,7 +110,6 @@ public class OAuthDAO {
                 oAuth2Scopes.add(new OAuth2Scope(resultSet.getInt("SCOPE_ID"), resultSet.getString("SCOPE_KEY"),
                         resultSet.getString("NAME"), resultSet.getString("ROLES")));
             }
-            connection.commit();
         }
         return oAuth2Scopes;
     }
@@ -123,7 +123,7 @@ public class OAuthDAO {
      */
     public void addOAuth2ScopeBindings(Connection connection, List<OAuth2ScopeBinding> oAuth2ScopeBindings)
             throws SQLException {
-
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_SCOPE_BINDINGS)) {
             for (OAuth2ScopeBinding oAuth2ScopeBinding : oAuth2ScopeBindings) {
                 preparedStatement.setInt(1, oAuth2ScopeBinding.getScopeId());
@@ -132,6 +132,8 @@ public class OAuthDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
         }
     }
 
@@ -143,7 +145,7 @@ public class OAuthDAO {
      * @throws SQLException SQLException
      */
     public void updateOAuth2Scopes(Connection connection, List<OAuth2Scope> updatedOAuth2Scopes) throws SQLException {
-
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_OAUTH2_SCOPES)) {
             for (OAuth2Scope oAuth2Scope : updatedOAuth2Scopes) {
                 preparedStatement.setString(1, oAuth2Scope.getName());
@@ -152,6 +154,8 @@ public class OAuthDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
         }
     }
 }
