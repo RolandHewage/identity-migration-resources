@@ -76,6 +76,7 @@ public class IDPIDColumnAdditionInH2Migrator extends Migrator {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            log.error("SQL error while obtaining connection from identity data source.", e);
         }
     }
 
@@ -86,6 +87,7 @@ public class IDPIDColumnAdditionInH2Migrator extends Migrator {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            log.error("SQL error while obtaining connection from identity data source.", e);
         }
     }
 }

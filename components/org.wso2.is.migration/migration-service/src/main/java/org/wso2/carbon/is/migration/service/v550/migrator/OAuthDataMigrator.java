@@ -76,6 +76,7 @@ public class OAuthDataMigrator extends Migrator {
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
+                    throw new MigrationClientException("SQL error while adding hash columns", e);
                 }
             }
         }
@@ -87,6 +88,7 @@ public class OAuthDataMigrator extends Migrator {
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
+                    throw new MigrationClientException("SQL error while adding hash columns", e);
                 }
             }
         }
@@ -105,6 +107,7 @@ public class OAuthDataMigrator extends Migrator {
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
+                    throw new MigrationClientException("SQL error while delete client secret hash columns", e);
                 }
             }
         }

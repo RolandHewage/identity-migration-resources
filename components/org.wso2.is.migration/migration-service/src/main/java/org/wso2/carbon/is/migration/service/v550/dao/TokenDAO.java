@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.is.migration.service.v550.dao;
 
+import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.v550.bean.OauthTokenInfo;
 
 import java.sql.Connection;
@@ -143,7 +144,8 @@ public class TokenDAO {
         return oauthTokenInfoList;
     }
 
-    public void updateNewEncryptedTokens(List<OauthTokenInfo> updatedOauthTokenList,Connection connection) throws SQLException {
+    public void updateNewEncryptedTokens(List<OauthTokenInfo> updatedOauthTokenList,Connection connection)
+            throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ENCRYPTED_ACCESS_TOKEN)) {
             for (OauthTokenInfo oauthTokenInfo : updatedOauthTokenList) {
@@ -158,6 +160,7 @@ public class TokenDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while update new encrypted token ", e);
         }
     }
 
@@ -168,7 +171,7 @@ public class TokenDAO {
      * @throws SQLException
      */
     public void updatePlainTextTokens(List<OauthTokenInfo> updatedOauthTokenList, Connection connection)
-            throws SQLException {
+            throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PLAIN_TEXT_ACCESS_TOKEN)) {
             for (OauthTokenInfo oauthTokenInfo : updatedOauthTokenList) {
@@ -181,6 +184,7 @@ public class TokenDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while update plan text token", e);
         }
     }
 

@@ -54,7 +54,7 @@ public class OAuthDataMigrator extends Migrator {
                     connection.commit();
                 } catch (SQLException e1) {
                     connection.rollback();
-                    String error = "Rollback transaction error while updating token hash";
+                    String error = "SQL error while updating token hash";
                     throw new MigrationClientException(error, e1);
                 }
             } catch (SQLException e) {
@@ -84,7 +84,7 @@ public class OAuthDataMigrator extends Migrator {
                     connection.commit();
                 } catch (SQLException e1) {
                     connection.rollback();
-                    String error = "Rollback transaction error while updating authorization code hash";
+                    String error = "SQL error while updating authorization code hash";
                     throw new MigrationClientException(error, e1);
                 }
             } catch (SQLException e) {

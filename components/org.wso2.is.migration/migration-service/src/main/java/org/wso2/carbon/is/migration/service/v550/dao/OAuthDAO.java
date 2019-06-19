@@ -128,7 +128,7 @@ public class OAuthDAO {
      * @throws SQLException
      */
     public void updateNewClientSecrets(List<ClientSecretInfo> updatedClientSecretList, Connection connection)
-            throws SQLException {
+            throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CONSUMER_SECRET)) {
             for (ClientSecretInfo clientSecretInfo : updatedClientSecretList) {
@@ -140,6 +140,7 @@ public class OAuthDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while retrieving and updating client secrets. ", e);
         }
     }
 }

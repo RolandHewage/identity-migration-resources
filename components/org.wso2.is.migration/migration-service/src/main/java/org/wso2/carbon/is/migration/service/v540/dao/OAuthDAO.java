@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.is.migration.service.v540.dao;
 
+import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.v540.bean.OAuthConsumerApp;
 import org.wso2.carbon.is.migration.service.v540.bean.OAuth2Scope;
 import org.wso2.carbon.is.migration.service.v540.bean.OAuth2ScopeBinding;
@@ -77,7 +78,7 @@ public class OAuthDAO {
      * @throws SQLException SQLException
      */
     public void updateExpiryTimesDefinedForOAuthConsumerApps(Connection connection, List<OAuthConsumerApp>
-            updatedConsumerApps) throws SQLException {
+            updatedConsumerApps) throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXPIRY_TIMES_IN_CONSUMER_APPS)) {
             for (OAuthConsumerApp consumerApp : updatedConsumerApps) {
@@ -91,6 +92,7 @@ public class OAuthDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while migrate OAuth consumer apps. ", e);
         }
     }
 
@@ -122,7 +124,7 @@ public class OAuthDAO {
      * @throws SQLException SQLException
      */
     public void addOAuth2ScopeBindings(Connection connection, List<OAuth2ScopeBinding> oAuth2ScopeBindings)
-            throws SQLException {
+            throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_SCOPE_BINDINGS)) {
             for (OAuth2ScopeBinding oAuth2ScopeBinding : oAuth2ScopeBindings) {
@@ -134,6 +136,7 @@ public class OAuthDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while migrate OAuth2 scope data. ", e);
         }
     }
 
@@ -144,7 +147,8 @@ public class OAuthDAO {
      * @param updatedOAuth2Scopes Updated OAuth2 scopes
      * @throws SQLException SQLException
      */
-    public void updateOAuth2Scopes(Connection connection, List<OAuth2Scope> updatedOAuth2Scopes) throws SQLException {
+    public void updateOAuth2Scopes(Connection connection, List<OAuth2Scope> updatedOAuth2Scopes)
+            throws SQLException, MigrationClientException {
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_OAUTH2_SCOPES)) {
             for (OAuth2Scope oAuth2Scope : updatedOAuth2Scopes) {
@@ -156,6 +160,7 @@ public class OAuthDAO {
             connection.commit();
         } catch (SQLException e) {
             connection.rollback();
+            throw new MigrationClientException("SQL error while update OAuth2 scopes. ", e);
         }
     }
 }
