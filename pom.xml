@@ -26,7 +26,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>identity-migration-resources</groupId>
+    <groupId>org.wso2.carbon.identity.migration.resources</groupId>
     <artifactId>identity-migration-resources</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
