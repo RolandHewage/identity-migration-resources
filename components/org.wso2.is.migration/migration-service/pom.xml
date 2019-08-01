@@ -173,7 +173,7 @@
                             <descriptors>
                                 <descriptor>src/assembly/migration.xml</descriptor>
                             </descriptors>
-                            <finalName>wso2is-migration-${pom.version}</finalName>
+                            <finalName>wso2is-migration-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
