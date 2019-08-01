@@ -34,6 +34,13 @@
     <description>Unified migration client of WSO2 IS</description>
     <url>http://wso2.org</url>
 
+    <scm>
+        <url>https://github.com/wso2-extensions/identity-migration-resources.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/identity-migration-resources.git</developerConnection>
+        <connection>scm:git:https://github.com/wso2-extensions/identity-migration-resources.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
     <modules>
         <module>components/org.wso2.is.data.sync.client</module>
         <module>components/org.wso2.is.migration/migration-service</module>
