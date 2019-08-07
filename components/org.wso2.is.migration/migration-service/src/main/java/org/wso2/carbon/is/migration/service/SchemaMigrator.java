@@ -67,8 +67,11 @@ public class SchemaMigrator extends Migrator {
             String databaseType = DatabaseCreator.getDatabaseType(this.conn);
             if ("mysql".equals(databaseType)) {
                 Utility.setMySQLDBName(conn);
-                if (getDatabaseProductVersion() > 5.7) {
+                if (Double.compare(getDatabaseProductVersion(), 5.7) >= 0) {
+                    log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
                     databaseType = "mysql5.7";
+                } else {
+                    log.info("MySQL version is lower than 5.7. Executing 5.6 script.");
                 }
             }
             statement = conn.createStatement();
@@ -101,16 +104,17 @@ public class SchemaMigrator extends Migrator {
         }
     }
 
-    private Float getDatabaseProductVersion() throws SQLException, MigrationClientException {
+    private Double getDatabaseProductVersion() throws SQLException, MigrationClientException {
 
         String databaseProductVersion = this.conn.getMetaData().getDatabaseProductVersion();
         NumberFormat formatter = NumberFormat.getInstance();
         ParsePosition pos = new ParsePosition(0);
         Number number = formatter.parse(databaseProductVersion, pos);
         if (number != null) {
-            return number.floatValue();
+            log.info("Found database product version: " + number.doubleValue());
+            return number.doubleValue();
         }
-        throw new MigrationClientException("Error while parsing database version.");
+        throw new MigrationClientException("Error while parsing database version: " + databaseProductVersion);
     }
 
     /**
