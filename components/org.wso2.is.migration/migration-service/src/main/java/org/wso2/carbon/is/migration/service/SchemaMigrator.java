@@ -33,6 +33,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.StringTokenizer;
 
 import static org.wso2.carbon.is.migration.util.Constant.IDENTITY_DB_SCRIPT;
@@ -99,14 +101,16 @@ public class SchemaMigrator extends Migrator {
         }
     }
 
-    private Float getDatabaseProductVersion() throws SQLException {
+    private Float getDatabaseProductVersion() throws SQLException, MigrationClientException {
 
-        String[] splittedVersion = this.conn.getMetaData().getDatabaseProductVersion().split("\\.",2);
-        if (splittedVersion.length > 1) {
-            return Float.parseFloat(splittedVersion[0] + "." + splittedVersion[1].replaceAll("\\.",""));
-        } else {
-            return Float.parseFloat(splittedVersion[0]);
+        String databaseProductVersion = this.conn.getMetaData().getDatabaseProductVersion();
+        NumberFormat formatter = NumberFormat.getInstance();
+        ParsePosition pos = new ParsePosition(0);
+        Number number = formatter.parse(databaseProductVersion, pos);
+        if (number != null) {
+            return number.floatValue();
         }
+        throw new MigrationClientException("Error while parsing database version.");
     }
 
     /**
