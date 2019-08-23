@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v550.migrator;
 
 import org.apache.commons.io.Charsets;
@@ -428,50 +428,45 @@ public class OAuthDataMigrator extends Migrator {
     public void migrateClientSecrets() throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 consumer apps table.");
-        try {
-            try {
-                if (OAuth2Util.isEncryptionWithTransformationEnabled()) {
-                    List<ClientSecretInfo> clientSecretInfoList;
-                    try (Connection connection = getDataSource().getConnection()) {
-                        clientSecretInfoList = OAuthDAO.getInstance().getAllClientSecrets(connection);
-                    }
-                    List<ClientSecretInfo> updatedClientSecretInfoList = null;
-                    try {
-                        updatedClientSecretInfoList = transformClientSecretFromOldToNewEncryption(clientSecretInfoList);
-                    } catch (IdentityOAuth2Exception e) {
-                        throw new MigrationClientException(
-                                "Error while transforming client secret from old to new " + "encryption. ", e);
-                    }
-                    try (Connection connection = getDataSource().getConnection()) {
-                        OAuthDAO.getInstance().updateNewClientSecrets(updatedClientSecretInfoList, connection);
-                    }
-                }
-            } catch (IdentityOAuth2Exception e) {
-                throw new MigrationClientException("Error while checking encryption with transformation is enabled. ",
-                        e);
+        try (Connection connection = getDataSource().getConnection()) {
+            if (OAuth2Util.isEncryptionWithTransformationEnabled()) {
+                List<ClientSecretInfo> clientSecretInfoList;
+                clientSecretInfoList = OAuthDAO.getInstance().getAllClientSecrets(connection);
+                List<ClientSecretInfo> updatedClientSecretInfoList = null;
+                updatedClientSecretInfoList = transformClientSecretFromOldToNewEncryption(clientSecretInfoList);
+                OAuthDAO.getInstance().updateNewClientSecrets(updatedClientSecretInfoList, connection);
             }
+        } catch (IdentityOAuth2Exception e) {
+            throw new MigrationClientException("Error while checking encryption with transformation is enabled. ", e);
         } catch (SQLException e) {
             throw new MigrationClientException("Error while retrieving and updating client secrets. ", e);
-        } catch (CryptoException e) {
-            throw new MigrationClientException(
-                    "Error while transforming client secret from old to new " + "encryption. ", e);
         }
     }
 
     private List<ClientSecretInfo> transformClientSecretFromOldToNewEncryption(
-            List<ClientSecretInfo> clientSecretInfoList) throws CryptoException, IdentityOAuth2Exception {
+            List<ClientSecretInfo> clientSecretInfoList) throws MigrationClientException {
 
         List<ClientSecretInfo> updatedClientSecretList = new ArrayList<>();
         for (ClientSecretInfo clientSecretInfo : clientSecretInfoList) {
-            if (!CryptoUtil.getDefaultCryptoUtil()
-                    .base64DecodeAndIsSelfContainedCipherText(clientSecretInfo.getClientSecret())) {
-                byte[] decryptedClientSecret = CryptoUtil.getDefaultCryptoUtil()
-                        .base64DecodeAndDecrypt(clientSecretInfo.getClientSecret(), "RSA");
-                String newEncryptedClientSecret = CryptoUtil.getDefaultCryptoUtil()
-                        .encryptAndBase64Encode(decryptedClientSecret);
-                ClientSecretInfo updatedClientSecretInfo = (new ClientSecretInfo(newEncryptedClientSecret,
-                        clientSecretInfo.getId()));
-                updatedClientSecretList.add(updatedClientSecretInfo);
+            try {
+                if (!CryptoUtil.getDefaultCryptoUtil()
+                        .base64DecodeAndIsSelfContainedCipherText(clientSecretInfo.getClientSecret())) {
+                    byte[] decryptedClientSecret = CryptoUtil.getDefaultCryptoUtil()
+                            .base64DecodeAndDecrypt(clientSecretInfo.getClientSecret(), "RSA");
+                    String newEncryptedClientSecret = CryptoUtil.getDefaultCryptoUtil()
+                            .encryptAndBase64Encode(decryptedClientSecret);
+                    ClientSecretInfo updatedClientSecretInfo = (new ClientSecretInfo(newEncryptedClientSecret,
+                            clientSecretInfo.getId()));
+                    updatedClientSecretList.add(updatedClientSecretInfo);
+                }
+            } catch (CryptoException e) {
+                if (isContinueOnError()) {
+                    log.error("Error when migrating the secret for client with app ID: " +
+                            clientSecretInfo.getId(), e);
+                } else {
+                    throw new MigrationClientException("Error when migrating the secret for client with app ID: " +
+                            clientSecretInfo.getId(), e);
+                }
             }
         }
         return updatedClientSecretList;
