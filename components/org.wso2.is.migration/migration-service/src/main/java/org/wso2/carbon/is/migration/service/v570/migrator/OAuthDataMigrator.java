@@ -252,7 +252,7 @@ public class OAuthDataMigrator extends Migrator {
                 tokenInfo.getTokenId()));
         updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
         if (refreshToken != null) {
-            updatedOauthTokenInfo.setRefreshTokenhash(refreshTokenHash);
+            updatedOauthTokenInfo.setRefreshTokenHash(refreshTokenHash);
         }
         return updatedOauthTokenInfo;
     }
@@ -267,10 +267,10 @@ public class OAuthDataMigrator extends Migrator {
         tokenInfo.setAccessTokenHash(accessTokenHashObject.toString());
 
         refreshTokenHashObject = new JSONObject();
-        String oldRefreshTokenHash = tokenInfo.getRefreshTokenhash();
+        String oldRefreshTokenHash = tokenInfo.getRefreshTokenHash();
         refreshTokenHashObject.put(ALGORITHM, hashAlgorithm);
         refreshTokenHashObject.put(HASH, oldRefreshTokenHash);
-        tokenInfo.setRefreshTokenhash(refreshTokenHashObject.toString());
+        tokenInfo.setRefreshTokenHash(refreshTokenHashObject.toString());
     }
 
     private OauthTokenInfo getHashedTokenInfo(OauthTokenInfo tokenInfo, String accessToken, String refreshToken)
@@ -290,7 +290,7 @@ public class OAuthDataMigrator extends Migrator {
                 tokenInfo.getTokenId()));
         updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
         if (refreshToken != null) {
-            updatedOauthTokenInfo.setRefreshTokenhash(refreshTokenHash);
+            updatedOauthTokenInfo.setRefreshTokenHash(refreshTokenHash);
         }
         return updatedOauthTokenInfo;
     }
