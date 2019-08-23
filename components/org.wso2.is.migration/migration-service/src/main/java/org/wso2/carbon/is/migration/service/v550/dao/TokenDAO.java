@@ -111,7 +111,7 @@ public class TokenDAO {
                 ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 oauthTokenInfos.add(new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
-                        resultSet.getString("REFRESH_TOKEN"),resultSet.getString("TOKEN_ID")));
+                        resultSet.getString("REFRESH_TOKEN"), resultSet.getString("TOKEN_ID")));
             }
             connection.commit();
         }
@@ -137,7 +137,7 @@ public class TokenDAO {
                                                               resultSet.getString("REFRESH_TOKEN"),
                                                               resultSet.getString("TOKEN_ID"));
                 tokenInfo.setAccessTokenHash(resultSet.getString("ACCESS_TOKEN_HASH"));
-                tokenInfo.setRefreshTokenhash(resultSet.getString("REFRESH_TOKEN_HASH"));
+                tokenInfo.setRefreshTokenHash(resultSet.getString("REFRESH_TOKEN_HASH"));
                 oauthTokenInfoList.add(tokenInfo);
             }
             connection.commit();
@@ -152,7 +152,7 @@ public class TokenDAO {
                 preparedStatement.setString(1, oauthTokenInfo.getAccessToken());
                 preparedStatement.setString(2, oauthTokenInfo.getRefreshToken());
                 preparedStatement.setString(3, oauthTokenInfo.getAccessTokenHash());
-                preparedStatement.setString(4, oauthTokenInfo.getRefreshTokenhash());
+                preparedStatement.setString(4, oauthTokenInfo.getRefreshTokenHash());
                 preparedStatement.setString(5, oauthTokenInfo.getTokenId());
                 preparedStatement.addBatch();
             }
@@ -173,7 +173,7 @@ public class TokenDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PLAIN_TEXT_ACCESS_TOKEN)) {
             for (OauthTokenInfo oauthTokenInfo : updatedOauthTokenList) {
                 preparedStatement.setString(1, oauthTokenInfo.getAccessTokenHash());
-                preparedStatement.setString(2, oauthTokenInfo.getRefreshTokenhash());
+                preparedStatement.setString(2, oauthTokenInfo.getRefreshTokenHash());
                 preparedStatement.setString(3, oauthTokenInfo.getTokenId());
                 preparedStatement.addBatch();
             }

@@ -50,7 +50,7 @@ public class OAuthDAO {
                         resultSet.getString("REFRESH_TOKEN"),
                         resultSet.getString("TOKEN_ID"));
                 tokenInfo.setAccessTokenHash(resultSet.getString("ACCESS_TOKEN_HASH"));
-                tokenInfo.setRefreshTokenhash(resultSet.getString("REFRESH_TOKEN_HASH"));
+                tokenInfo.setRefreshTokenHash(resultSet.getString("REFRESH_TOKEN_HASH"));
                 oauthTokenInfoList.add(tokenInfo);
             }
         }
@@ -72,7 +72,7 @@ public class OAuthDAO {
                 preparedStatement.setString(1, oauthTokenInfo.getAccessToken());
                 preparedStatement.setString(2, oauthTokenInfo.getRefreshToken());
                 preparedStatement.setString(3, oauthTokenInfo.getAccessTokenHash());
-                preparedStatement.setString(4, oauthTokenInfo.getRefreshTokenhash());
+                preparedStatement.setString(4, oauthTokenInfo.getRefreshTokenHash());
                 preparedStatement.setString(5, oauthTokenInfo.getTokenId());
                 preparedStatement.addBatch();
             }
