@@ -64,12 +64,14 @@ public class OAuthDataMigrator extends Migrator {
     public void addHashColumns() throws MigrationClientException, SQLException {
 
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             isTokenHashColumnsAvailable = TokenDAO.getInstance().isTokenHashColumnsAvailable(connection);
             isAuthzCodeHashColumnAvailable = AuthzCodeDAO.getInstance().isAuthzCodeHashColumnAvailable(connection);
             connection.commit();
         }
         if (!isTokenHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 TokenDAO.getInstance().addAccessTokenHashColumn(connection);
                 TokenDAO.getInstance().addRefreshTokenHashColumn(connection);
                 connection.commit();
@@ -77,6 +79,7 @@ public class OAuthDataMigrator extends Migrator {
         }
         if (!isAuthzCodeHashColumnAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 AuthzCodeDAO.getInstance().addAuthzCodeHashColumns(connection);
                 connection.commit();
             }
@@ -86,11 +89,13 @@ public class OAuthDataMigrator extends Migrator {
     public void deleteClientSecretHashColumn() throws MigrationClientException, SQLException {
 
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             isClientSecretHashColumnsAvailable = OAuthDAO.getInstance().isConsumerSecretHashColumnAvailable(connection);
             connection.commit();
         }
         if (isClientSecretHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 OAuthDAO.getInstance().deleteConsumerSecretHashColumn(connection);
                 connection.commit();
             }
@@ -108,6 +113,7 @@ public class OAuthDataMigrator extends Migrator {
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 access token table.");
         List<OauthTokenInfo> oauthTokenList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             oauthTokenList = TokenDAO.getInstance().getAllAccessTokensWithHash(connection);
         }
         try {
@@ -133,6 +139,7 @@ public class OAuthDataMigrator extends Migrator {
         updatedOauthTokenList = transformFromOldToNewEncryption(oauthTokenList);
 
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             TokenDAO.getInstance().updateNewEncryptedTokens(updatedOauthTokenList, connection);
         }
 
@@ -153,6 +160,7 @@ public class OAuthDataMigrator extends Migrator {
         try {
             List<OauthTokenInfo> updatedOauthTokenList = generateTokenHashValues(oauthTokenList);
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 TokenDAO.getInstance().updatePlainTextTokens(updatedOauthTokenList, connection);
             }
         } catch (IdentityOAuth2Exception e) {
@@ -299,6 +307,7 @@ public class OAuthDataMigrator extends Migrator {
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 authorization code table.");
         List<AuthzCodeInfo> authzCodeInfoList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             authzCodeInfoList = AuthzCodeDAO.getInstance().getAllAuthzCodesWithHashes(connection);
         }
         try {
@@ -333,6 +342,7 @@ public class OAuthDataMigrator extends Migrator {
         try {
             List<AuthzCodeInfo> updatedAuthzCodeInfoList = transformAuthzCodeFromOldToNewEncryption(authzCodeInfoList);
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 AuthzCodeDAO.getInstance().updateNewEncryptedAuthzCodes(updatedAuthzCodeInfoList, connection);
             }
         } catch (CryptoException e) {
@@ -358,6 +368,7 @@ public class OAuthDataMigrator extends Migrator {
         try {
             List<AuthzCodeInfo> updatedAuthzCodeInfoList = generateAuthzCodeHashValues(authzCodeInfoList);
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 AuthzCodeDAO.getInstance().updatePlainTextAuthzCodes(updatedAuthzCodeInfoList, connection);
             }
         } catch (IdentityOAuth2Exception e) {
@@ -429,6 +440,7 @@ public class OAuthDataMigrator extends Migrator {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 consumer apps table.");
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             if (OAuth2Util.isEncryptionWithTransformationEnabled()) {
                 List<ClientSecretInfo> clientSecretInfoList;
                 clientSecretInfoList = OAuthDAO.getInstance().getAllClientSecrets(connection);

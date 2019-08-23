@@ -92,6 +92,7 @@ public class DataSyncPipeline {
         try {
             try {
                 sourceConnection = pipelineConfiguration.getSourceDataSource().getConnection();
+                sourceConnection.setAutoCommit(false);
             } catch (SQLException e) {
                 throw new SyncClientException("Error while creating source connection from data source for schema: "
                         + schema);

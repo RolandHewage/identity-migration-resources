@@ -90,6 +90,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<OauthTokenInfo> oauthTokenList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             oauthTokenList = OAuthDAO.getInstance().getAllAccessTokens(connection);
             connection.commit();
         } catch (SQLException e) {
@@ -104,6 +105,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<AuthzCodeInfo> authzCodeInfoList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             authzCodeInfoList = OAuthDAO.getInstance().getAllAuthzCodes(connection);
             connection.commit();
         } catch (SQLException e) {

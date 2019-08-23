@@ -111,7 +111,7 @@ public class TokenDAO {
                 ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 oauthTokenInfos.add(new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
-                        resultSet.getString("REFRESH_TOKEN"),resultSet.getString("TOKEN_ID")));
+                        resultSet.getString("REFRESH_TOKEN"), resultSet.getString("TOKEN_ID")));
             }
             connection.commit();
         }
