@@ -15,53 +15,53 @@ CREATE TABLE IF NOT EXISTS IDN_AUTH_USER (
 	PRIMARY KEY (USER_ID),
 	CONSTRAINT USER_STORE_CONSTRAINT UNIQUE (USER_NAME, TENANT_ID, DOMAIN_NAME, IDP_ID));
 
-CREATE OR REPLACE FUNCTION skip_index_if_exists(indexName varchar(64),tableName varchar(64), tableColumns varchar(64))  RETURNS void AS $$ declare s varchar(1000);  begin if to_regclass(indexName) IS NULL then s :=  CONCAT('CREATE INDEX ' , indexName , ' ON ' , tableName, tableColumns);execute s;end if;END;$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION skip_index_if_exists(nameOfTheIndex varchar(64),tableName varchar(64), tableColumns varchar(64)) RETURNS void AS $$ declare s varchar(1000); declare result INTEGER; begin SELECT COUNT(1) into result FROM pg_indexes WHERE indexname = nameOfTheIndex; IF result = 0 THEN s :=  CONCAT('CREATE INDEX ' , nameOfTheIndex , ' ON ' , tableName, tableColumns); execute s; end if; END;$$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS IDN_AUTH_USER_SESSION_MAPPING (
 	USER_ID VARCHAR(255) NOT NULL,
 	SESSION_ID VARCHAR(255) NOT NULL,
 	CONSTRAINT USER_SESSION_STORE_CONSTRAINT UNIQUE (USER_ID, SESSION_ID));
 
-SELECT skip_index_if_exists('IDX_USER_ID', 'IDN_AUTH_USER_SESSION_MAPPING', '(USER_ID)');
+SELECT skip_index_if_exists('idx_user_id', 'idn_auth_user_session_mapping', '(user_id)');
 
-SELECT skip_index_if_exists('IDX_SESSION_ID', 'IDN_AUTH_USER_SESSION_MAPPING', '(SESSION_ID)');
+SELECT skip_index_if_exists('idx_session_id', 'idn_auth_user_session_mapping', '(session_id)');
 
-SELECT skip_index_if_exists('IDX_OCA_UM_TID_UD_APN','IDN_OAUTH_CONSUMER_APPS','(USERNAME,TENANT_ID,USER_DOMAIN, APP_NAME)');
+SELECT skip_index_if_exists('idx_oca_um_tid_ud_apn','idn_oauth_consumer_apps','(username,tenant_id,user_domain, app_name)');
 
-SELECT skip_index_if_exists('IDX_SPI_APP','SP_INBOUND_AUTH','(APP_ID)');
+SELECT skip_index_if_exists('idx_spi_app','sp_inbound_auth','(app_id)');
 
-SELECT skip_index_if_exists('IDX_IOP_TID_CK','IDN_OIDC_PROPERTY','(TENANT_ID,CONSUMER_KEY)');
+SELECT skip_index_if_exists('idx_iop_tid_ck','idn_oidc_property','(tenant_id,consumer_key)');
 
-SELECT skip_index_if_exists('IDX_AT_AU_TID_UD_TS_CKID', 'IDN_OAUTH2_ACCESS_TOKEN', '(AUTHZ_USER, TENANT_ID, USER_DOMAIN, TOKEN_STATE, CONSUMER_KEY_ID)');
+SELECT skip_index_if_exists('idx_at_au_tid_ud_ts_ckid', 'idn_oauth2_access_token', '(authz_user, tenant_id, user_domain, token_state, consumer_key_id)');
 
-SELECT skip_index_if_exists('IDX_AT_AT', 'IDN_OAUTH2_ACCESS_TOKEN', '(ACCESS_TOKEN)');
+SELECT skip_index_if_exists('idx_at_at', 'idn_oauth2_access_token', '(access_token)');
 
-SELECT skip_index_if_exists('IDX_AT_AU_CKID_TS_UT', 'IDN_OAUTH2_ACCESS_TOKEN', '(AUTHZ_USER, CONSUMER_KEY_ID, TOKEN_STATE, USER_TYPE)');
+SELECT skip_index_if_exists('idx_at_au_ckid_ts_ut', 'idn_oauth2_access_token', '(authz_user, consumer_key_id, token_state, user_type)');
 
-SELECT skip_index_if_exists('IDX_AT_RTH', 'IDN_OAUTH2_ACCESS_TOKEN', '(REFRESH_TOKEN_HASH)');
+SELECT skip_index_if_exists('idx_at_rth', 'idn_oauth2_access_token', '(refresh_token_hash)');
 
-SELECT skip_index_if_exists('IDX_AT_RT', 'IDN_OAUTH2_ACCESS_TOKEN', '(REFRESH_TOKEN)');
+SELECT skip_index_if_exists('idx_at_rt', 'idn_oauth2_access_token', '(refresh_token)');
 
-SELECT skip_index_if_exists('IDX_AC_CKID', 'IDN_OAUTH2_AUTHORIZATION_CODE', '(CONSUMER_KEY_ID)');
+SELECT skip_index_if_exists('idx_ac_ckid', 'idn_oauth2_authorization_code', '(consumer_key_id)');
 
-SELECT skip_index_if_exists('IDX_AC_TID', 'IDN_OAUTH2_AUTHORIZATION_CODE', '(TOKEN_ID)');
+SELECT skip_index_if_exists('idx_ac_tid', 'idn_oauth2_authorization_code', '(token_id)');
 
-SELECT skip_index_if_exists('IDX_AC_AC_CKID', 'IDN_OAUTH2_AUTHORIZATION_CODEE', '(AUTHORIZATION_CODE, CONSUMER_KEY_ID)');
+SELECT skip_index_if_exists('idx_ac_ac_ckid', 'idn_oauth2_authorization_codee', '(authorization_code, consumer_key_id)');
 
-SELECT skip_index_if_exists('IDX_SC_TID', 'IDN_OAUTH2_SCOPEE', '(TENANT_ID)');
+SELECT skip_index_if_exists('idx_sc_tid', 'idn_oauth2_scopee', '(tenant_id)');
 
-SELECT skip_index_if_exists('IDX_SC_N_TID', 'IDN_OAUTH2_SCOPEE', '(NAME, TENANT_ID)');
+SELECT skip_index_if_exists('idx_sc_n_tid', 'idn_oauth2_scopee', '(name, tenant_id)');
 
-SELECT skip_index_if_exists('IDX_SB_SCPID', 'IDN_OAUTH2_SCOPE_BINDINGE', '(SCOPE_ID)');
+SELECT skip_index_if_exists('idx_sb_scpid', 'idn_oauth2_scope_bindinge', '(scope_id)');
 
-SELECT skip_index_if_exists('IDX_OROR_TID', 'IDN_OIDC_REQ_OBJECT_REFERENCEE', '(TOKEN_ID)');
+SELECT skip_index_if_exists('idx_oror_tid', 'idn_oidc_req_object_referencee', '(token_id)');
 
-SELECT skip_index_if_exists('IDX_ATS_TID', 'IDN_OAUTH2_ACCESS_TOKEN_SCOPE', '(TOKEN_ID)');
+SELECT skip_index_if_exists('idx_ats_tid', 'idn_oauth2_access_token_scope', '(token_id)');
 
-SELECT skip_index_if_exists('IDX_AUTH_USER_UN_TID_DN', 'IDN_AUTH_USER', '(USER_NAME, TENANT_ID, DOMAIN_NAME)');
+SELECT skip_index_if_exists('idx_auth_user_un_tid_dn', 'idn_auth_user', '(user_name, tenant_id, domain_name)');
 
-SELECT skip_index_if_exists('IDX_AUTH_USER_DN_TOD', 'IDN_AUTH_USER', '(DOMAIN_NAME, TENANT_ID)');
+SELECT skip_index_if_exists('idx_auth_user_dn_tod', 'idn_auth_user', '(domain_name, tenant_id)');
 
-DROP FUNCTION skip_index_if_exists;
+DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
 
-DROP FUNCTION add_idp_id_to_con_app_key_if_token_id_present;
+DROP FUNCTION add_idp_id_to_con_app_key_if_token_id_present();
