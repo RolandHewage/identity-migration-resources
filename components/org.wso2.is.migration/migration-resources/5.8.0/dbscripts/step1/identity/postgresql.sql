@@ -46,15 +46,15 @@ SELECT skip_index_if_exists('idx_ac_ckid', 'idn_oauth2_authorization_code', '(co
 
 SELECT skip_index_if_exists('idx_ac_tid', 'idn_oauth2_authorization_code', '(token_id)');
 
-SELECT skip_index_if_exists('idx_ac_ac_ckid', 'idn_oauth2_authorization_codee', '(authorization_code, consumer_key_id)');
+SELECT skip_index_if_exists('idx_ac_ac_ckid', 'idn_oauth2_authorization_code', '(authorization_code, consumer_key_id)');
 
-SELECT skip_index_if_exists('idx_sc_tid', 'idn_oauth2_scopee', '(tenant_id)');
+SELECT skip_index_if_exists('idx_sc_tid', 'idn_oauth2_scope', '(tenant_id)');
 
-SELECT skip_index_if_exists('idx_sc_n_tid', 'idn_oauth2_scopee', '(name, tenant_id)');
+SELECT skip_index_if_exists('idx_sc_n_tid', 'idn_oauth2_scope', '(name, tenant_id)');
 
-SELECT skip_index_if_exists('idx_sb_scpid', 'idn_oauth2_scope_bindinge', '(scope_id)');
+SELECT skip_index_if_exists('idx_sb_scpid', 'idn_oauth2_scope_binding', '(scope_id)');
 
-SELECT skip_index_if_exists('idx_oror_tid', 'idn_oidc_req_object_referencee', '(token_id)');
+SELECT skip_index_if_exists('idx_oror_tid', 'idn_oidc_req_object_reference', '(token_id)');
 
 SELECT skip_index_if_exists('idx_ats_tid', 'idn_oauth2_access_token_scope', '(token_id)');
 
