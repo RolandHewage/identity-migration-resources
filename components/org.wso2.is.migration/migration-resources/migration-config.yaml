@@ -308,11 +308,5 @@ versions:
        location: "step1"
        schema: "identity"
    -
-     name: "SchemaMigrator"
-     order: 2
-     parameters:
-       location: "step2"
-       schema: "carbon"
-   -
      name: "ClaimDataMigrator"
-     order: 3
+     order: 2
