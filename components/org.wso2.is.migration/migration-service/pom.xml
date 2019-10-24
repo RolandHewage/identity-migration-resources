@@ -80,7 +80,7 @@
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.mgt</artifactId>
         </dependency>
-        <dependency>
+       <dependency>
             <groupId>org.wso2.orbit.org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
@@ -124,15 +124,17 @@
                             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
                             org.apache.commons.logging; version="${version.commons.logging}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.version.range}",
-                            org.yaml.snakeyaml; version="${snakeyaml.version.range}",
                             org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.wso2.carbon.base.api,
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
+                        <Embed-Dependency>
+                            snakeyaml
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
+           <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <inherited>false</inherited>
