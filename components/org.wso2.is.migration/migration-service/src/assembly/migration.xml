@@ -36,9 +36,5 @@
             <source>target/org.wso2.carbon.is.migration-${project.version}.jar</source>
             <outputDirectory>wso2is-migration-${project.version}/dropins/</outputDirectory>
         </file>
-        <file>
-            <source>target/snakeyaml-${snakeyaml.version}.jar</source>
-            <outputDirectory>wso2is-migration-${project.version}/dropins/</outputDirectory>
-        </file>
     </files>
 </assembly>
