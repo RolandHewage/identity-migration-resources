@@ -38,8 +38,8 @@ CREATE TABLE IDN_FUNCTION_LIBRARY (
       PRIMARY KEY (TENANT_ID,NAME)
 );
 
-CREATE OR REPLACE FUNCTION skip_index_if_exists(indexName varchar(64),tableName varchar(64), tableColumns varchar(64))  RETURNS void AS $$ declare s varchar(1000);  begin if to_regclass(indexName) IS NULL then s :=  CONCAT('CREATE INDEX ' , indexName , ' ON ' , tableName, tableColumns);execute s;end if;END;$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION skip_index_if_exists(nameOfTheIndex varchar(64),tableName varchar(64), tableColumns varchar(64)) RETURNS void AS $$ declare s varchar(1000); declare result INTEGER; begin SELECT COUNT(1) into result FROM pg_indexes WHERE indexname = nameOfTheIndex; IF result = 0 THEN s :=  CONCAT('CREATE INDEX ' , nameOfTheIndex , ' ON ' , tableName, tableColumns); execute s; end if; END;$$ LANGUAGE plpgsql;
 
-SELECT skip_index_if_exists('IDX_FIDO2_STR','FIDO2_DEVICE_STORE','(USER_NAME, TENANT_ID, DOMAIN_NAME, CREDENTIAL_ID, USER_HANDLE)');
+SELECT skip_index_if_exists('idx_fido2_str','fido2_device_store','(user_name, tenant_id, domain_name, credential_id, user_handle)');
 
 DROP FUNCTION skip_index_if_exists;
