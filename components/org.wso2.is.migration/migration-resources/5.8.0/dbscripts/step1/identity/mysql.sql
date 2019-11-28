@@ -40,7 +40,7 @@ DROP PROCEDURE IF EXISTS handle_partly_index;
 
 CREATE PROCEDURE handle_partly_index() BEGIN DECLARE indexColumnCount BIGINT; DECLARE subPartValue BIGINT; SELECT SUB_PART INTO subPartValue FROM information_schema.statistics WHERE TABLE_SCHEMA = DATABASE() and table_name = 'IDN_SCIM_GROUP' AND index_name = 'IDX_IDN_SCIM_GROUP_TI_RN_AN' AND COLUMN_NAME = 'ATTR_NAME'; SELECT COUNT(*) AS index_exists INTO indexColumnCount FROM information_schema.statistics WHERE TABLE_SCHEMA = DATABASE() and table_name = 'IDN_SCIM_GROUP' AND index_name = 'IDX_IDN_SCIM_GROUP_TI_RN_AN' AND COLUMN_NAME = 'ATTR_NAME'; IF (subPartValue IS NULL) THEN START TRANSACTION; IF (indexColumnCount > 0) THEN SET @dropQuery = CONCAT('DROP INDEX ', 'IDX_IDN_SCIM_GROUP_TI_RN_AN', ' ON ', 'IDN_SCIM_GROUP'); PREPARE dropStatement FROM @dropQuery; EXECUTE dropStatement; END IF; SET @createQuery = CONCAT('CREATE INDEX ', 'IDX_IDN_SCIM_GROUP_TI_RN_AN', ' ON ', 'IDN_SCIM_GROUP', '(TENANT_ID, ROLE_NAME, ATTR_NAME(500))'); PREPARE createStatement FROM @createQuery; EXECUTE createStatement; COMMIT; END IF; END;
 
-call create_index_if_not_column_is_partly_indexed('ATTR_NAME', 'IDX_IDN_SCIM_GROUP_TI_RN_AN', 'IDN_SCIM_GROUP', '(TENANT_ID, ROLE_NAME, ATTR_NAME(500))');
+call handle_partly_index();
 
 DROP PROCEDURE IF EXISTS handle_partly_index;
 

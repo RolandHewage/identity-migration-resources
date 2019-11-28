@@ -1,4 +1,9 @@
+DROP PROCEDURE IF EXISTS drop_index_ioat_at_if_exists;
+CREATE PROCEDURE drop_index_ioat_at_if_exists() BEGIN IF((SELECT COUNT(*) AS index_exists FROM information_schema.statistics WHERE TABLE_SCHEMA = DATABASE() and table_name = 'IDN_OAUTH2_ACCESS_TOKEN' AND index_name = 'IDX_IOAT_AT') > 0) THEN SET @s = CONCAT('DROP INDEX ' , 'IDX_IOAT_AT' , ' ON ' , 'IDN_OAUTH2_ACCESS_TOKEN'); PREPARE stmt FROM @s; EXECUTE stmt; END IF; END;
+CALL drop_index_ioat_at_if_exists();
+
 DROP INDEX IDX_AT ON IDN_OAUTH2_ACCESS_TOKEN;
+
 DROP PROCEDURE IF EXISTS drop_index_if_exists;
 CREATE PROCEDURE drop_index_if_exists() BEGIN IF((SELECT COUNT(*) AS index_exists FROM information_schema.statistics WHERE TABLE_SCHEMA = DATABASE() and table_name = 'IDN_OAUTH2_AUTHORIZATION_CODE' AND index_name = 'IDX_AUTHORIZATION_CODE') > 0) THEN SET @s = CONCAT('DROP INDEX ' , 'IDX_AUTHORIZATION_CODE' , ' ON ' , 'IDN_OAUTH2_AUTHORIZATION_CODE'); PREPARE stmt FROM @s; EXECUTE stmt; END IF; END;
 CALL drop_index_if_exists();
@@ -80,4 +85,5 @@ CREATE TABLE IF NOT EXISTS IDN_CERTIFICATE (
              CONSTRAINT CERTIFICATE_UNIQUE_KEY UNIQUE (NAME, TENANT_ID)
 )ENGINE INNODB;
 
+DROP PROCEDURE IF EXISTS drop_index_ioat_at_if_exists;
 DROP PROCEDURE IF EXISTS drop_index_if_exists;

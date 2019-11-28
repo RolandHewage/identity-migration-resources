@@ -102,6 +102,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<OauthTokenInfo> oauthTokenList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             oauthTokenList = OAuthDAO.getInstance().getAllAccessTokens(connection);
         } catch (SQLException e) {
             String error = "SQL error while retrieving token hash";
@@ -115,6 +116,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<AuthzCodeInfo> authzCodeInfoList;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             authzCodeInfoList = OAuthDAO.getInstance().getAllAuthzCodes(connection);
         } catch (SQLException e) {
             String error = "SQL error while retrieving authorization code hash";
@@ -135,8 +137,6 @@ public class OAuthDataMigrator extends Migrator {
         List<OauthTokenInfo> updatedOauthTokenList = new ArrayList<>();
         if (oauthTokenList != null) {
             boolean encryptionWithTransformationEnabled = OAuth2Util.isEncryptionWithTransformationEnabled();
-            JSONObject accessTokenHashObject;
-            JSONObject refreshTokenHashObject;
 
             for (OauthTokenInfo tokenInfo : oauthTokenList) {
 
@@ -144,7 +144,7 @@ public class OAuthDataMigrator extends Migrator {
                 String refreshToken = tokenInfo.getRefreshToken();
 
                 if (encryptionWithTransformationEnabled) {
-                    // Token encryption is enabled.
+                    // Token OAEP encryption is enabled.
                     if (!isBase64DecodeAndIsSelfContainedCipherText(accessToken)) {
                         // Existing access tokens are not encrypted with OAEP.
                         byte[] decryptedAccessToken = CryptoUtil.getDefaultCryptoUtil()
@@ -159,28 +159,16 @@ public class OAuthDataMigrator extends Migrator {
                             newEncryptedRefreshToken = CryptoUtil.getDefaultCryptoUtil()
                                     .encryptAndBase64Encode(decryptedRefreshToken);
                         }
-                        TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
-                        String accessTokenHash;
-                        String refreshTokenHash = null;
 
-                        accessTokenHash = tokenPersistenceProcessor
-                                .getProcessedAccessTokenIdentifier(new String(decryptedAccessToken, Charsets.UTF_8));
-                        if (refreshToken != null) {
-                            refreshTokenHash = tokenPersistenceProcessor
-                                    .getProcessedRefreshToken(new String(decryptedRefreshToken, Charsets.UTF_8));
-                        }
-
-                        OauthTokenInfo updatedOauthTokenInfo = (new OauthTokenInfo(newEncryptedAccessToken,
-                                newEncryptedRefreshToken,
-                                tokenInfo.getTokenId()));
-                        updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
-                        if (refreshToken != null) {
-                            updatedOauthTokenInfo.setRefreshTokenhash(refreshTokenHash);
-                        }
+                        OauthTokenInfo updatedOauthTokenInfo =
+                                getHashedTokenInfoFromEncryptedToken(tokenInfo, newEncryptedAccessToken, newEncryptedRefreshToken,
+                                        decryptedAccessToken,
+                                        decryptedRefreshToken);
                         updatedOauthTokenList.add(updatedOauthTokenInfo);
                     } else {
+                        // Existing access tokens are encrypted with OAEP.
                         if (StringUtils.isBlank(tokenInfo.getAccessTokenHash())) {
-
+                            // Token hash is empty.
                             byte[] decryptedAccessToken = CryptoUtil.getDefaultCryptoUtil()
                                     .base64DecodeAndDecrypt(accessToken);
                             byte[] decryptedRefreshToken = null;
@@ -188,51 +176,55 @@ public class OAuthDataMigrator extends Migrator {
                                 decryptedRefreshToken = CryptoUtil.getDefaultCryptoUtil()
                                         .base64DecodeAndDecrypt(refreshToken);
                             }
-                            TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
-                            String accessTokenHash;
-                            String refreshTokenHash = null;
-
-                            accessTokenHash = tokenPersistenceProcessor
-                                    .getProcessedAccessTokenIdentifier(new String(decryptedAccessToken, Charsets.UTF_8));
-                            if (refreshToken != null) {
-                                refreshTokenHash = tokenPersistenceProcessor
-                                        .getProcessedRefreshToken(new String(decryptedRefreshToken, Charsets.UTF_8));
-                            }
-
-                            OauthTokenInfo updatedOauthTokenInfo = (new OauthTokenInfo(accessToken,
-                                    refreshToken,
-                                    tokenInfo.getTokenId()));
-                            updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
-                            if (refreshToken != null) {
-                                updatedOauthTokenInfo.setRefreshTokenhash(refreshTokenHash);
-                            }
+                            OauthTokenInfo updatedOauthTokenInfo =
+                                    getHashedTokenInfoFromEncryptedToken(tokenInfo, accessToken, refreshToken,
+                                            decryptedAccessToken,
+                                            decryptedRefreshToken);
                             updatedOauthTokenList.add(updatedOauthTokenInfo);
                         } else {
+                            // Token hash is not empty.
                             String oldAccessTokenHash = tokenInfo.getAccessTokenHash();
                             try {
                                 //If hash column already is a JSON value, no need to update the record
                                 new JSONObject(oldAccessTokenHash);
                             } catch (JSONException e) {
                                 //Exception is thrown because the hash value is not a json
-                                accessTokenHashObject = new JSONObject();
-                                accessTokenHashObject.put(ALGORITHM, hashAlgorithm);
-                                accessTokenHashObject.put(HASH, oldAccessTokenHash);
-                                tokenInfo.setAccessTokenHash(accessTokenHashObject.toString());
-
-                                refreshTokenHashObject = new JSONObject();
-                                String oldRefreshTokenHash = tokenInfo.getRefreshTokenhash();
-                                refreshTokenHashObject.put(ALGORITHM, hashAlgorithm);
-                                refreshTokenHashObject.put(HASH, oldRefreshTokenHash);
-                                tokenInfo.setRefreshTokenhash(refreshTokenHashObject.toString());
+                                buildHashedTokenInfoJson(hashAlgorithm, tokenInfo, oldAccessTokenHash);
                                 updatedOauthTokenList.add(tokenInfo);
                             }
+                        }
+                    }
+                } else if (OAuth2Util.isTokenEncryptionEnabled()) {
+                    // Token encryption is enabled with RSA.
+                    if (StringUtils.isBlank(tokenInfo.getAccessTokenHash())) {
+                        // Hash value is not present.
+                        byte[] decryptedAccessToken = CryptoUtil.getDefaultCryptoUtil()
+                                .base64DecodeAndDecrypt(accessToken, "RSA");
+                        byte[] decryptedRefreshToken = null;
+                        if (refreshToken != null) {
+                            decryptedRefreshToken = CryptoUtil.getDefaultCryptoUtil()
+                                    .base64DecodeAndDecrypt(refreshToken, "RSA");
+                        }
+                        OauthTokenInfo updatedOauthTokenInfo =
+                                getHashedTokenInfoFromEncryptedToken(tokenInfo, accessToken, refreshToken,
+                                        decryptedAccessToken, decryptedRefreshToken);
+                        updatedOauthTokenList.add(updatedOauthTokenInfo);
+                    } else {
+                        // Hash value is present.
+                        String oldAccessTokenHash = tokenInfo.getAccessTokenHash();
+                        try {
+                            //If hash column already is a JSON value, no need to update the record
+                            new JSONObject(oldAccessTokenHash);
+                        } catch (JSONException e) {
+                            //Exception is thrown because the hash value is not a json
+                            buildHashedTokenInfoJson(hashAlgorithm, tokenInfo, oldAccessTokenHash);
+                            updatedOauthTokenList.add(tokenInfo);
                         }
                     }
                 } else {
                     // Token encryption is not enabled.
                     if (StringUtils.isBlank(tokenInfo.getAccessTokenHash())) {
-
-                        OauthTokenInfo updatedOauthTokenInfo = getOauthTokenInfo(tokenInfo, accessToken, refreshToken);
+                        OauthTokenInfo updatedOauthTokenInfo = getHashedTokenInfo(tokenInfo, accessToken, refreshToken);
                         updatedOauthTokenList.add(updatedOauthTokenInfo);
                     } else {
                         String oldAccessTokenHash = tokenInfo.getAccessTokenHash();
@@ -241,16 +233,7 @@ public class OAuthDataMigrator extends Migrator {
                             new JSONObject(oldAccessTokenHash);
                         } catch (JSONException e) {
                             //Exception is thrown because the hash value is not a json
-                            accessTokenHashObject = new JSONObject();
-                            accessTokenHashObject.put(ALGORITHM, hashAlgorithm);
-                            accessTokenHashObject.put(HASH, oldAccessTokenHash);
-                            tokenInfo.setAccessTokenHash(accessTokenHashObject.toString());
-
-                            refreshTokenHashObject = new JSONObject();
-                            String oldRefreshTokenHash = tokenInfo.getRefreshTokenhash();
-                            refreshTokenHashObject.put(ALGORITHM, hashAlgorithm);
-                            refreshTokenHashObject.put(HASH, oldRefreshTokenHash);
-                            tokenInfo.setRefreshTokenhash(refreshTokenHashObject.toString());
+                            buildHashedTokenInfoJson(hashAlgorithm, tokenInfo, oldAccessTokenHash);
                             updatedOauthTokenList.add(tokenInfo);
                         }
                     }
@@ -260,7 +243,49 @@ public class OAuthDataMigrator extends Migrator {
         return updatedOauthTokenList;
     }
 
-    private OauthTokenInfo getOauthTokenInfo(OauthTokenInfo tokenInfo, String accessToken, String refreshToken)
+    private OauthTokenInfo getHashedTokenInfoFromEncryptedToken(OauthTokenInfo tokenInfo, String accessToken,
+                                                                String refreshToken, byte[] decryptedAccessToken,
+                                                                byte[] decryptedRefreshToken)
+            throws IdentityOAuth2Exception {
+
+        TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
+        String accessTokenHash;
+        String refreshTokenHash = null;
+
+        accessTokenHash = tokenPersistenceProcessor
+                .getProcessedAccessTokenIdentifier(new String(decryptedAccessToken, Charsets.UTF_8));
+        if (refreshToken != null) {
+            refreshTokenHash = tokenPersistenceProcessor
+                    .getProcessedRefreshToken(new String(decryptedRefreshToken, Charsets.UTF_8));
+        }
+
+        OauthTokenInfo updatedOauthTokenInfo = (new OauthTokenInfo(accessToken,
+                refreshToken,
+                tokenInfo.getTokenId()));
+        updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
+        if (refreshToken != null) {
+            updatedOauthTokenInfo.setRefreshTokenHash(refreshTokenHash);
+        }
+        return updatedOauthTokenInfo;
+    }
+
+    private void buildHashedTokenInfoJson(String hashAlgorithm, OauthTokenInfo tokenInfo, String oldAccessTokenHash) {
+
+        JSONObject accessTokenHashObject;
+        JSONObject refreshTokenHashObject;
+        accessTokenHashObject = new JSONObject();
+        accessTokenHashObject.put(ALGORITHM, hashAlgorithm);
+        accessTokenHashObject.put(HASH, oldAccessTokenHash);
+        tokenInfo.setAccessTokenHash(accessTokenHashObject.toString());
+
+        refreshTokenHashObject = new JSONObject();
+        String oldRefreshTokenHash = tokenInfo.getRefreshTokenHash();
+        refreshTokenHashObject.put(ALGORITHM, hashAlgorithm);
+        refreshTokenHashObject.put(HASH, oldRefreshTokenHash);
+        tokenInfo.setRefreshTokenHash(refreshTokenHashObject.toString());
+    }
+
+    private OauthTokenInfo getHashedTokenInfo(OauthTokenInfo tokenInfo, String accessToken, String refreshToken)
             throws IdentityOAuth2Exception {
 
         TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
@@ -277,7 +302,7 @@ public class OAuthDataMigrator extends Migrator {
                 tokenInfo.getTokenId()));
         updatedOauthTokenInfo.setAccessTokenHash(accessTokenHash);
         if (refreshToken != null) {
-            updatedOauthTokenInfo.setRefreshTokenhash(refreshTokenHash);
+            updatedOauthTokenInfo.setRefreshTokenHash(refreshTokenHash);
         }
         return updatedOauthTokenInfo;
     }

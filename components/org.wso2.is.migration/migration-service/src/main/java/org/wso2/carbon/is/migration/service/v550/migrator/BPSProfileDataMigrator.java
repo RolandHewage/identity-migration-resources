@@ -58,12 +58,14 @@ public class BPSProfileDataMigrator extends Migrator {
 
         try {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 bpsProfileList = BPSProfileDAO.getInstance().getAllProfiles(connection);
             }
 
             List<BPSProfile> updatedBpsProfileList = transformPasswordFromOldToNewEncryption(bpsProfileList);
 
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 BPSProfileDAO.getInstance().updateNewPasswords(updatedBpsProfileList, connection);
             }
         } catch (SQLException e) {

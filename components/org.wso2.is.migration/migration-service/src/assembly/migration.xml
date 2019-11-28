@@ -23,7 +23,7 @@
     <fileSets>
         <fileSet>
             <directory>../migration-resources</directory>
-            <outputDirectory>wso2is-migration-${pom.version}/migration-resources</outputDirectory>
+            <outputDirectory>wso2is-migration-${project.version}/migration-resources</outputDirectory>
             <includes>
                 <include>**/*.sql</include>
                 <include>**/*.yaml</include>
@@ -33,12 +33,8 @@
     </fileSets>
     <files>
         <file>
-            <source>target/org.wso2.carbon.is.migration-${pom.version}.jar</source>
-            <outputDirectory>wso2is-${pom.version}-migration/dropins/</outputDirectory>
-        </file>
-        <file>
-            <source>target/snakeyaml-${snakeyaml.version}.jar</source>
-            <outputDirectory>wso2is-${pom.version}-migration/dropins/</outputDirectory>
+            <source>target/org.wso2.carbon.is.migration-${project.version}.jar</source>
+            <outputDirectory>wso2is-migration-${project.version}/dropins/</outputDirectory>
         </file>
     </files>
 </assembly>

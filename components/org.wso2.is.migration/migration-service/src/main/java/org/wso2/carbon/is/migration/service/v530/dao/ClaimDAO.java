@@ -65,11 +65,13 @@ public class ClaimDAO {
      */
     public void addClaimDialect(String claimDialectURI, int tenantId) throws MigrationClientException {
 
-        Connection connection = IdentityDatabaseUtil.getDBConnection();
+        Connection connection = null;
         PreparedStatement prepStmt = null;
 
         String query = SQLConstants.ADD_CLAIM_DIALECT;
         try {
+            connection = IdentityDatabaseUtil.getDBConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, claimDialectURI);
             prepStmt.setInt(2, tenantId);
@@ -135,7 +137,7 @@ public class ClaimDAO {
             // Start transaction
             connection.setAutoCommit(false);
             localClaimId = getClaimId(connection, ClaimConstants.LOCAL_CLAIM_DIALECT_URI, localClaimURI,
-                                      claim.getTenantId());
+                    claim.getTenantId());
             if (localClaimId == 0) {
                 //Claim record is not in the table
                 //Add record
@@ -147,7 +149,7 @@ public class ClaimDAO {
                         log.debug("JDBC Driver did not return the claimId, executing Select operation");
                     }
                     localClaimId = getClaimId(connection, ClaimConstants.LOCAL_CLAIM_DIALECT_URI, localClaimURI,
-                                              claim.getTenantId());
+                            claim.getTenantId());
                 }
 
                 Map<String, String> claimProperties = new HashMap<>();
@@ -184,7 +186,7 @@ public class ClaimDAO {
 
                 for (MappedAttribute mappedAttribute : claim.getAttributes()) {
                     addClaimAttributeMappings(connection, localClaimId, mappedAttribute.getAttribute(),
-                                              mappedAttribute.getDomain(), claim.getTenantId());
+                            mappedAttribute.getDomain(), claim.getTenantId());
                 }
             }
 
@@ -234,7 +236,7 @@ public class ClaimDAO {
             }
         } catch (SQLException e) {
             throw new MigrationClientException("Error while adding claim " + claimURI + " to dialect " +
-                                               claimDialectURI, e);
+                    claimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeResultSet(rs);
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -345,7 +347,7 @@ public class ClaimDAO {
             }
         } catch (SQLException e) {
             throw new MigrationClientException("Error while retrieving ID for claim " + claimURI + " in dialect "
-                                               + claimDialectURI, e);
+                    + claimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeResultSet(rs);
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -374,7 +376,7 @@ public class ClaimDAO {
             }
         } catch (SQLException e) {
             throw new MigrationClientException("Error while retrieving URI for claim " + claimURI + " in dialect "
-                                               + claimDialectURI, e);
+                    + claimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeResultSet(rs);
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -417,7 +419,7 @@ public class ClaimDAO {
             }
         } catch (SQLException e) {
             throw new MigrationClientException("Error while retrieving LOCAL_CLAIM_ID for claim " + mappedAttribute +
-                                               " " + "in tenant : " + IdentityTenantUtil.getTenantDomain(tenantId), e);
+                    " " + "in tenant : " + IdentityTenantUtil.getTenantDomain(tenantId), e);
         } finally {
             IdentityDatabaseUtil.closeResultSet(rs);
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -452,7 +454,7 @@ public class ClaimDAO {
                         log.debug("JDBC Driver did not return the claimId, executing Select operation");
                     }
                     externalClaimId = getClaimId(connection, externalClaimDialectURI, externalClaimURI,
-                                                 claim.getTenantId());
+                            claim.getTenantId());
                 }
 
                 //Ge the relevant local claim from mapped attributes.If all mapped attributes are matching to the
@@ -475,17 +477,17 @@ public class ClaimDAO {
                 if (commonLocalClaimIds.size() > 0) {
                     addClaimMapping(connection, externalClaimId, commonLocalClaimIds.get(0), claim.getTenantId());
                     String localClaimURI = getClaimURI(connection, ClaimConstants.LOCAL_CLAIM_DIALECT_URI,
-                                                       commonLocalClaimIds.get(0), claim.getTenantId());
+                            commonLocalClaimIds.get(0), claim.getTenantId());
 
                     report.append("\n\n Added Remote Claim  :" + claim.getDialectURI() + " in Dialect : " + claim
                             .getDialectURI()
-                                  + " in  tenant domain :" + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
-                                  + " , " + "Mapped Local claim :" + localClaimURI);
+                            + " in  tenant domain :" + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
+                            + " , " + "Mapped Local claim :" + localClaimURI);
                     if (log.isDebugEnabled()) {
                         log.debug("\n Added Remote Claim  :" + claim.getDialectURI() + " in Dialect : "
-                                  + claim.getDialectURI() + " in  tenant domain :"
-                                  + IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + " , "
-                                  + "Mapped Local claim :" + localClaimURI);
+                                + claim.getDialectURI() + " in  tenant domain :"
+                                + IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + " , "
+                                + "Mapped Local claim :" + localClaimURI);
                     }
 
                 } else {
@@ -496,28 +498,28 @@ public class ClaimDAO {
 
                     if (StringUtils.isNotBlank(claim.getDisplayTag())) {
                         newClaimId = addClaim(connection, ClaimConstants.LOCAL_CLAIM_DIALECT_URI,
-                                              ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" +
-                                              claim.getDisplayTag().toLowerCase() + "__" + random_number,
-                                              claim.getTenantId());
+                                ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" +
+                                        claim.getDisplayTag().toLowerCase() + "__" + random_number,
+                                claim.getTenantId());
 
                         logReport(report, "\n\n No matching local claim found for external claim :"
-                                          + claim.getClaimURI() + " in claim dialect :" + claim.getDialectURI()
-                                          + " in tenant domain :"
-                                          + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
-                                          + ". So create a new local " + "claim named : "
-                                          + ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__"
-                                          + claim.getDisplayTag().toLowerCase() + "__" + random_number);
+                                + claim.getClaimURI() + " in claim dialect :" + claim.getDialectURI()
+                                + " in tenant domain :"
+                                + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
+                                + ". So create a new local " + "claim named : "
+                                + ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__"
+                                + claim.getDisplayTag().toLowerCase() + "__" + random_number);
                     } else {
                         newClaimId = addClaim(connection, ClaimConstants.LOCAL_CLAIM_DIALECT_URI,
-                                              ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" + random_number,
-                                              claim.getTenantId());
+                                ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" + random_number,
+                                claim.getTenantId());
 
                         logReport(report, "\n\n No matching local claim found for external claim :"
-                                          + claim.getClaimURI() + " in claim dialect :" + claim.getDialectURI()
-                                          + " in tenant domain :"
-                                          + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
-                                          + ". So create a new local " + "claim named : "
-                                          + ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" + random_number);
+                                + claim.getClaimURI() + " in claim dialect :" + claim.getDialectURI()
+                                + " in tenant domain :"
+                                + IdentityTenantUtil.getTenantDomain(claim.getTenantId())
+                                + ". So create a new local " + "claim named : "
+                                + ClaimConstants.LOCAL_CLAIM_DIALECT_URI + "/migration__" + random_number);
                     }
 
 
@@ -528,7 +530,7 @@ public class ClaimDAO {
 
                     for (MappedAttribute mappedAttribute : claim.getAttributes()) {
                         addClaimAttributeMappings(connection, newClaimId, mappedAttribute.getAttribute(),
-                                                  mappedAttribute.getDomain(), claim.getTenantId());
+                                mappedAttribute.getDomain(), claim.getTenantId());
                     }
                     addClaimMapping(connection, externalClaimId, newClaimId, claim.getTenantId());
                 }
@@ -538,7 +540,7 @@ public class ClaimDAO {
         } catch (SQLException e) {
             IdentityDatabaseUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding external claim " + externalClaimURI + " to " +
-                                               "dialect " + externalClaimDialectURI, e);
+                    "dialect " + externalClaimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeConnection(connection);
         }

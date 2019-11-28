@@ -82,6 +82,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<OAuthConsumerApp> consumerApps;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             consumerApps = OAuthDAO.getInstance().getAllOAuthConsumerApps(connection);
         }
 
@@ -150,6 +151,7 @@ public class OAuthDataMigrator extends Migrator {
 
         if (!updatedConsumerApps.isEmpty()) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 OAuthDAO.getInstance().updateExpiryTimesDefinedForOAuthConsumerApps(connection,
                         updatedConsumerApps);
             }
@@ -169,6 +171,7 @@ public class OAuthDataMigrator extends Migrator {
 
         List<OAuth2Scope> oAuth2Scopes;
         try (Connection connection = getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
             oAuth2Scopes = OAuthDAO.getInstance().getAllOAuth2Scopes(connection);
         }
 
@@ -195,12 +198,14 @@ public class OAuthDataMigrator extends Migrator {
 
         if (!oAuth2ScopeBindings.isEmpty()) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 OAuthDAO.getInstance().addOAuth2ScopeBindings(connection, oAuth2ScopeBindings);
             }
         }
 
         if (!updatedAuth2Scopes.isEmpty()) {
             try (Connection connection = getDataSource().getConnection()) {
+                connection.setAutoCommit(false);
                 OAuthDAO.getInstance().updateOAuth2Scopes(connection, updatedAuth2Scopes);
             }
         }

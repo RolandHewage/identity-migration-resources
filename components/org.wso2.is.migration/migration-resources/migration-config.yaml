@@ -298,3 +298,15 @@ versions:
       order: 5
       parameters:
         schema: "identity"
+ -
+   version: "5.9.0"
+   migratorConfigs:
+   -
+     name: "SchemaMigrator"
+     order: 1
+     parameters:
+       location: "step1"
+       schema: "identity"
+   -
+     name: "ClaimDataMigrator"
+     order: 2

@@ -33,6 +33,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.StringTokenizer;
 
 import static org.wso2.carbon.is.migration.util.Constant.IDENTITY_DB_SCRIPT;
@@ -65,8 +67,11 @@ public class SchemaMigrator extends Migrator {
             String databaseType = DatabaseCreator.getDatabaseType(this.conn);
             if ("mysql".equals(databaseType)) {
                 Utility.setMySQLDBName(conn);
-                if (getDatabaseProductVersion() > 5.7) {
+                if (Double.compare(getDatabaseProductVersion(), 5.7) >= 0) {
+                    log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
                     databaseType = "mysql5.7";
+                } else {
+                    log.info("MySQL version is lower than 5.7. Executing 5.6 script.");
                 }
             }
             statement = conn.createStatement();
@@ -104,14 +109,17 @@ public class SchemaMigrator extends Migrator {
         }
     }
 
-    private Float getDatabaseProductVersion() throws SQLException {
+    private Double getDatabaseProductVersion() throws SQLException, MigrationClientException {
 
-        String[] splittedVersion = this.conn.getMetaData().getDatabaseProductVersion().split("\\.",2);
-        if (splittedVersion.length > 1) {
-            return Float.parseFloat(splittedVersion[0] + "." + splittedVersion[1].replaceAll("\\.",""));
-        } else {
-            return Float.parseFloat(splittedVersion[0]);
+        String databaseProductVersion = this.conn.getMetaData().getDatabaseProductVersion();
+        NumberFormat formatter = NumberFormat.getInstance();
+        ParsePosition pos = new ParsePosition(0);
+        Number number = formatter.parse(databaseProductVersion, pos);
+        if (number != null) {
+            log.info("Found database product version: " + number.doubleValue());
+            return number.doubleValue();
         }
+        throw new MigrationClientException("Error while parsing database version: " + databaseProductVersion);
     }
 
     /**
