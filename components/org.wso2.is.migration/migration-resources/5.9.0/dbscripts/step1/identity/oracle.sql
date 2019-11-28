@@ -35,22 +35,17 @@ CREATE TABLE IDN_FUNCTION_LIBRARY (
       PRIMARY KEY (TENANT_ID,NAME))
 /
 
-CREATE OR REPLACE PROCEDURE add_index_if_not_exists (query IN VARCHAR2, t_index IN VARCHAR2)
+CREATE OR REPLACE PROCEDURE add_index_if_not_exists (query IN VARCHAR2)
   IS
-DECLARE
-  v_code NUMBER;
-  v_errm VARCHAR2(64);
 BEGIN
   execute immediate query;
   dbms_output.put_line(query);
 exception WHEN OTHERS THEN
-  v_code := SQLCODE;
-  v_errm := SUBSTR(SQLERRM, 1 , 64);
-  dbms_output.put_line( 'Error occurred. Error code is ' || v_code || '- ' || v_errm || '. Skipped '|| t_index ||' index creation.' );
+  dbms_output.put_line( 'Skipped ');
 END;
 /
 
-CALL add_index_if_not_exists('CREATE INDEX IDX_FIDO2_STR ON FIDO2_DEVICE_STORE(USER_NAME, TENANT_ID, DOMAIN_NAME, CREDENTIAL_ID, USER_HANDLE)', 'IDX_FIDO2_STR')
+CALL add_index_if_not_exists('CREATE INDEX IDX_FIDO2_STR ON FIDO2_DEVICE_STORE(USER_NAME, TENANT_ID, DOMAIN_NAME, CREDENTIAL_ID, USER_HANDLE)')
 /
 
 DROP PROCEDURE add_index_if_not_exists
