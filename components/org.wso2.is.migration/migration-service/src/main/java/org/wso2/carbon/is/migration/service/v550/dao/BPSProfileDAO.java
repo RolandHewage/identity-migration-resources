@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.is.migration.service.v550.dao;
 
+import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.v550.bean.BPSProfile;
 
 import java.sql.Connection;
@@ -50,7 +51,6 @@ public class BPSProfileDAO {
                         resultSet.getInt("TENANT_ID"),
                         resultSet.getString("PASSWORD")));
             }
-            connection.commit();
         }
         return bpsProfileList;
     }
@@ -62,8 +62,9 @@ public class BPSProfileDAO {
      * @param connection
      * @throws SQLException
      */
-    public void updateNewPasswords(List<BPSProfile> updatedBpsProfileList, Connection connection) throws SQLException {
-
+    public void updateNewPasswords(List<BPSProfile> updatedBpsProfileList, Connection connection)
+            throws SQLException, MigrationClientException {
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BPS_PROFILE_PASSWORD)) {
             for (BPSProfile bpsProfile : updatedBpsProfileList) {
                 preparedStatement.setString(1, bpsProfile.getPassword());
@@ -73,6 +74,10 @@ public class BPSProfileDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new MigrationClientException(
+                    "SQL error while retrieving datasource or database connection for BPS " + "profiles table", e);
         }
     }
 }

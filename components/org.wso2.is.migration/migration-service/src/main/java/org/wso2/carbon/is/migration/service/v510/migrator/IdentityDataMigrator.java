@@ -407,7 +407,11 @@ public class IdentityDataMigrator extends Migrator {
             identityConnection.commit();
 
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(identityConnection);
+            try {
+                identityConnection.rollback();
+            } catch (SQLException e1) {
+                log.error("An error occurred while rolling back transactions. ", e1);
+            }
             log.error("MIGRATION-ERROR-LOGS--026 >> Error while executing the migration.", e);
             if (!isContinueOnError()) {
                 throw new MigrationClientException("Error while executing the migration.", e);

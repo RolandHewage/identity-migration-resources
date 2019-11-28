@@ -71,6 +71,7 @@ public class PermissionDataMigrator extends Migrator {
             umConnection.commit();
             addNewPermissions(oldPermissionsRS, newPermList);
         } catch (SQLException e) {
+            rollbackTransaction(umConnection);
             log.error("Error while migrating permission data", e);
         } finally {
             IdentityDatabaseUtil.closeAllConnections(umConnection, oldPermissionsRS, null);
@@ -114,6 +115,7 @@ public class PermissionDataMigrator extends Migrator {
                 umConnection.commit();
             }
         } catch (SQLException e) {
+            rollbackTransaction(umConnection);
             log.error("Error while adding new permission data", e);
         } finally {
             IdentityDatabaseUtil.closeConnection(umConnection);
@@ -133,7 +135,6 @@ public class PermissionDataMigrator extends Migrator {
             addPermission.setInt(3, tenantId);
             addPermission.setInt(4, moduleId);
             addPermission.execute();
-            umConnection.commit();
         }
         return selectAddedPermissions(newPermValue, umConnection, tenantId);
     }
@@ -167,6 +168,7 @@ public class PermissionDataMigrator extends Migrator {
             IdentityDatabaseUtil.closeResultSet(rolesWithExistingPerm);
             umConnection.commit();
         } catch (SQLException e) {
+            rollbackTransaction(umConnection);
             log.error("Error while assigning new permission data", e);
         } finally {
             IdentityDatabaseUtil.closeConnection(umConnection);
@@ -192,7 +194,6 @@ public class PermissionDataMigrator extends Migrator {
             }
         }
         IdentityDatabaseUtil.closeResultSet(countRS);
-        umConnection.commit();
         return isExist;
     }
 
@@ -218,7 +219,6 @@ public class PermissionDataMigrator extends Migrator {
             }
         }
         IdentityDatabaseUtil.closeResultSet(countRS);
-        umConnection.commit();
         return isExist;
     }
     /**
@@ -242,5 +242,18 @@ public class PermissionDataMigrator extends Migrator {
         return selectPermissions.executeQuery();
     }
 
-
+    /**
+     * rollback the transaction
+     *
+     * @param dbConnection database connection
+     */
+    public void rollbackTransaction(Connection dbConnection) {
+        try {
+            if (dbConnection != null) {
+                dbConnection.rollback();
+            }
+        } catch (SQLException e) {
+            log.error("An error occurred while rolling back transactions. ", e);
+        }
+    }
 }

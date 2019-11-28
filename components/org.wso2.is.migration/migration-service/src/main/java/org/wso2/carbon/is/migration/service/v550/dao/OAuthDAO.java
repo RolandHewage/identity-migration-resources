@@ -116,7 +116,6 @@ public class OAuthDAO {
                         .add(new ClientSecretInfo(resultSet.getString("CONSUMER_SECRET"),
                                 resultSet.getInt("ID")));
             }
-            connection.commit();
         }
         return clientSecretInfoList;
     }
@@ -129,8 +128,8 @@ public class OAuthDAO {
      * @throws SQLException
      */
     public void updateNewClientSecrets(List<ClientSecretInfo> updatedClientSecretList, Connection connection)
-            throws SQLException {
-
+            throws SQLException, MigrationClientException {
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CONSUMER_SECRET)) {
             for (ClientSecretInfo clientSecretInfo : updatedClientSecretList) {
                 preparedStatement.setString(1, clientSecretInfo.getClientSecret());
@@ -139,6 +138,9 @@ public class OAuthDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new MigrationClientException("SQL error while retrieving and updating client secrets. ", e);
         }
     }
 }

@@ -47,38 +47,41 @@ public class PermissionMigrator extends Migrator {
         try (Connection connection = getDataSource().getConnection()) {
 
             connection.setAutoCommit(false);
+            try {
+                List<Permission> duplicatedPermissions = getDuplicatedPermissions(connection);
+                if (duplicatedPermissions.isEmpty()) {
+                    log.info(Constant.MIGRATION_LOG + " Permission migration is not required.");
+                    return;
+                }
 
-            List<Permission> duplicatedPermissions = getDuplicatedPermissions(connection);
-            if (duplicatedPermissions.isEmpty()) {
-                log.info(Constant.MIGRATION_LOG + " Permission migration is not required.");
-                return;
+                log.info(Constant.MIGRATION_LOG + " Found " + duplicatedPermissions.size() + " duplicated permissions.");
+
+                List<RolePermission> duplicatedRolePermissions = getDuplicatedRolePermissions(connection,
+                        duplicatedPermissions);
+                if (!duplicatedRolePermissions.isEmpty()) {
+                    log.info(Constant.MIGRATION_LOG + " Found " + duplicatedPermissions.size() + " duplicated role " + "permissions.");
+                    deleteDuplicatedRolePermissions(connection, duplicatedRolePermissions);
+                    log.info(Constant.MIGRATION_LOG + " Removed duplicated role permissions.");
+                }
+                updateRolePermissionTable(connection, duplicatedPermissions);
+
+                List<UserPermission> duplicatedUserPermissions = getDuplicatedUserPermissions(connection,
+                        duplicatedPermissions);
+                if (!duplicatedUserPermissions.isEmpty()) {
+                    log.info(Constant.MIGRATION_LOG + " Found " + duplicatedUserPermissions.size() + " duplicated user "
+                            + "permissions.");
+                    deleteDuplicatedUserPermissions(connection, duplicatedUserPermissions);
+                    log.info(Constant.MIGRATION_LOG + " Removed duplicated user permissions.");
+                }
+                updateUserPermissionTable(connection, duplicatedPermissions);
+
+                deleteDuplicatedPermissions(connection, duplicatedPermissions);
+                connection.commit();
+                log.info(Constant.MIGRATION_LOG + " Permission migration is successful.");
+            } catch (SQLException e1) {
+                connection.rollback();
+                throw new MigrationClientException("Failed to migrate permissions.", e1);
             }
-
-            log.info(Constant.MIGRATION_LOG + " Found " + duplicatedPermissions.size() + " duplicated permissions.");
-
-            List<RolePermission> duplicatedRolePermissions = getDuplicatedRolePermissions(connection,
-                    duplicatedPermissions);
-            if (!duplicatedRolePermissions.isEmpty()) {
-                log.info(Constant.MIGRATION_LOG + " Found " + duplicatedPermissions.size() + " duplicated role "
-                        + "permissions.");
-                deleteDuplicatedRolePermissions(connection, duplicatedRolePermissions);
-                log.info(Constant.MIGRATION_LOG + " Removed duplicated role permissions.");
-            }
-            updateRolePermissionTable(connection, duplicatedPermissions);
-
-            List<UserPermission> duplicatedUserPermissions = getDuplicatedUserPermissions(connection,
-                    duplicatedPermissions);
-            if (!duplicatedUserPermissions.isEmpty()) {
-                log.info(Constant.MIGRATION_LOG + " Found " + duplicatedUserPermissions.size() + " duplicated user "
-                        + "permissions.");
-                deleteDuplicatedUserPermissions(connection, duplicatedUserPermissions);
-                log.info(Constant.MIGRATION_LOG + " Removed duplicated user permissions.");
-            }
-            updateUserPermissionTable(connection, duplicatedPermissions);
-
-            deleteDuplicatedPermissions(connection, duplicatedPermissions);
-            connection.commit();
-            log.info(Constant.MIGRATION_LOG + " Permission migration is successful.");
         } catch (SQLException e) {
             throw new MigrationClientException("Failed to migrate permissions.", e);
         }

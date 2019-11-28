@@ -76,9 +76,10 @@ public class ClaimDAO {
             prepStmt.setString(1, claimDialectURI);
             prepStmt.setInt(2, tenantId);
             prepStmt.executeUpdate();
-            connection.commit();
+            IdentityDatabaseUtil.commitTransaction(connection);
 
         } catch (SQLException e) {
+            IdentityDatabaseUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding claim dialect " + claimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -190,9 +191,9 @@ public class ClaimDAO {
             }
 
             // End transaction
-            connection.commit();
+            IdentityDatabaseUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            IdentityDatabaseUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding local claim " + localClaimURI, e);
         } finally {
             IdentityDatabaseUtil.closeConnection(connection);
@@ -535,9 +536,9 @@ public class ClaimDAO {
                 }
             }
             // End transaction
-            connection.commit();
+            IdentityDatabaseUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            IdentityDatabaseUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding external claim " + externalClaimURI + " to " +
                     "dialect " + externalClaimDialectURI, e);
         } finally {

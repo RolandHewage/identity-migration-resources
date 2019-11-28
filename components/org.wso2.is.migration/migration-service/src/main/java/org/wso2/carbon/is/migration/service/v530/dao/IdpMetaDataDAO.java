@@ -129,9 +129,9 @@ public class IdpMetaDataDAO {
                 prepStmt.setInt(5, idpMetaData.getTenantId());
                 prepStmt.executeUpdate();
             }
-            connection.commit();
+            IdentityDatabaseUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollBack(connection);
+            IdentityDatabaseUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while inserting default resident idp property values.", e);
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);

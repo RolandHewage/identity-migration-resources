@@ -84,6 +84,7 @@ public class MigrationDatabaseCreator {
                 log.trace("Migration script executed successfully.");
             }
         } catch (SQLException e) {
+            rollbackTransaction(conn);
             String msg = "Failed to execute the migration script. " + e.getMessage();
             log.fatal(msg, e);
             throw new Exception(msg, e);
@@ -116,6 +117,7 @@ public class MigrationDatabaseCreator {
                 log.trace("Migration script executed successfully.");
             }
         } catch (SQLException e) {
+            rollbackTransaction(conn);
             String msg = "Failed to execute the migration script. " + e.getMessage();
             log.fatal(msg, e);
             throw new Exception(msg, e);
@@ -296,6 +298,21 @@ public class MigrationDatabaseCreator {
                     log.error("Error occurred while closing result set.", e);
                 }
             }
+        }
+    }
+
+    /**
+     * rollback the transaction
+     *
+     * @param dbConnection database connection
+     */
+    public void rollbackTransaction(Connection dbConnection) {
+        try {
+            if (dbConnection != null) {
+                dbConnection.rollback();
+            }
+        } catch (SQLException e) {
+            log.error("An error occurred while rolling back transactions. ", e);
         }
     }
 }

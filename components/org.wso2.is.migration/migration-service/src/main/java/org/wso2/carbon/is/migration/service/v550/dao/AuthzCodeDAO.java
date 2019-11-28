@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.is.migration.service.v550.dao;
 
+import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.v550.bean.AuthzCodeInfo;
 
 import java.sql.Connection;
@@ -108,7 +109,6 @@ public class AuthzCodeDAO {
                 authzCodeInfoList.add(new AuthzCodeInfo(resultSet.getString("AUTHORIZATION_CODE"),
                         resultSet.getString("CODE_ID")));
             }
-            connection.commit();
         }
         return authzCodeInfoList;
     }
@@ -132,7 +132,6 @@ public class AuthzCodeDAO {
                 authzCodeInfo.setAuthorizationCodeHash(resultSet.getString("AUTHORIZATION_CODE_HASH"));
                 authzCodeInfoList.add(authzCodeInfo);
             }
-            connection.commit();
         }
         return authzCodeInfoList;
     }
@@ -144,8 +143,8 @@ public class AuthzCodeDAO {
      * @throws SQLException
      */
     public void updateNewEncryptedAuthzCodes(List<AuthzCodeInfo> updatedAuthzCodeList, Connection connection)
-            throws SQLException {
-
+            throws SQLException, MigrationClientException {
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ENCRYPTED_AUTHORIZATION_CODE)) {
             for (AuthzCodeInfo authzCodeInfo : updatedAuthzCodeList) {
                 preparedStatement.setString(1, authzCodeInfo.getAuthorizationCode());
@@ -155,6 +154,9 @@ public class AuthzCodeDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new MigrationClientException("SQL error while update new encrypted authz codes.", e);
         }
     }
 
@@ -167,8 +169,8 @@ public class AuthzCodeDAO {
      * @throws SQLException
      */
     public void updatePlainTextAuthzCodes(List<AuthzCodeInfo> updatedAuthzCodeList, Connection connection)
-            throws SQLException {
-
+            throws SQLException, MigrationClientException {
+        connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PLAIN_TEXT_AUTHORIZATION_CODE)) {
             for (AuthzCodeInfo authzCodeInfo : updatedAuthzCodeList) {
                 preparedStatement.setString(1, authzCodeInfo.getAuthorizationCodeHash());
@@ -177,6 +179,9 @@ public class AuthzCodeDAO {
             }
             preparedStatement.executeBatch();
             connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new MigrationClientException("SQL error while update plain text authz codes.", e);
         }
     }
 

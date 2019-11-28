@@ -67,21 +67,30 @@ public class OAuthDataMigrator extends Migrator {
             connection.setAutoCommit(false);
             isTokenHashColumnsAvailable = TokenDAO.getInstance().isTokenHashColumnsAvailable(connection);
             isAuthzCodeHashColumnAvailable = AuthzCodeDAO.getInstance().isAuthzCodeHashColumnAvailable(connection);
-            connection.commit();
         }
         if (!isTokenHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
-                TokenDAO.getInstance().addAccessTokenHashColumn(connection);
-                TokenDAO.getInstance().addRefreshTokenHashColumn(connection);
-                connection.commit();
+                try {
+                    TokenDAO.getInstance().addAccessTokenHashColumn(connection);
+                    TokenDAO.getInstance().addRefreshTokenHashColumn(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new MigrationClientException("SQL error while adding hash columns", e);
+                }
             }
         }
         if (!isAuthzCodeHashColumnAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
-                AuthzCodeDAO.getInstance().addAuthzCodeHashColumns(connection);
-                connection.commit();
+                try {
+                    AuthzCodeDAO.getInstance().addAuthzCodeHashColumns(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new MigrationClientException("SQL error while adding hash columns", e);
+                }
             }
         }
     }
@@ -91,13 +100,17 @@ public class OAuthDataMigrator extends Migrator {
         try (Connection connection = getDataSource().getConnection()) {
             connection.setAutoCommit(false);
             isClientSecretHashColumnsAvailable = OAuthDAO.getInstance().isConsumerSecretHashColumnAvailable(connection);
-            connection.commit();
         }
         if (isClientSecretHashColumnsAvailable) {
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
-                OAuthDAO.getInstance().deleteConsumerSecretHashColumn(connection);
-                connection.commit();
+                try {
+                    OAuthDAO.getInstance().deleteConsumerSecretHashColumn(connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new MigrationClientException("SQL error while delete client secret hash columns", e);
+                }
             }
         }
     }
