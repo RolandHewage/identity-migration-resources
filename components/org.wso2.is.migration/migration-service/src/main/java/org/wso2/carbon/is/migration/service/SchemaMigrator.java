@@ -17,7 +17,6 @@ package org.wso2.carbon.is.migration.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.util.Constant;
@@ -48,9 +47,6 @@ public class SchemaMigrator extends Migrator {
 
     private static final Log log = LogFactory.getLog(SchemaMigrator.class);
 
-    public static final String LOCATION = "location";
-    public static final String MYSQL_5_7 = "mysql5.7";
-
     private String location;
 
     private Connection conn = null;
@@ -60,7 +56,7 @@ public class SchemaMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
-        this.location = getMigratorConfig().getParameterValue(LOCATION);
+        this.location = getMigratorConfig().getParameterValue(Constant.LOCATION);
 
         log.info(Constant.MIGRATION_LOG + "Executing Identity Migration Scripts.");
         try {
@@ -70,9 +66,10 @@ public class SchemaMigrator extends Migrator {
             if ("mysql".equals(databaseType)) {
                 Utility.setMySQLDBName(conn);
                 if (Double.compare(getDatabaseProductVersion(), 5.7) >= 0) {
-                    if (Utility.isDBScriptExists(getSchema(), MYSQL_5_7, location, getVersionConfig().getVersion())) {
+                    if (Utility.isDBScriptExists(getSchema(), Constant.MYSQL_5_7, location,
+                            getVersionConfig().getVersion())) {
                         log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
-                        databaseType = MYSQL_5_7;
+                        databaseType = Constant.MYSQL_5_7;
                     }
                 } else {
                     log.info("MySQL version is lower than 5.7. Executing 5.6 script.");
@@ -156,7 +153,7 @@ public class SchemaMigrator extends Migrator {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.contains("DELIMITER")) {
+                if (line.contains(Constant.DELIMITER)) {
                     delimiter = line.split(" ")[1];
                     continue;
                 }

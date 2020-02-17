@@ -21,6 +21,7 @@ import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.config.Config;
 import org.wso2.carbon.is.migration.config.MigratorConfig;
 import org.wso2.carbon.is.migration.config.Version;
+import org.wso2.carbon.is.migration.service.ClaimDataMigrator;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
 import org.wso2.carbon.is.migration.util.Constant;
@@ -71,9 +72,13 @@ public abstract class VersionMigration {
         String basePackage = aPackage.getName() + ".migrator";
         try {
             Class<?> migratorClass = Class.forName(basePackage + "." + migratorName);
-            Migrator migrator = (Migrator)migratorClass.newInstance();
-            return migrator ;
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            return (Migrator)migratorClass.newInstance();
+        } catch (ClassNotFoundException e) {
+            if (migratorName.equals(Constant.CLAIM_DATA_MIGRATOR_NAME)) {
+                return new ClaimDataMigrator();
+            }
+            log.error("Migrator class not exists for: " + migratorName);
+        } catch (InstantiationException | IllegalAccessException e) {
             log.error("Error while creating migration instance", e);
         }
         return null;
