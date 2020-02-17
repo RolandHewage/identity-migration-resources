@@ -17,6 +17,7 @@ package org.wso2.carbon.is.migration.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMElement;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.util.Constant;
@@ -47,7 +48,8 @@ public class SchemaMigrator extends Migrator {
 
     private static final Log log = LogFactory.getLog(SchemaMigrator.class);
 
-    public static final String LOCATION = "location" ;
+    public static final String LOCATION = "location";
+    public static final String MYSQL_5_7 = "mysql5.7";
 
     private String location;
 
@@ -68,8 +70,10 @@ public class SchemaMigrator extends Migrator {
             if ("mysql".equals(databaseType)) {
                 Utility.setMySQLDBName(conn);
                 if (Double.compare(getDatabaseProductVersion(), 5.7) >= 0) {
-                    log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
-                    databaseType = "mysql5.7";
+                    if (Utility.isDBScriptExists(getSchema(), MYSQL_5_7, location, getVersionConfig().getVersion())) {
+                        log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
+                        databaseType = MYSQL_5_7;
+                    }
                 } else {
                     log.info("MySQL version is lower than 5.7. Executing 5.6 script.");
                 }
@@ -127,6 +131,7 @@ public class SchemaMigrator extends Migrator {
 
         String databaseType = DatabaseCreator.getDatabaseType(this.conn);
         boolean keepFormat = false;
+        boolean isProcedure = false;
 
         if ("oracle".equals(databaseType)) {
             delimiter = "/";
@@ -151,6 +156,20 @@ public class SchemaMigrator extends Migrator {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
+                if (line.contains("DELIMITER")) {
+                    delimiter = line.split(" ")[1];
+                    continue;
+                }
+                if (line.contains("-- start of procedure --")) {
+                    isProcedure = true;
+                    continue;
+                }
+                if (line.contains("-- end of procedure --")) {
+                    executeSQL(sql.substring(0, sql.length() - delimiter.length()));
+                    sql.replace(0, sql.length(), "");
+                    isProcedure = false;
+                    continue;
+                }
                 if (!keepFormat) {
                     if (line.startsWith("//")) {
                         continue;
@@ -165,6 +184,10 @@ public class SchemaMigrator extends Migrator {
                             continue;
                         }
                     }
+                }
+                if (isProcedure) {
+                    sql.append(" ").append(line);
+                    continue;
                 }
                 //add the oracle database owner
                 if ("oracle".equals(databaseType) && line.contains("databasename :=")) {
