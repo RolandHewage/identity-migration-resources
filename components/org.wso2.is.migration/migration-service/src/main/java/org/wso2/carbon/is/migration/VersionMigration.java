@@ -22,6 +22,7 @@ import org.wso2.carbon.is.migration.config.Config;
 import org.wso2.carbon.is.migration.config.MigratorConfig;
 import org.wso2.carbon.is.migration.config.Version;
 import org.wso2.carbon.is.migration.service.ClaimDataMigrator;
+import org.wso2.carbon.is.migration.service.EmailTemplateDataMigrator;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
 import org.wso2.carbon.is.migration.util.Constant;
@@ -76,6 +77,9 @@ public abstract class VersionMigration {
         } catch (ClassNotFoundException e) {
             if (migratorName.equals(Constant.CLAIM_DATA_MIGRATOR_NAME)) {
                 return new ClaimDataMigrator();
+            }
+            if (migratorName.equals(Constant.EMAIL_TEMPLATE_DATA_MIGRATOR_NAME)) {
+                return new EmailTemplateDataMigrator();
             }
             log.error("Migrator class not exists for: " + migratorName);
         } catch (InstantiationException | IllegalAccessException e) {

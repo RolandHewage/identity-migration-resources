@@ -139,6 +139,11 @@
                 <artifactId>org.wso2.carbon.identity.application.mgt</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.governance</groupId>
+                <artifactId>org.wso2.carbon.identity.governance</artifactId>
+                <version>${identity.governance.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -264,7 +269,7 @@
         <version.commons.logging>1.1.1</version.commons.logging>
         <axiom.impl.version>1.2.12</axiom.impl.version>
         <axiom.version>1.2.11-wso2v6</axiom.version>
-        <identity.governance.version>1.1.46</identity.governance.version>
+        <identity.governance.version>1.3.52</identity.governance.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <json.version>3.0.0.wso2v1</json.version>
