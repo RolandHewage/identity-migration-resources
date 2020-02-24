@@ -322,3 +322,6 @@ versions:
    -
      name: "ClaimDataMigrator"
      order: 2
+   -
+     name: "EmailTemplateDataMigrator"
+     order: 3
