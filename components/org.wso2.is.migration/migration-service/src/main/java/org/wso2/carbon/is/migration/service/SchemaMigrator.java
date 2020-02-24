@@ -157,11 +157,11 @@ public class SchemaMigrator extends Migrator {
                     delimiter = line.split(" ")[1];
                     continue;
                 }
-                if (line.contains("-- start of procedure --")) {
+                if (line.contains("Start of Procedure")) {
                     isProcedure = true;
                     continue;
                 }
-                if (line.contains("-- end of procedure --")) {
+                if (line.contains("End of Procedure")) {
                     executeSQL(sql.substring(0, sql.length() - delimiter.length()));
                     sql.replace(0, sql.length(), "");
                     isProcedure = false;

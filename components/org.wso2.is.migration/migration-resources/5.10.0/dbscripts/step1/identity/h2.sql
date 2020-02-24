@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS IDN_OIDC_SCOPE_CLAIM_MAPPING_NEW (
 
 DROP ALIAS IF EXISTS MIGRATE_OIDC_SCOPE_DATA;
 
--- start of procedure --
+--<![CDATA[Start of Procedure]]>--
 CREATE ALIAS MIGRATE_OIDC_SCOPE_DATA AS $$
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -167,7 +167,7 @@ void migrateOidcScopeData(final Connection conn) throws SQLException {
    }
 }
 $$;
--- end of procedure --
+--<![CDATA[End of Procedure]]>--
 
 CALL MIGRATE_OIDC_SCOPE_DATA();
 
