@@ -20,6 +20,7 @@ package org.wso2.carbon.is.migration.util;
  */
 public class Constant {
     public static final String SCHEMA_MIGRATOR_NAME = "SchemaMigrator" ;
+    public static final String CLAIM_DATA_MIGRATOR_NAME = "ClaimDataMigrator";
     public static final String MIGRATION_RESOURCE_HOME = "migration-resources" ;
     public static final String MIGRATION_RESOURCE_DBSCRIPTS = "dbscripts" ;
     public static final String MIGRATION_RESOURCE_DATA_FILES = "data" ;
@@ -34,4 +35,10 @@ public class Constant {
     public static final String UM_DB_SCRIPT = "um";
 
     public static final String EVENT_PUBLISHER_PATH = "/repository/deployment/server/eventpublishers";
+
+    public static final String CLAIM_CONFIG = "claim-config.xml";
+
+    public static final String LOCATION = "location";
+    public static final String MYSQL_5_7 = "mysql5.7";
+    public static final String DELIMITER = "DELIMITER";
 }
