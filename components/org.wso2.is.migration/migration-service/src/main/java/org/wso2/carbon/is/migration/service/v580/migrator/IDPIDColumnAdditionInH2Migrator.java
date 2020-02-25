@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.is.migration.service.v580.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v580.dao.IDPIDColumnAdditionInH2DAO;
@@ -34,7 +34,7 @@ import static org.wso2.carbon.is.migration.util.SchemaUtil.isColumnExist;
  */
 public class IDPIDColumnAdditionInH2Migrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(IDPIDColumnAdditionInH2Migrator.class);
+    private static final Logger log = LoggerFactory.getLogger(IDPIDColumnAdditionInH2Migrator.class);
 
     private static final String COLUMN_NAME_IDP_ID = "IDP_ID";
     private static final String UNIQUE_CONSTRAINT_NAME_CON_APP_KEY = "IDP_ID";

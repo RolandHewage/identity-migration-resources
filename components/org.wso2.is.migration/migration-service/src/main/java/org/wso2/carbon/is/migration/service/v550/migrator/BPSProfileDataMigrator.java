@@ -17,6 +17,8 @@ package org.wso2.carbon.is.migration.service.v550.migrator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -35,8 +37,8 @@ import java.util.List;
  */
 public class BPSProfileDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory
-            .getLog(org.wso2.carbon.is.migration.service.v550.migrator.BPSProfileDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(org.wso2.carbon.is.migration.service.v550.migrator
+            .BPSProfileDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

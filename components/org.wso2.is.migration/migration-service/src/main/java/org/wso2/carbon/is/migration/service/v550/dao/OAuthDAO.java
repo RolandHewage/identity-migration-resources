@@ -15,8 +15,8 @@
  */
 package org.wso2.carbon.is.migration.service.v550.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.v550.bean.ClientSecretInfo;
 
@@ -38,7 +38,7 @@ import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_CONS
 
 public class OAuthDAO {
 
-    private static final Log log = LogFactory.getLog(OAuthDAO.class);
+    private static final Logger log = LoggerFactory.getLogger(OAuthDAO.class);
     private static OAuthDAO instance = new OAuthDAO();
     private static final String CONSUMER_SECRET_HASH = "CONSUMER_SECRET_HASH";
 

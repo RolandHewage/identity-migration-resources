@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.is.migration.service.v580.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
@@ -32,7 +32,7 @@ import static org.wso2.carbon.is.migration.util.SchemaUtil.isColumnExist;
  */
 public class UMAPermissionTicketSchemaMigrator extends SchemaMigrator {
 
-    private static final Log log = LogFactory.getLog(UMAPermissionTicketSchemaMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(UMAPermissionTicketSchemaMigrator.class);
     private static final String COLUMN_NAME_TOKEN_ID = "TOKEN_ID";
     private static final String TABLE_NAME_IDN_UMA_PERMISSION_TICKET = "IDN_UMA_PERMISSION_TICKET";
 

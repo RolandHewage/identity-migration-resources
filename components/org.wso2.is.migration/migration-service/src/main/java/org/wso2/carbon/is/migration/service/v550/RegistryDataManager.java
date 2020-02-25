@@ -19,8 +19,8 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -53,7 +53,7 @@ import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID;
 public class RegistryDataManager {
 
     private static final String STS_SERVICE_GROUP = "org.wso2.carbon.sts";
-    private static final Log log = LogFactory.getLog(RegistryDataManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistryDataManager.class);
     private static final String SERVICE_PRINCIPAL_PASSWORD = "service.principal.password";
     private static final String KERBEROS = "Kerberos";
     private static final String NAME = "name";

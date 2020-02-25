@@ -20,8 +20,8 @@
 package org.wso2.carbon.is.migration.service.v590.migrator;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.CacheBackedExternalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.CacheBackedLocalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.ClaimDialectDAO;
@@ -46,7 +46,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.claim.ClaimMapping;
 import org.wso2.carbon.user.core.claim.inmemory.ClaimConfig;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,13 +53,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class handles the claim data migration.
  */
 public class ClaimDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(ClaimDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(ClaimDataMigrator.class);
 
     private static final String CLAIM_CONFIG = "claim-config.xml";
 

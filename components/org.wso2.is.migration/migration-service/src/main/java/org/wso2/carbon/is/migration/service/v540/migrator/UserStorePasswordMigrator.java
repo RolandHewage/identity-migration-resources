@@ -20,8 +20,8 @@ package org.wso2.carbon.is.migration.service.v540.migrator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -47,8 +47,7 @@ import javax.xml.stream.XMLStreamReader;
 
 public class UserStorePasswordMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(
-            UserStorePasswordMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(UserStorePasswordMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

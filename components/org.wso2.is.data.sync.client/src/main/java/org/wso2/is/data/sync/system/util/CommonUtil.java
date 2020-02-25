@@ -126,11 +126,11 @@ public class CommonUtil {
         return formattedName;
     }
 
-    public static EntryField convertResultToEntryField(ResultSet resultSet, ColumnData columnData) throws SQLException {
+    public static EntryField<?> convertResultToEntryField(ResultSet resultSet, ColumnData columnData) throws SQLException {
 
         String columnType = columnData.getType();
         String columnName = columnData.getName();
-        EntryField entryField;
+        EntryField<?> entryField;
         if (COLUMN_TYPE_VARCHAR.equals(columnType) || COLUMN_TYPE_CHAR.equals(columnType)) {
             entryField = new EntryField<>(resultSet.getString(columnName));
         } else if (COLUMN_TYPE_INT.equals(columnType)) {
@@ -216,10 +216,10 @@ public class CommonUtil {
         }
     }
 
-    public static Object getObjectValueFromEntry(JournalEntry entry, String key) {
+    public static <T> T getObjectValueFromEntry(JournalEntry<T> entry, String key) {
 
-        EntryField entryField = entry.get(key);
-        Object value = null;
+        EntryField<T> entryField = entry.get(key);
+        T value = null;
         if (entryField != null) {
             value = entryField.getValue();
         }

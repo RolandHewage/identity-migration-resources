@@ -21,25 +21,25 @@ import java.util.Map;
 
 public class JournalEntry {
 
-    private Map<String, EntryField> rowEntry = new HashMap<>();
+    private Map<String, EntryField<?>> rowEntry = new HashMap<>();
     private String operation;
 
-    public Map<String, EntryField> getRowEntry() {
+    public Map<String, EntryField<?>> getRowEntry() {
 
         return rowEntry;
     }
 
-    public void setRowEntry(Map<String, EntryField> rowEntry) {
+    public void setRowEntry(Map<String, EntryField<?>> rowEntry) {
 
         this.rowEntry = rowEntry;
     }
 
-    public EntryField get(String key) {
+    public EntryField<?> get(String key) {
 
         return rowEntry.get(key);
     }
 
-    public void addEntryField(String key, EntryField value) {
+    public void addEntryField(String key, EntryField<?> value) {
 
         rowEntry.put(key, value);
     }

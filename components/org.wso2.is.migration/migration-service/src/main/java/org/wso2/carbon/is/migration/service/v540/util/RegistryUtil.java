@@ -16,9 +16,9 @@
 
 package org.wso2.carbon.is.migration.service.v540.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.is.migration.service.v540.bean.SpOAuth2ExpiryTimeConfiguration;
@@ -30,7 +30,7 @@ import java.util.List;
 
 public class RegistryUtil {
 
-    private static Log log = LogFactory.getLog(RegistryUtil.class);
+    private static Logger log = LoggerFactory.getLogger(RegistryUtil.class);
 
     private static final String TOKEN_EXPIRE_TIME_RESOURCE_PATH = "/identity/config/spTokenExpireTime";
 

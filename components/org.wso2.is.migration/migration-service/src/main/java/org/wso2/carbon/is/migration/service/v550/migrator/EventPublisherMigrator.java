@@ -16,14 +16,14 @@
 package org.wso2.carbon.is.migration.service.v550.migrator;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
-import org.wso2.carbon.is.migration.util.EncryptionUtil;
 import org.wso2.carbon.is.migration.util.Constant;
+import org.wso2.carbon.is.migration.util.EncryptionUtil;
 
 import java.io.File;
 import java.util.Objects;
@@ -44,7 +44,7 @@ import javax.xml.xpath.XPathFactory;
  */
 public class EventPublisherMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(EventPublisherMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(EventPublisherMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

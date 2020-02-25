@@ -16,8 +16,8 @@
 
 package org.wso2.carbon.is.migration.service.v530.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.is.migration.service.v530.SQLConstants;
@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class IdpMetaDataDAO {
 
-    private static Log log = LogFactory.getLog(IdpMetaDataDAO.class);
+    private static Logger log = LoggerFactory.getLogger(IdpMetaDataDAO.class);
 
     private static IdpMetaDataDAO idpMetaDataDAO = new IdpMetaDataDAO();
 

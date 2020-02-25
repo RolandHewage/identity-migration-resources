@@ -42,8 +42,7 @@ import java.util.List;
 
 public class OAuthDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory
-            .getLog(org.wso2.carbon.is.migration.service.v550.migrator.OAuthDataMigrator.class);
+    private static final Log log = LogFactory.getLog(org.wso2.carbon.is.migration.service.v550.migrator.OAuthDataMigrator.class);
     boolean isTokenHashColumnsAvailable = false;
     boolean isAuthzCodeHashColumnAvailable = false;
     boolean isClientSecretHashColumnsAvailable = false;

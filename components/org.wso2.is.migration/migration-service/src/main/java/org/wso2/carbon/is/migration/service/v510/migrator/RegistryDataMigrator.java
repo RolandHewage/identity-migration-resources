@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration.service.v510.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -44,7 +44,7 @@ public class RegistryDataMigrator extends Migrator {
     private static final String DEFAULT_CONST = "[default]";
 
 
-    private static final Log log = LogFactory.getLog(RegistryDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistryDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

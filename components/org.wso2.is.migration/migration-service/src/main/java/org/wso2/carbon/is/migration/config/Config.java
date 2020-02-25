@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Utility;
@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class Config {
 
-    private static final Log log = LogFactory.getLog(Config.class);
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     private boolean migrationEnable ;
     private String currentVersion ;

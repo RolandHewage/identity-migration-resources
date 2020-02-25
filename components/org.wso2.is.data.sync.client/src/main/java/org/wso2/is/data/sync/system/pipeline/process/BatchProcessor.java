@@ -108,7 +108,7 @@ public class BatchProcessor {
                 while (rs.next()) {
                     JournalEntry entry = new JournalEntry();
                     for (ColumnData columnData : tableMetaData.getColumnDataList()) {
-                        EntryField entryField = convertResultToEntryField(rs, columnData);
+                        EntryField<?> entryField = convertResultToEntryField(rs, columnData);
                         String columnName = columnData.getName();
                         entry.addEntryField(columnName, entryField);
                     }

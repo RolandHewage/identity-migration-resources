@@ -83,6 +83,8 @@ public class Constant {
     public static final String COLUMN_AUTHORIZATION_CODE = "AUTHORIZATION_CODE";
     public static final String COLUMN_AUTHORIZATION_CODE_HASH = "AUTHORIZATION_CODE_HASH";
 
+    public static final String COLUMN_UM_USER_ID = "UM_USER_ID";
+
     public static final String PROPERTY_NAME_HASH = "hash";
     public static final String PROPERTY_NAME_ALGORITHM = "algorithm";
 

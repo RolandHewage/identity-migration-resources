@@ -18,6 +18,8 @@ package org.wso2.carbon.is.migration.service.v510.migrator;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
@@ -38,7 +40,7 @@ import java.util.UUID;
  */
 public class IdentityDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(IdentityDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(IdentityDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

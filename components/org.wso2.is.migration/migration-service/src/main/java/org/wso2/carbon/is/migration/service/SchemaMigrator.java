@@ -17,6 +17,8 @@ package org.wso2.carbon.is.migration.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.util.Constant;
@@ -45,7 +47,7 @@ import static org.wso2.carbon.is.migration.util.Constant.UM_DB_SCRIPT;
  */
 public class SchemaMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(SchemaMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(SchemaMigrator.class);
 
     public static final String LOCATION = "location" ;
 
@@ -87,7 +89,7 @@ public class SchemaMigrator extends Migrator {
             } catch (SQLException e1) {
                 log.error("An error occurred while rolling back transactions. ", e1);
             }
-            log.error(e);
+            log.error("An error occurred while rolling back transactions. ", e);
             if (!isContinueOnError()) {
                 throw new MigrationClientException(e.getMessage(), e);
             }
