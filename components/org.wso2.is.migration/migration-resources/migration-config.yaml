@@ -319,3 +319,9 @@ versions:
      parameters:
        location: "step1"
        schema: "identity"
+   -
+     name: "ClaimDataMigrator"
+     order: 2
+   -
+     name: "EmailTemplateDataMigrator"
+     order: 3

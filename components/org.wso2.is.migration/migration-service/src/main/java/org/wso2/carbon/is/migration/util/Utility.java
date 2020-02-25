@@ -26,6 +26,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -246,5 +247,21 @@ public class Utility {
      */
     public static int getMigrationEndingTenantID() {
         return Config.getInstance().getMigrationEndingTenantID();
+    }
+
+    /**
+     * Checks whether the script for the given database type exists in the path or not.
+     *
+     * @param schema type of the schema
+     * @param databaseType the type of the database
+     * @param location the location of the scripts
+     * @param version Identity Server version
+     * @return true if the script exists & false otherwise
+     */
+    public static boolean isDBScriptExists(String schema, String databaseType, String location, String version) {
+
+        String dbScriptFile = getSchemaPath(schema, databaseType, location, version);
+        File dbScript = new File(dbScriptFile);
+        return dbScript.exists();
     }
 }
