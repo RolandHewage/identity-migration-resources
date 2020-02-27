@@ -29,6 +29,8 @@ public class UserIDMigrator extends Migrator {
 
     private static final int SUPER_TENANT_ID = -1234;
     private static final String USER_ID_CLAIM = "http://wso2.org/claim/userid";
+    private static final String USERNAME_CLAIM = "http://wso2.org/claim/username";
+
     private static final String DEFAULT_PROFILE = "default";
 
     private RealmService realmService = ISMigrationServiceDataHolder.getRealmService();
@@ -53,17 +55,18 @@ public class UserIDMigrator extends Migrator {
         try {
             UserRealm userRealm = realmService.getTenantUserRealm(SUPER_TENANT_ID);
             UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-            if (userStoreManager instanceof ReadWriteLDAPUserStoreManager) {
-                while (true) {
-                    List<User> userList = ((ReadWriteLDAPUserStoreManager) userStoreManager).listUsersWithID("*",
-                            INCREMENT, i);
-                    for (User user : userList) {
+
+            while (true) {
+                List<User> userList = ((AbstractUserStoreManager) userStoreManager).listUsersWithID("*", INCREMENT, i);
+                for (User user : userList) {
+                    if (userStoreManager instanceof ReadWriteLDAPUserStoreManager) {
                         updateUserIDClaim(user, (AbstractUserStoreManager) userStoreManager);
-                        i++;
                     }
-                    if (userList.size() < INCREMENT) {
-                        break;
-                    }
+                    updateUserNameClaim(user, (AbstractUserStoreManager) userStoreManager);
+                    i++;
+                }
+                if (userList.size() < INCREMENT) {
+                    break;
                 }
             }
         } catch (UserStoreException e) {
@@ -78,5 +81,12 @@ public class UserIDMigrator extends Migrator {
 
         String uuid = UUID.randomUUID().toString();
         abstractUserStoreManager.setUserClaimValue(user.getUsername(), USER_ID_CLAIM, uuid, DEFAULT_PROFILE);
+    }
+
+    private void updateUserNameClaim(User user, AbstractUserStoreManager abstractUserStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
+
+        abstractUserStoreManager.setUserClaimValue(user.getUsername(), USERNAME_CLAIM, user.getUsername(),
+                DEFAULT_PROFILE);
     }
 }
