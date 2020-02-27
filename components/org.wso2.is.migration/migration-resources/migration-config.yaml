@@ -320,8 +320,23 @@ versions:
        location: "step1"
        schema: "identity"
    -
-     name: "ClaimDataMigrator"
+     name: "SchemaMigrator"
      order: 2
+     parameters:
+       location: "step1"
+       schema: "um"
+   -
+     name: "SchemaMigrator"
+     order: 3
+     parameters:
+       location: "step2"
+       schema: "um"
+   -
+     name: "ClaimDataMigrator"
+     order: 4
    -
      name: "EmailTemplateDataMigrator"
-     order: 3
+     order: 5
+   -
+     name: "UserIDMigrator"
+     order: 6
