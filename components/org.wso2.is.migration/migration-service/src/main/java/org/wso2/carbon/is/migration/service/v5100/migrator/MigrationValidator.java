@@ -38,7 +38,7 @@ public class MigrationValidator extends Migrator {
 
         boolean hasDuplicateScope;
         try {
-            hasDuplicateScope = hasScopeDuplication();
+            hasDuplicateScope = checkScopeDuplication();
         } catch (MigrationClientException e) {
             throw new MigrationClientException("Error while checking for scope name duplication among " +
                     "IDN_OAUTH2_SCOPE and IDN_OIDC_SCOPE tables.");
@@ -50,7 +50,7 @@ public class MigrationValidator extends Migrator {
         log.info("Scope name validation has been passed.");
     }
 
-    private boolean hasScopeDuplication() throws MigrationClientException {
+    private boolean checkScopeDuplication() throws MigrationClientException {
 
         String sql = "SELECT IDN_OAUTH2_SCOPE.NAME FROM IDN_OAUTH2_SCOPE WHERE IDN_OAUTH2_SCOPE.NAME IN " +
                 "(SELECT IDN_OIDC_SCOPE.NAME FROM IDN_OIDC_SCOPE)";
