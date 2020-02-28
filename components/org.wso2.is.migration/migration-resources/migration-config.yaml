@@ -314,14 +314,17 @@ versions:
    version: "5.10.0"
    migratorConfigs:
    -
-     name: "SchemaMigrator"
+     name: "MigrationValidator"
      order: 1
+   -
+     name: "SchemaMigrator"
+     order: 2
      parameters:
        location: "step1"
        schema: "identity"
    -
      name: "ClaimDataMigrator"
-     order: 2
+     order: 3
    -
      name: "EmailTemplateDataMigrator"
-     order: 3
+     order: 4
