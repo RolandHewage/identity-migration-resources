@@ -216,12 +216,12 @@ public class CommonUtil {
         }
     }
 
-    public static <T> T getObjectValueFromEntry(JournalEntry<T> entry, String key) {
+    public static <T> T getObjectValueFromEntry(JournalEntry entry, String key) {
 
-        EntryField<T> entryField = entry.get(key);
+        EntryField<?> entryField = entry.get(key);
         T value = null;
         if (entryField != null) {
-            value = entryField.getValue();
+            value = (T) entryField.getValue();
         }
         return value;
     }

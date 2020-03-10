@@ -1,20 +1,31 @@
 package org.wso2.carbon.is.migration.service.v5100.migrator;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
-import org.wso2.carbon.user.core.common.User;
+import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
 import org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager;
+import org.wso2.carbon.user.core.model.ExpressionAttribute;
+import org.wso2.carbon.user.core.model.ExpressionCondition;
+import org.wso2.carbon.user.core.model.ExpressionOperation;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 public class UserIDMigrator extends Migrator {
@@ -22,14 +33,26 @@ public class UserIDMigrator extends Migrator {
     private static final Logger log = LoggerFactory.getLogger(UserIDMigrator.class);
 
     private static final String INCREMENT_PARAMETER_NAME = "increment";
-    private static final String STARTING_POINT_PARAMETER_NAME = "starting_point";
+    private static final String STARTING_POINT_PARAMETER_NAME = "startingPoint";
+    private static final String MIGRATING_DOMAINS = "migratingDomains";
+    private static final String FORCE_UPDATE_USER_ID = "forceUpdateUserId";
+    private static final String TENANT_DOMAIN = "tenantDomain";
+    private static final String SCIM_ENABLED = "scimEnabled";
+    private static final String MIGRATE_ALL = "migrateAll";
+    private static final String VALIDATE = "validateBeforeMigration";
 
-    private static int INCREMENT = 1000;
-    private static int STARTING_POINT = 0;
+    private int increment = 100;
+    private int offset = 0;
 
     private static final int SUPER_TENANT_ID = -1234;
-    private static final String USER_ID_CLAIM = "http://wso2.org/claim/userid";
-    private static final String USERNAME_CLAIM = "http://wso2.org/claim/username";
+    private static final String USER_ID_CLAIM = "http://wso2.org/claims/userid";
+    private static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
+    private static final String SCIM_ID_CLAIM = "http://wso2.org/claims/scimid";
+
+    private static final String UPDATE_USER_ID_SQL =
+            "UPDATE UM_USER " +
+            "SET UM_USER_ID = ? " +
+            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?;";
 
     private static final String DEFAULT_PROFILE = "default";
 
@@ -38,55 +61,241 @@ public class UserIDMigrator extends Migrator {
     @Override
     public void migrate() throws MigrationClientException {
 
-        String startingPointValue = getMigratorConfig().getParameterValue(STARTING_POINT_PARAMETER_NAME);
-        String incrementValue = getMigratorConfig().getParameterValue(INCREMENT_PARAMETER_NAME);
+        // Counter to the updated user in each user store in each tenant.
+        int userCounter = 0;
+        String tenantDomain = null;
+        String userStoreDomain = null;
 
-        if (StringUtils.isNotEmpty(startingPointValue)) {
-            STARTING_POINT = Integer.parseInt(startingPointValue);
-        }
-
-        if (StringUtils.isNotEmpty(incrementValue)) {
-            INCREMENT = Integer.parseInt(incrementValue);
-        }
-
-        log.info("User ID migrator started with offset {} and increment {} .", STARTING_POINT, INCREMENT);
-
-        int i = STARTING_POINT;
         try {
-            UserRealm userRealm = realmService.getTenantUserRealm(SUPER_TENANT_ID);
-            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-
-            while (true) {
-                List<User> userList = ((AbstractUserStoreManager) userStoreManager).listUsersWithID("*", INCREMENT, i);
-                for (User user : userList) {
-                    if (userStoreManager instanceof ReadWriteLDAPUserStoreManager) {
-                        updateUserIDClaim(user, (AbstractUserStoreManager) userStoreManager);
-                    }
-                    updateUserNameClaim(user, (AbstractUserStoreManager) userStoreManager);
-                    i++;
-                }
-                if (userList.size() < INCREMENT) {
-                    break;
+            Properties migrationProperties = getMigratorConfig().getParameters();
+            if (migrationProperties.containsKey(VALIDATE) && ((Boolean) migrationProperties.get(VALIDATE))) {
+                if (!okayForMigration()) {
+                    throw new MigrationClientException("Validation enabled and validation errors detected.");
                 }
             }
-        } catch (UserStoreException e) {
+
+            // If migrate all property is there, we have to migrate all the tenants.
+            if (migrationProperties.containsKey(MIGRATE_ALL) && ((Boolean) migrationProperties.get(MIGRATE_ALL))) {
+                Tenant [] tenants = getAllTenants();
+                // Clear all other properties before we add our ones since we don't need other properties.
+                migrationProperties.clear();
+                for (Tenant tenant : tenants) {
+                    HashMap<String, Object> parameters = new HashMap<>();
+                    parameters.put(STARTING_POINT_PARAMETER_NAME, migrationProperties
+                            .get(STARTING_POINT_PARAMETER_NAME));
+                    parameters.put(INCREMENT_PARAMETER_NAME, migrationProperties.get(INCREMENT_PARAMETER_NAME));
+                    parameters.put(MIGRATING_DOMAINS, migrationProperties.get(MIGRATING_DOMAINS));
+                    parameters.put(FORCE_UPDATE_USER_ID, migrationProperties.get(FORCE_UPDATE_USER_ID));
+                    parameters.put(SCIM_ENABLED, migrationProperties.get(SCIM_ENABLED));
+                    parameters.put(TENANT_DOMAIN, tenant.getDomain());
+                    migrationProperties.put(tenant.getDomain(), parameters);
+                }
+            }
+
+            // Migration properties are provided tenant wise.
+            for (Object key : migrationProperties.keySet()) {
+                String keyStr = (String) key;
+                HashMap<String, Object> parameters = (HashMap<String, Object>) migrationProperties.get(keyStr);
+
+                // Get the registered tenant domains from the config.
+                tenantDomain = (String) parameters.get(TENANT_DOMAIN);
+                log.info("Migration started for tenant domain: {}", tenantDomain);
+
+                // Get the related domain from our map to resolve the id.
+                int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+                if (tenantId == -1) {
+                    log.error("Invalid tenant domain name '{}' provided.", tenantDomain);
+                    throw new MigrationClientException("Invalid tenant domain provided.");
+                }
+
+                // Starting point of the user migration.
+                Integer startingPointValue = (Integer) parameters.get(STARTING_POINT_PARAMETER_NAME);
+                // Chunk size to be retrieved from the user store.
+                Integer incrementValue = (Integer) parameters.get(INCREMENT_PARAMETER_NAME);
+                // Domains need to be migrated.
+                String migratingDomains = (String) parameters.get(MIGRATING_DOMAINS);
+                // Forcefully update the user id even if there is already a value.
+                Boolean forceUpdateUserId = (Boolean) parameters.get(FORCE_UPDATE_USER_ID);
+                // SCIM enabled for user stores in this tenant.
+                Boolean scimEnabled = (Boolean) parameters.get(SCIM_ENABLED);
+
+                if (startingPointValue != null) {
+                    offset = startingPointValue;
+                }
+
+                if (incrementValue != null) {
+                    increment = incrementValue;
+                }
+
+                if (forceUpdateUserId == null) {
+                    forceUpdateUserId = false;
+                }
+
+                log.info("User ID migrator started with offset {} and increment {} .", offset, increment);
+
+                UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
+                UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+
+                // If the domains are provided in config, use them. Otherwise update all the available domains.
+                String[] domains;
+                if (migratingDomains != null) {
+                    domains = migratingDomains.split(",");
+                } else {
+                    domains = getAllDomainNames((AbstractUserStoreManager) userStoreManager);
+                }
+
+                // Iterate through provided domains for the given tenant.
+                for (String domain : domains) {
+                    userStoreDomain = domain;
+                    AbstractUserStoreManager abstractUserStoreManager =
+                            (AbstractUserStoreManager) ((AbstractUserStoreManager) userStoreManager)
+                                    .getSecondaryUserStoreManager(domain);
+
+                    if (abstractUserStoreManager == null) {
+                        log.error("Invalid domain name {} provided. No user store found for the given domain name.",
+                                domain);
+                        throw new MigrationClientException("Invalid domain name provided. No user store found.");
+                    }
+
+                    log.info("Migration started for domain: {}", domain);
+                    ExpressionCondition expressionCondition = new ExpressionCondition(ExpressionOperation.SW.toString(),
+                            ExpressionAttribute.USERNAME.toString(), "");
+
+                    userCounter = offset;
+                    while (true) {
+                        String[] userList = abstractUserStoreManager.getUserList(expressionCondition, domain,
+                                DEFAULT_PROFILE, increment, userCounter, "", "");
+                        log.info("Migrating users from offset {} to increment of {}.", userCounter, increment);
+                        for (String username : userList) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Migrating user {}, counter index {}", username, userCounter);
+                            }
+                            if (abstractUserStoreManager instanceof ReadWriteLDAPUserStoreManager) {
+                                updateUserIDClaim(username, abstractUserStoreManager, forceUpdateUserId);
+                            }
+                            if (abstractUserStoreManager instanceof JDBCUserStoreManager && scimEnabled) {
+                                updateUserIDWithSCIMID(username, tenantId, abstractUserStoreManager);
+                            }
+                            updateUserNameClaim(username, abstractUserStoreManager);
+                            userCounter++;
+                        }
+                        if (userList.length < increment) {
+                            break;
+                        }
+                    }
+                }
+            }
+            log.info("User id migration completed.");
+        } catch (UserStoreException | SQLException e) {
             String message = String.format("Error occurred while updating user id for the user. user id updating " +
-                    "process stopped at the offset %d", i);
+                    "process stopped at the offset %d in domain %s in tenant %s", userCounter, userStoreDomain,
+                    tenantDomain);
             log.error(message, e);
+            throw new MigrationClientException(message, e);
         }
     }
 
-    private void updateUserIDClaim(User user, AbstractUserStoreManager abstractUserStoreManager)
-            throws org.wso2.carbon.user.core.UserStoreException {
+    private boolean okayForMigration() throws UserStoreException {
 
-        String uuid = UUID.randomUUID().toString();
-        abstractUserStoreManager.setUserClaimValue(user.getUsername(), USER_ID_CLAIM, uuid, DEFAULT_PROFILE);
+        boolean validationStatus = true;
+        Tenant [] tenants = getAllTenants();
+        for (Tenant tenant : tenants) {
+            if (!validateForTenant(tenant)) {
+                validationStatus = false;
+            }
+        }
+        return validationStatus;
     }
 
-    private void updateUserNameClaim(User user, AbstractUserStoreManager abstractUserStoreManager)
+    private boolean validateForTenant(Tenant tenant) throws UserStoreException {
+
+        UserRealm userRealm = realmService.getTenantUserRealm(tenant.getId());
+        UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+        String [] domains = getAllDomainNames((AbstractUserStoreManager) userStoreManager);
+        for (String domain : domains) {
+            AbstractUserStoreManager abstractUserStoreManager = (AbstractUserStoreManager)
+                    ((AbstractUserStoreManager) userStoreManager).getSecondaryUserStoreManager(domain);
+            if (abstractUserStoreManager instanceof ReadWriteLDAPUserStoreManager &&
+                    abstractUserStoreManager.isSCIMEnabled()) {
+                log.warn("User store '{}' in tenant '{}' is an LDAP user store and SCIM enabled for it. Hence " +
+                        "migration should be done via changing the claim configurations.", domain, tenant.getDomain());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void updateUserIDClaim(String username, AbstractUserStoreManager abstractUserStoreManager,
+                                   boolean forceUpdateUserId)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        abstractUserStoreManager.setUserClaimValue(user.getUsername(), USERNAME_CLAIM, user.getUsername(),
-                DEFAULT_PROFILE);
+        String value = abstractUserStoreManager.getUserClaimValue(username, USER_ID_CLAIM, DEFAULT_PROFILE);
+        if (!forceUpdateUserId && value != null && !value.isEmpty()) {
+            return;
+        }
+        String uuid = UUID.randomUUID().toString();
+        abstractUserStoreManager.setUserClaimValue(username, USER_ID_CLAIM, uuid, DEFAULT_PROFILE);
+    }
+
+    private void updateUserIDWithSCIMID(String username, int tenantId,
+                                        AbstractUserStoreManager abstractUserStoreManager)
+            throws MigrationClientException, SQLException, org.wso2.carbon.user.core.UserStoreException {
+
+        String scimId = abstractUserStoreManager.getUserClaimValue(username, SCIM_ID_CLAIM, DEFAULT_PROFILE);
+
+        try (Connection connection = getDataSource().getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_ID_SQL);
+            preparedStatement.setString(1, scimId);
+            preparedStatement.setString(2, username);
+            preparedStatement.setInt(3, tenantId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void updateUserNameClaim(String username, AbstractUserStoreManager abstractUserStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
+
+        // If we don't have a value for username, we need to update it.
+        String value = abstractUserStoreManager.getUserClaimValue(username, USERNAME_CLAIM, DEFAULT_PROFILE);
+        if (value != null && !value.isEmpty()) {
+            return;
+        }
+        abstractUserStoreManager.setUserClaimValue(username, USERNAME_CLAIM, username, DEFAULT_PROFILE);
+    }
+
+    private String [] getAllDomainNames(AbstractUserStoreManager abstractUserStoreManager) {
+
+        List<String> domainNames = new ArrayList<>();
+
+        // Add the primary domain.
+        domainNames.add(UserCoreUtil.getDomainName(abstractUserStoreManager.getRealmConfiguration()));
+
+        // Add the rest if there are any.
+        while (true) {
+            AbstractUserStoreManager userStoreManager = (AbstractUserStoreManager) abstractUserStoreManager
+                    .getSecondaryUserStoreManager();
+            if (userStoreManager == null) {
+                break;
+            }
+            domainNames.add(UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration()));
+            abstractUserStoreManager = userStoreManager;
+        }
+        return domainNames.toArray(new String[0]);
+    }
+
+    private Tenant[] getAllTenants() throws UserStoreException {
+
+        // Add the super tenant.
+        Tenant superTenant = new Tenant();
+        superTenant.setDomain("carbon.super");
+        superTenant.setId(-1234);
+
+        // Add the rest.
+        Tenant [] tenants = realmService.getTenantManager().getAllTenants();
+        List<Tenant> tenantList = new ArrayList<>();
+        tenantList.add(superTenant);
+        tenantList.addAll(Arrays.asList(tenants));
+
+        return tenantList.toArray(new Tenant[0]);
     }
 }

@@ -46,6 +46,7 @@ public class MigratorConfig {
     public Properties getParameters() {
         return parameters;
     }
+
     public String getParameterValue(String parameterKey){
         return getParameters().getProperty(parameterKey);
     }
