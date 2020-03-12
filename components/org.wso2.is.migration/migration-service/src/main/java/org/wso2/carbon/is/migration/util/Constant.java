@@ -41,6 +41,8 @@ public class Constant {
 
     public static final String LOCATION = "location";
     public static final String MYSQL_5_7 = "mysql5.7";
+    public static final String MYSQL_CLUSTER = "mysql_cluster";
+    public static final String MYSQL_CLUSTER_5_7 = "mysql-cluster-5.7";
     public static final String DELIMITER = "DELIMITER";
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
