@@ -76,6 +76,9 @@ public class MigrationClientImpl implements MigrationClient {
                 if (!isMigrationStarted && versionMigration.getPreviousVersion().equals(config.getCurrentVersion())) {
                     versionMigration.migrate();
                     isMigrationStarted = true;
+                    if (versionMigration.getCurrentVersion().equals(config.getMigrateVersion())) {
+                        break;
+                    }
                     continue;
                 }
 
