@@ -5,21 +5,30 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.is.migration.util.ReportUtil;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
+import org.wso2.carbon.user.core.jdbc.UniqueIDJDBCUserStoreManager;
+import org.wso2.carbon.user.core.ldap.ActiveDirectoryUserStoreManager;
+import org.wso2.carbon.user.core.ldap.ReadOnlyLDAPUserStoreManager;
 import org.wso2.carbon.user.core.ldap.ReadWriteLDAPUserStoreManager;
+import org.wso2.carbon.user.core.ldap.UniqueIDActiveDirectoryUserStoreManager;
+import org.wso2.carbon.user.core.ldap.UniqueIDReadOnlyLDAPUserStoreManager;
+import org.wso2.carbon.user.core.ldap.UniqueIDReadWriteLDAPUserStoreManager;
 import org.wso2.carbon.user.core.model.ExpressionAttribute;
 import org.wso2.carbon.user.core.model.ExpressionCondition;
 import org.wso2.carbon.user.core.model.ExpressionOperation;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +48,8 @@ public class UserIDMigrator extends Migrator {
     private static final String TENANT_DOMAIN = "tenantDomain";
     private static final String SCIM_ENABLED = "scimEnabled";
     private static final String MIGRATE_ALL = "migrateAll";
-    private static final String VALIDATE = "validateBeforeMigration";
+    private static final String VALIDATE = "dryRun";
+    private static final String REPORT_PATH = "reportPath";
 
     private int increment = 100;
     private int offset = 0;
@@ -54,9 +64,15 @@ public class UserIDMigrator extends Migrator {
             "SET UM_USER_ID = ? " +
             "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?;";
 
+    private static final String GET_USER_ID =
+            "SELECT UM_USER_ID " +
+            "FROM UM_USER " +
+            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?;";
+
     private static final String DEFAULT_PROFILE = "default";
 
     private RealmService realmService = ISMigrationServiceDataHolder.getRealmService();
+    private ReportUtil reportUtil;
 
     @Override
     public void migrate() throws MigrationClientException {
@@ -69,9 +85,11 @@ public class UserIDMigrator extends Migrator {
         try {
             Properties migrationProperties = getMigratorConfig().getParameters();
             if (migrationProperties.containsKey(VALIDATE) && ((Boolean) migrationProperties.get(VALIDATE))) {
-                if (!okayForMigration()) {
-                    throw new MigrationClientException("Validation enabled and validation errors detected.");
-                }
+                String reportPath = (String) migrationProperties.get(REPORT_PATH);
+                reportUtil = new ReportUtil(reportPath);
+                dryRun();
+                reportUtil.commit();
+                return;
             }
 
             // If migrate all property is there, we have to migrate all the tenants.
@@ -162,20 +180,46 @@ public class UserIDMigrator extends Migrator {
                             ExpressionAttribute.USERNAME.toString(), "");
 
                     userCounter = offset;
+                    // Iterate for each increment.
                     while (true) {
+                        // Get set of users according to the given increment value.
                         String[] userList = abstractUserStoreManager.getUserList(expressionCondition, domain,
                                 DEFAULT_PROFILE, increment, userCounter, "", "");
                         log.info("Migrating users from offset {} to increment of {}.", userCounter, increment);
+
+                        // Iterate for each user.
                         for (String username : userList) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Migrating user {}, counter index {}", username, userCounter);
                             }
-                            if (abstractUserStoreManager instanceof ReadWriteLDAPUserStoreManager) {
-                                updateUserIDClaim(username, abstractUserStoreManager, forceUpdateUserId);
+
+                            // JDBC User stores.
+                            if (abstractUserStoreManager instanceof JDBCUserStoreManager) {
+                                // If this is an JDBC user store and SCIM enabled, get the SCIM user id and add it as
+                                // the unique user id. In non SCIM enabled scenario's, user id is generated by SQL
+                                // script.
+                                if (scimEnabled) {
+                                    String userId = updateUserIDWithSCIMID(username, abstractUserStoreManager,
+                                            forceUpdateUserId);
+                                    // If this is not a custom user store, we can update the user id column as well.
+                                    if (!isCustomUserStore(abstractUserStoreManager)) {
+                                        updateUserIdColumn(userId, username, tenantId);
+                                    }
+                                } else {
+                                    // In this scenario, we have generated the UUID using SQL. So we have to get it
+                                    // and add it as the user id claim.
+                                    String userId = getUserIDClaimFromDB(username, tenantId);
+                                    updateUserIDClaim(username, userId, abstractUserStoreManager, forceUpdateUserId);
+                                }
                             }
-                            if (abstractUserStoreManager instanceof JDBCUserStoreManager && scimEnabled) {
-                                updateUserIDWithSCIMID(username, tenantId, abstractUserStoreManager);
+
+                            // If this is a LDAP user store, generate and update the user id.
+                            if (abstractUserStoreManager instanceof ReadWriteLDAPUserStoreManager && !scimEnabled) {
+                                String uuid = UUID.randomUUID().toString();
+                                updateUserIDClaim(username, uuid, abstractUserStoreManager, forceUpdateUserId);
                             }
+
+                            // We need the username value in the username claim. This is for all scenarios.
                             updateUserNameClaim(username, abstractUserStoreManager);
                             userCounter++;
                         }
@@ -192,40 +236,47 @@ public class UserIDMigrator extends Migrator {
                     tenantDomain);
             log.error(message, e);
             throw new MigrationClientException(message, e);
+        } catch (IOException e) {
+            throw new MigrationClientException("Error while generating dry run report.", e);
         }
     }
 
-    private boolean okayForMigration() throws UserStoreException {
+    private void dryRun() throws UserStoreException {
 
-        boolean validationStatus = true;
-        Tenant [] tenants = getAllTenants();
+        Tenant[] tenants = getAllTenants();
         for (Tenant tenant : tenants) {
-            if (!validateForTenant(tenant)) {
-                validationStatus = false;
-            }
+            validateForTenant(tenant);
         }
-        return validationStatus;
     }
 
-    private boolean validateForTenant(Tenant tenant) throws UserStoreException {
+    private void validateForTenant(Tenant tenant) throws UserStoreException {
 
         UserRealm userRealm = realmService.getTenantUserRealm(tenant.getId());
         UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-        String [] domains = getAllDomainNames((AbstractUserStoreManager) userStoreManager);
+        String[] domains = getAllDomainNames((AbstractUserStoreManager) userStoreManager);
         for (String domain : domains) {
             AbstractUserStoreManager abstractUserStoreManager = (AbstractUserStoreManager)
                     ((AbstractUserStoreManager) userStoreManager).getSecondaryUserStoreManager(domain);
-            if (abstractUserStoreManager instanceof ReadWriteLDAPUserStoreManager &&
-                    abstractUserStoreManager.isSCIMEnabled()) {
-                log.warn("User store '{}' in tenant '{}' is an LDAP user store and SCIM enabled for it. Hence " +
-                        "migration should be done via changing the claim configurations.", domain, tenant.getDomain());
-                return false;
-            }
+            validateForDomain(tenant.getDomain(), domain, abstractUserStoreManager);
         }
-        return true;
     }
 
-    private void updateUserIDClaim(String username, AbstractUserStoreManager abstractUserStoreManager,
+    private void validateForDomain(String tenant, String domain, AbstractUserStoreManager userStoreManager) {
+
+        String type = userStoreManager.getClass().getName();
+        String scimEnabled = String.valueOf(userStoreManager.isSCIMEnabled());
+        String tag = "Info: ";
+
+        if (userStoreManager.isSCIMEnabled() || isCustomUserStore(userStoreManager)) {
+            tag = "WARN: ";
+        }
+
+        String message = String.format("%s Tenant domain: %s | User Store domain: %s | Type: %s | SCIM Enabled: %s", tag,
+                tenant, domain, type, scimEnabled);
+        reportUtil.writeMessage(message);
+    }
+
+    private void updateUserIDClaim(String username, String userId, AbstractUserStoreManager abstractUserStoreManager,
                                    boolean forceUpdateUserId)
             throws org.wso2.carbon.user.core.UserStoreException {
 
@@ -233,19 +284,24 @@ public class UserIDMigrator extends Migrator {
         if (!forceUpdateUserId && value != null && !value.isEmpty()) {
             return;
         }
-        String uuid = UUID.randomUUID().toString();
-        abstractUserStoreManager.setUserClaimValue(username, USER_ID_CLAIM, uuid, DEFAULT_PROFILE);
+        abstractUserStoreManager.setUserClaimValue(username, USER_ID_CLAIM, userId, DEFAULT_PROFILE);
     }
 
-    private void updateUserIDWithSCIMID(String username, int tenantId,
-                                        AbstractUserStoreManager abstractUserStoreManager)
+    private String updateUserIDWithSCIMID(String username, AbstractUserStoreManager abstractUserStoreManager,
+                                        boolean forceUpdateUserId)
             throws MigrationClientException, SQLException, org.wso2.carbon.user.core.UserStoreException {
 
         String scimId = abstractUserStoreManager.getUserClaimValue(username, SCIM_ID_CLAIM, DEFAULT_PROFILE);
+        updateUserIDClaim(username, scimId, abstractUserStoreManager, forceUpdateUserId);
+        return scimId;
+    }
+
+    private void updateUserIdColumn(String userId, String username, int tenantId)
+            throws MigrationClientException, SQLException {
 
         try (Connection connection = getDataSource().getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_ID_SQL);
-            preparedStatement.setString(1, scimId);
+            preparedStatement.setString(1, userId);
             preparedStatement.setString(2, username);
             preparedStatement.setInt(3, tenantId);
             preparedStatement.executeUpdate();
@@ -297,5 +353,34 @@ public class UserIDMigrator extends Migrator {
         tenantList.addAll(Arrays.asList(tenants));
 
         return tenantList.toArray(new Tenant[0]);
+    }
+
+    private String getUserIDClaimFromDB(String username, int tenantId) throws MigrationClientException, SQLException {
+
+        try (Connection connection = getDataSource().getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_USER_ID);
+            preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("UM_USER_ID");
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isCustomUserStore(UserStoreManager userStoreManager) {
+
+        Class clazz = userStoreManager.getClass();
+
+        return !JDBCUserStoreManager.class.equals(clazz)
+                && !ReadOnlyLDAPUserStoreManager.class.equals(clazz)
+                && !ReadWriteLDAPUserStoreManager.class.equals(clazz)
+                && !ActiveDirectoryUserStoreManager.class.equals(clazz)
+                && !UniqueIDJDBCUserStoreManager.class.equals(clazz)
+                && !UniqueIDReadOnlyLDAPUserStoreManager.class.equals(clazz)
+                && !UniqueIDReadWriteLDAPUserStoreManager.class.equals(clazz)
+                && !UniqueIDActiveDirectoryUserStoreManager.class.equals(clazz);
     }
 }
