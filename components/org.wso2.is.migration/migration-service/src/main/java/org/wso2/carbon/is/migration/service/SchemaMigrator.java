@@ -68,7 +68,14 @@ public class SchemaMigrator extends Migrator {
             if ("mysql".equals(databaseType)) {
                 Utility.setMySQLDBName(conn);
                 if (Double.compare(getDatabaseProductVersion(), 5.7) >= 0) {
-                    if (Utility.isDBScriptExists(getSchema(), Constant.MYSQL_5_7, location,
+                    if (isMySQLCluster()) {
+                        if (Utility.isDBScriptExists(getSchema(), Constant.MYSQL_CLUSTER_5_7, location,
+                                getVersionConfig().getVersion())) {
+                            databaseType = Constant.MYSQL_CLUSTER_5_7;
+                        } else {
+                            databaseType = Constant.MYSQL_CLUSTER;
+                        }
+                    } else if (Utility.isDBScriptExists(getSchema(), Constant.MYSQL_5_7, location,
                             getVersionConfig().getVersion())) {
                         log.info("MySQL version is higher than 5.7. Executing 5.7 script.");
                         databaseType = Constant.MYSQL_5_7;
@@ -123,6 +130,16 @@ public class SchemaMigrator extends Migrator {
             return number.doubleValue();
         }
         throw new MigrationClientException("Error while parsing database version: " + databaseProductVersion);
+    }
+
+    private boolean isMySQLCluster() throws SQLException {
+
+        boolean isCluster = false;
+        String databaseProductVersion = this.conn.getMetaData().getDatabaseProductVersion();
+        if (databaseProductVersion.contains("cluster")) {
+            isCluster = true;
+        }
+        return isCluster;
     }
 
     /**
