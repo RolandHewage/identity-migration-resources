@@ -45,6 +45,12 @@ public class IDPIDColumnAdditionInH2Migrator extends Migrator {
             "IDN_OAUTH2_ACCESS_TOKEN", "IDN_OAUTH2_ACCESS_TOKEN_AUDIT");
 
     @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
+    @Override
     public void migrate() throws MigrationClientException {
 
         try (Connection connection = getDataSource().getConnection()) {

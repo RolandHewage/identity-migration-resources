@@ -119,6 +119,12 @@ public class SchemaMigrator extends Migrator {
         }
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     private Double getDatabaseProductVersion() throws SQLException, MigrationClientException {
 
         String databaseProductVersion = this.conn.getMetaData().getDatabaseProductVersion();

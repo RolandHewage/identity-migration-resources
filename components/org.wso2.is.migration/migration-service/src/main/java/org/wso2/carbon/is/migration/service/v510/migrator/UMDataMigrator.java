@@ -42,6 +42,12 @@ public class UMDataMigrator extends Migrator {
         migrateUMData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     public void migrateUMData() throws MigrationClientException {
         log.info("MIGRATION-LOGS >> Going to start : migrateUMData.");
         Connection identityConnection = null;

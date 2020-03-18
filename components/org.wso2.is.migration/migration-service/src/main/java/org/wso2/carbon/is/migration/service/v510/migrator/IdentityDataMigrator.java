@@ -47,6 +47,11 @@ public class IdentityDataMigrator extends Migrator {
         migrateIdentityData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     /**
      * migrate data in the identity database and finalize the database table restructuring

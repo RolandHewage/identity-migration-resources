@@ -24,7 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ReportUtil {
 
@@ -80,7 +81,8 @@ public class ReportUtil {
         }
 
         if (Files.isDirectory(path) || Files.notExists(path) || newFile) {
-            fileName = UUID.randomUUID().toString() + ".txt";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
+            fileName = sdf.format(new Date()) + ".txt";
             path = Paths.get(filePath, fileName);
             Files.createFile(path);
         }

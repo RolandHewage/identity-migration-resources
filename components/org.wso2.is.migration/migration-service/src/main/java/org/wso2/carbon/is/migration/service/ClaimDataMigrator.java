@@ -19,8 +19,8 @@
 package org.wso2.carbon.is.migration.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.CacheBackedExternalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.CacheBackedLocalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.ClaimDialectDAO;
@@ -34,6 +34,7 @@ import org.wso2.carbon.identity.claim.metadata.mgt.model.LocalClaim;
 import org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
+import org.wso2.carbon.is.migration.service.v5100.migrator.UserIDMigrator;
 import org.wso2.carbon.is.migration.service.v540.util.FileBasedClaimBuilder;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Utility;
@@ -58,7 +59,7 @@ import java.util.Set;
  */
 public class ClaimDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(ClaimDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(ClaimDataMigrator.class);
 
     private ClaimConfig claimConfig;
 
@@ -67,6 +68,12 @@ public class ClaimDataMigrator extends Migrator {
     private CacheBackedLocalClaimDAO localClaimDAO = new CacheBackedLocalClaimDAO(new LocalClaimDAO());
 
     private CacheBackedExternalClaimDAO externalClaimDAO = new CacheBackedExternalClaimDAO(new ExternalClaimDAO());
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     @Override
     public void migrate() throws MigrationClientException {

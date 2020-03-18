@@ -21,8 +21,8 @@ import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
@@ -64,11 +64,17 @@ import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
  */
 public class EmailTemplateDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(EmailTemplateDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailTemplateDataMigrator.class);
 
     private RegistryResourceMgtService registryResourceMgtService = new RegistryResourceMgtServiceImpl();
 
     private static final String EMAIL_ADMIN_CONFIG = "email-admin-config.xml";
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     @Override
     public void migrate() throws MigrationClientException {

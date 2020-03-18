@@ -50,6 +50,12 @@ public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
         }
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     /**
      * SP claim dialect storing (in the DB) is shipped as an update to this version.
      * It needs a database schema change. If the schema change is not done, the existing code should work without an

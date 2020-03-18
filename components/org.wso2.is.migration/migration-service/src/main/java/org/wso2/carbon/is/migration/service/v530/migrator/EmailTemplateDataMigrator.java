@@ -39,7 +39,11 @@ public class EmailTemplateDataMigrator extends Migrator{
         migrateEmailTemplateData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
 
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     public void migrateEmailTemplateData()  {
         RegistryDataManager registryDataManager = RegistryDataManager.getInstance();

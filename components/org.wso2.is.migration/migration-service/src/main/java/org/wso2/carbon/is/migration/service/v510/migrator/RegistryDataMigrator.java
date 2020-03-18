@@ -51,6 +51,12 @@ public class RegistryDataMigrator extends Migrator {
         migrateRegistryData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     public void migrateRegistryData() throws MigrationClientException {
         log.info("MIGRATION-LOGS >> Going to start : migrateRegistryData.");
         //migrating super tenant configurations

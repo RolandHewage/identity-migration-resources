@@ -73,6 +73,12 @@ public class ClaimDataMigrator extends Migrator {
     private CacheBackedExternalClaimDAO externalClaimDAO = new CacheBackedExternalClaimDAO(new ExternalClaimDAO());
 
     @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
+    @Override
     public void migrate() throws MigrationClientException {
 
         String filePath = Utility.getDataFilePath(CLAIM_CONFIG, getVersionConfig().getVersion());

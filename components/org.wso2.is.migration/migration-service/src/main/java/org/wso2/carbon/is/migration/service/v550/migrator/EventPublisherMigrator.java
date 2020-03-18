@@ -52,6 +52,12 @@ public class EventPublisherMigrator extends Migrator {
         migrateEventPublishers();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     private void migrateEventPublishers() throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on event publisher files. ");

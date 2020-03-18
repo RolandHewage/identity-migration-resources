@@ -36,6 +36,12 @@ public class ChallengeQuestionDataMigrator extends Migrator {
         migrateChallengeQuestionData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     public void migrateChallengeQuestionData()  {
 
         RegistryDataManager registryDataManager = RegistryDataManager.getInstance();

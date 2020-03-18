@@ -34,7 +34,6 @@ public abstract class Migrator {
     public static final String BATCH_UPDATE = "batchUpdate" ;
     public static final String IGNORE_FOR_INACTIVE_TENANTS = "ignoreForInactiveTenants" ;
 
-
     private MigratorConfig migratorConfig ;
     private Version versionConfig ;
 
@@ -91,6 +90,12 @@ public abstract class Migrator {
     public void setVersionConfig(Version versionConfig) {
         this.versionConfig = versionConfig;
     }
+
+    /**
+     * Do a dry run instead of doing the migration.
+     * @throws MigrationClientException
+     */
+    public abstract void dryRun() throws MigrationClientException;
 
     /**
      * Migrator specific implementation.

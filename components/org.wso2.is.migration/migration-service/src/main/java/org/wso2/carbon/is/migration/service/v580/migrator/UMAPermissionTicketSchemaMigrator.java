@@ -37,6 +37,12 @@ public class UMAPermissionTicketSchemaMigrator extends SchemaMigrator {
     private static final String TABLE_NAME_IDN_UMA_PERMISSION_TICKET = "IDN_UMA_PERMISSION_TICKET";
 
     @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
+    @Override
     public void migrate() throws MigrationClientException {
 
         try (Connection connection = IdentityDatabaseUtil.getDBConnection()) {

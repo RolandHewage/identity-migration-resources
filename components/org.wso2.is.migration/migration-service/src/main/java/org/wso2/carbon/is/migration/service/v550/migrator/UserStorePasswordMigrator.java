@@ -56,6 +56,12 @@ public class UserStorePasswordMigrator extends Migrator {
         updateTenantConfigs();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     private void updateTenantConfigs() throws MigrationClientException {
         try {
             Set<Tenant> tenants = Utility.getTenants();

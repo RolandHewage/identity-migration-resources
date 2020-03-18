@@ -41,6 +41,12 @@ public class KeyStorePasswordMigrator extends Migrator {
         }
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     private void migrateKeystorePasswords() throws Exception {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on Key Stores");

@@ -34,6 +34,12 @@ public class PermissionDataMigrator extends Migrator {
         migratePermissionData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     public void migratePermissionData() throws MigrationClientException {
         Document permissionMap = getPermissionMap();
         if (permissionMap != null) {

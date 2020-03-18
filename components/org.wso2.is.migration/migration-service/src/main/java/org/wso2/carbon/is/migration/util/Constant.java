@@ -19,12 +19,14 @@ package org.wso2.carbon.is.migration.util;
  * Holds common constants in migration service.
  */
 public class Constant {
+
     public static final String SCHEMA_MIGRATOR_NAME = "SchemaMigrator" ;
     public static final String CLAIM_DATA_MIGRATOR_NAME = "ClaimDataMigrator";
     public static final String EMAIL_TEMPLATE_DATA_MIGRATOR_NAME = "EmailTemplateDataMigrator";
     public static final String MIGRATION_RESOURCE_HOME = "migration-resources" ;
     public static final String MIGRATION_RESOURCE_DBSCRIPTS = "dbscripts" ;
     public static final String MIGRATION_RESOURCE_DATA_FILES = "data" ;
+    public static final String DRY_RUN = "dryRun";
 
     public static final String MIGRATION_CONFIG_FILE_NAME = "migration-config.yaml" ;
 
@@ -57,4 +59,17 @@ public class Constant {
 
     public static final String EMAIL_TEMPLATE_NAME = "templateName";
     public static final String EMAIL_TEMPLATE_TYPE_DISPLAY_NAME = "templateDisplayName";
+
+    public static final String INCREMENT_PARAMETER_NAME = "increment";
+    public static final String STARTING_POINT_PARAMETER_NAME = "startingPoint";
+    public static final String MIGRATING_DOMAINS = "migratingDomains";
+    public static final String FORCE_UPDATE_USER_ID = "forceUpdateUserId";
+    public static final String TENANT_DOMAIN = "tenantDomain";
+    public static final String SCIM_ENABLED = "scimEnabled";
+    public static final String MIGRATE_ALL = "migrateAll";
+    public static final String REPORT_PATH = "reportPath";
+
+    public static final String USER_ID_CLAIM = "http://wso2.org/claims/userid";
+    public static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
+    public static final String SCIM_ID_CLAIM = "http://wso2.org/claims/scimid";
 }

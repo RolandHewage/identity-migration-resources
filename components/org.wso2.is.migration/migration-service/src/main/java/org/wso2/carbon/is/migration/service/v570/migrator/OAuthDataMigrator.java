@@ -39,6 +39,12 @@ public class OAuthDataMigrator extends Migrator {
         migrateAuthzCodeHash();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
+
     public void migrateTokenHash() throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 access token table.");

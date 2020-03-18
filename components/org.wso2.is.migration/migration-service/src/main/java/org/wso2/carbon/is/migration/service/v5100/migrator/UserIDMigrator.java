@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.ReportUtil;
+import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -47,33 +49,30 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
+
+import static org.wso2.carbon.is.migration.util.Constant.FORCE_UPDATE_USER_ID;
+import static org.wso2.carbon.is.migration.util.Constant.INCREMENT_PARAMETER_NAME;
+import static org.wso2.carbon.is.migration.util.Constant.MIGRATE_ALL;
+import static org.wso2.carbon.is.migration.util.Constant.MIGRATING_DOMAINS;
+import static org.wso2.carbon.is.migration.util.Constant.REPORT_PATH;
+import static org.wso2.carbon.is.migration.util.Constant.SCIM_ENABLED;
+import static org.wso2.carbon.is.migration.util.Constant.SCIM_ID_CLAIM;
+import static org.wso2.carbon.is.migration.util.Constant.STARTING_POINT_PARAMETER_NAME;
+import static org.wso2.carbon.is.migration.util.Constant.TENANT_DOMAIN;
+import static org.wso2.carbon.is.migration.util.Constant.USERNAME_CLAIM;
+import static org.wso2.carbon.is.migration.util.Constant.USER_ID_CLAIM;
 
 public class UserIDMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(UserIDMigrator.class);
 
-    private static final String INCREMENT_PARAMETER_NAME = "increment";
-    private static final String STARTING_POINT_PARAMETER_NAME = "startingPoint";
-    private static final String MIGRATING_DOMAINS = "migratingDomains";
-    private static final String FORCE_UPDATE_USER_ID = "forceUpdateUserId";
-    private static final String TENANT_DOMAIN = "tenantDomain";
-    private static final String SCIM_ENABLED = "scimEnabled";
-    private static final String MIGRATE_ALL = "migrateAll";
-    private static final String VALIDATE = "dryRun";
-    private static final String REPORT_PATH = "reportPath";
-
     private int increment = 100;
     private int offset = 0;
-
-    private static final int SUPER_TENANT_ID = -1234;
-    private static final String USER_ID_CLAIM = "http://wso2.org/claims/userid";
-    private static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
-    private static final String SCIM_ID_CLAIM = "http://wso2.org/claims/scimid";
 
     private static final String UPDATE_USER_ID_SQL =
             "UPDATE UM_USER " +
@@ -89,6 +88,9 @@ public class UserIDMigrator extends Migrator {
 
     private RealmService realmService = ISMigrationServiceDataHolder.getRealmService();
     private ReportUtil reportUtil;
+    private int numberOfDomains;
+    private int numberOfTenants;
+    private int numberOfWarnings;
 
     @Override
     public void migrate() throws MigrationClientException {
@@ -100,13 +102,6 @@ public class UserIDMigrator extends Migrator {
 
         try {
             Properties migrationProperties = getMigratorConfig().getParameters();
-            if (migrationProperties.containsKey(VALIDATE) && ((Boolean) migrationProperties.get(VALIDATE))) {
-                String reportPath = (String) migrationProperties.get(REPORT_PATH);
-                reportUtil = new ReportUtil(reportPath);
-                dryRun();
-                reportUtil.commit();
-                return;
-            }
 
             // If migrate all property is there, we have to migrate all the tenants.
             if (migrationProperties.containsKey(MIGRATE_ALL) && ((Boolean) migrationProperties.get(MIGRATE_ALL))) {
@@ -114,6 +109,10 @@ public class UserIDMigrator extends Migrator {
                 // Clear all other properties before we add our ones since we don't need other properties.
                 migrationProperties.clear();
                 for (Tenant tenant : tenants) {
+                    // Ignore inactive tenants.
+                    if (!tenant.isActive()) {
+                        continue;
+                    }
                     HashMap<String, Object> parameters = new HashMap<>();
                     parameters.put(STARTING_POINT_PARAMETER_NAME, migrationProperties
                             .get(STARTING_POINT_PARAMETER_NAME));
@@ -252,16 +251,32 @@ public class UserIDMigrator extends Migrator {
                     tenantDomain);
             log.error(message, e);
             throw new MigrationClientException(message, e);
-        } catch (IOException e) {
-            throw new MigrationClientException("Error while generating dry run report.", e);
         }
     }
 
-    private void dryRun() throws UserStoreException {
+    public void dryRun() throws MigrationClientException {
 
-        Tenant[] tenants = getAllTenants();
-        for (Tenant tenant : tenants) {
-            validateForTenant(tenant);
+        log.info("Executing dry run for {}", this.getClass().getName());
+
+        Properties migrationProperties = getMigratorConfig().getParameters();
+        String reportPath = (String) migrationProperties.get(REPORT_PATH);
+
+        try {
+            reportUtil = new ReportUtil(reportPath);
+            Tenant[] tenants = getAllTenants();
+            for (Tenant tenant : tenants) {
+                try {
+                    validateForTenant(tenant);
+                } catch (UserStoreException e) {
+                    throw new MigrationClientException("Error occurred while running the dry run.", e);
+                }
+            }
+            reportUtil.writeMessage("\n--- Summery of the report ---\n");
+            reportUtil.writeMessage(String.format("Number of tenants: %d \nNumber of domains: %d \n" +
+                    "Number of warnings: %d ", numberOfTenants, numberOfDomains, numberOfWarnings));
+            reportUtil.commit();
+        } catch (IOException ex) {
+            throw new MigrationClientException("Error while writing the dry run report.", ex);
         }
     }
 
@@ -275,6 +290,7 @@ public class UserIDMigrator extends Migrator {
                     ((AbstractUserStoreManager) userStoreManager).getSecondaryUserStoreManager(domain);
             validateForDomain(tenant.getDomain(), domain, abstractUserStoreManager);
         }
+        numberOfTenants++;
     }
 
     private void validateForDomain(String tenant, String domain, AbstractUserStoreManager userStoreManager) {
@@ -283,13 +299,23 @@ public class UserIDMigrator extends Migrator {
         String scimEnabled = String.valueOf(userStoreManager.isSCIMEnabled());
         String tag = "Info: ";
 
-        if (userStoreManager.isSCIMEnabled() || isCustomUserStore(userStoreManager)) {
+        String suggestion = "";
+        if (userStoreManager instanceof ReadOnlyLDAPUserStoreManager && userStoreManager.isSCIMEnabled()) {
             tag = "WARN: ";
+            suggestion = "This user store has SCIM enabled hence migration not required. Please update the user id " +
+                    "attribute in the user store with attribute used for the SCIM.";
+            numberOfWarnings++;
+        } else if (isCustomUserStore(userStoreManager)) {
+            tag = "WARN: ";
+            suggestion = "This is a custom user. Only user id claim will be updated. Hence performance degradation " +
+                    "can be expected. If this is JDBC, 'user_id' column is expected.";
+            numberOfWarnings++;
         }
 
-        String message = String.format("%s Tenant domain: %s | User Store domain: %s | Type: %s | SCIM Enabled: %s", tag,
-                tenant, domain, type, scimEnabled);
+        String message = String.format("%s Tenant domain: %s | User Store domain: %s | Type: %s | SCIM Enabled: %s | " +
+                        "Suggestion: %s", tag, tenant, domain, type, scimEnabled, suggestion);
         reportUtil.writeMessage(message);
+        numberOfDomains++;
     }
 
     private void updateUserIDClaim(String username, String userId, AbstractUserStoreManager abstractUserStoreManager,
@@ -355,7 +381,7 @@ public class UserIDMigrator extends Migrator {
         return domainNames.toArray(new String[0]);
     }
 
-    private Tenant[] getAllTenants() throws UserStoreException {
+    private Tenant[] getAllTenants() throws MigrationClientException {
 
         // Add the super tenant.
         Tenant superTenant = new Tenant();
@@ -363,12 +389,10 @@ public class UserIDMigrator extends Migrator {
         superTenant.setId(-1234);
 
         // Add the rest.
-        Tenant [] tenants = realmService.getTenantManager().getAllTenants();
-        List<Tenant> tenantList = new ArrayList<>();
-        tenantList.add(superTenant);
-        tenantList.addAll(Arrays.asList(tenants));
+        Set<Tenant> tenants = Utility.getTenants();
+        tenants.add(superTenant);
 
-        return tenantList.toArray(new Tenant[0]);
+        return tenants.toArray(new Tenant[0]);
     }
 
     private String getUserIDClaimFromDB(String username, int tenantId) throws MigrationClientException, SQLException {

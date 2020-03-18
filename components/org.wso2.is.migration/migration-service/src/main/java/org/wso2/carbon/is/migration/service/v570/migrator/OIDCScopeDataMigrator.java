@@ -64,9 +64,16 @@ public class OIDCScopeDataMigrator extends Migrator {
     private static final String ID = "id";
     private static final String CLAIM = "Claim";
     private Map<String, String> scopeConfigFile = null;
+
     @Override
     public void migrate() throws MigrationClientException {
         migrateOIDCScopes();
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     public void migrateOIDCScopes() throws MigrationClientException {
