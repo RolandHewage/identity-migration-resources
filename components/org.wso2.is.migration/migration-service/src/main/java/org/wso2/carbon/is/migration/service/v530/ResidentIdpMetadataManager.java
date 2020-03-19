@@ -18,6 +18,8 @@ package org.wso2.carbon.is.migration.service.v530;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.is.migration.service.v530.dao.IdpMetaDataDAO;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.user.api.Tenant;
@@ -33,7 +35,7 @@ import java.util.Set;
  */
 public class ResidentIdpMetadataManager {
 
-    private Log log = LogFactory.getLog(ResidentIdpMetadataManager.class);
+    private Logger log = LoggerFactory.getLogger(ResidentIdpMetadataManager.class);
 
     // Default governance connector properties
     private static final Map<String, String> DEFAULT_PROPERTIES = new HashMap<String, String>() {{

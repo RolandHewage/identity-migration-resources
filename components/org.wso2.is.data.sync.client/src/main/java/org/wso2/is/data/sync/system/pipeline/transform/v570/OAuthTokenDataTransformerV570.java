@@ -58,10 +58,10 @@ public class OAuthTokenDataTransformerV570 implements DataTransformer {
 
             for (JournalEntry entry : journalEntryList) {
 
-                String accessToken = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN);
-                String refreshToken = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN);
-                String accessTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN_HASH);
-                String refreshTokenHash = (String) getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN_HASH);
+                String accessToken = getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN);
+                String refreshToken = getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN);
+                String accessTokenHash = getObjectValueFromEntry(entry, COLUMN_ACCESS_TOKEN_HASH);
+                String refreshTokenHash = getObjectValueFromEntry(entry, COLUMN_REFRESH_TOKEN_HASH);
 
                 TokenInfo tokenInfo = new TokenInfo(accessToken, refreshToken, accessTokenHash, refreshTokenHash);
                 if (encryptionWithTransformationEnabled) {

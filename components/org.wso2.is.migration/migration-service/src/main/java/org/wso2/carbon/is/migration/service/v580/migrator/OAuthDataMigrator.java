@@ -17,8 +17,8 @@
  */
 package org.wso2.carbon.is.migration.service.v580.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v580.dao.OAuthDAO;
@@ -29,13 +29,19 @@ import java.sql.SQLException;
 
 public class OAuthDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(OAuthDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(OAuthDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
 
         migrateTokensOfLocalUsers();
         migrateAuthCodesOfLocalUsers();
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     private void migrateTokensOfLocalUsers() throws MigrationClientException {

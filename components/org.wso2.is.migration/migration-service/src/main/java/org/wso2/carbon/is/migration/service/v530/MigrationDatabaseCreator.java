@@ -20,6 +20,8 @@ package org.wso2.carbon.is.migration.service.v530;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.v530.util.Constants;
 import org.wso2.carbon.is.migration.service.v530.util.ResourceUtil;
@@ -47,7 +49,7 @@ import static org.wso2.carbon.is.migration.util.Constant.UM_DB_SCRIPT;
  */
 public class MigrationDatabaseCreator {
 
-    private static Log log = LogFactory.getLog(MigrationDatabaseCreator.class);
+    private static Logger log = LoggerFactory.getLogger(MigrationDatabaseCreator.class);
     private DataSource dataSource;
     private DataSource umDataSource;
     private Connection conn = null;
@@ -86,7 +88,7 @@ public class MigrationDatabaseCreator {
         } catch (SQLException e) {
             rollbackTransaction(conn);
             String msg = "Failed to execute the migration script. " + e.getMessage();
-            log.fatal(msg, e);
+            log.error(msg, e);
             throw new Exception(msg, e);
         } finally {
             try {
@@ -119,7 +121,7 @@ public class MigrationDatabaseCreator {
         } catch (SQLException e) {
             rollbackTransaction(conn);
             String msg = "Failed to execute the migration script. " + e.getMessage();
-            log.fatal(msg, e);
+            log.error(msg, e);
             throw new Exception(msg, e);
         } finally {
             try {

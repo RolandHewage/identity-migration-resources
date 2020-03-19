@@ -21,8 +21,8 @@ package org.wso2.carbon.is.migration.service.v570.migrator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
@@ -58,15 +58,22 @@ import static org.wso2.carbon.identity.oauth.common.OAuthConstants.SCOPE_RESOURC
 
 public class OIDCScopeDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(OIDCScopeDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(OIDCScopeDataMigrator.class);
     private static final String OIDC_SCOPE_CONFIG_PATH = "oidc-scope-config.xml";
     private static final String SCOPE_CLAIM_SEPERATOR = ",";
     private static final String ID = "id";
     private static final String CLAIM = "Claim";
     private Map<String, String> scopeConfigFile = null;
+
     @Override
     public void migrate() throws MigrationClientException {
         migrateOIDCScopes();
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     public void migrateOIDCScopes() throws MigrationClientException {

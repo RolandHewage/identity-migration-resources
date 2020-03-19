@@ -24,6 +24,8 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
@@ -68,7 +70,7 @@ public class RegistryDataManager {
 
     private static RegistryDataManager instance = new RegistryDataManager();
 
-    private static final Log log = LogFactory.getLog(RegistryDataManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistryDataManager.class);
 
     private static final String SCOPE_RESOURCE_PATH = "/oidc";
 

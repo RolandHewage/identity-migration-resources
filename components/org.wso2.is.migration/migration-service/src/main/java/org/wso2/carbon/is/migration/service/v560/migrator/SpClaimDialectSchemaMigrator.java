@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.is.migration.service.v560.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
@@ -30,7 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
-    private static final Log log = LogFactory.getLog(SpClaimDialectSchemaMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(SpClaimDialectSchemaMigrator.class);
 
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_MYSQL = "SELECT ID FROM SP_CLAIM_DIALECT LIMIT 1";
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_DB2SQL = "SELECT ID FROM SP_CLAIM_DIALECT FETCH FIRST" +
@@ -48,6 +48,12 @@ public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
         } else {
             log.info("SP_CLAIM_DIALECT already exist in the database. Hence skipping.");
         }
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     /**

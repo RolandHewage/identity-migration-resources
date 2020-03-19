@@ -85,7 +85,7 @@ public class Persistor {
 
                     try (PreparedStatement ps = targetConnection.prepareStatement(sql)) {
 
-                        Map<String, EntryField> rowEntry = entry.getRowEntry();
+                        Map<String, EntryField<?>> rowEntry = entry.getRowEntry();
                         setPSForSelectTarget(tableMetaData, rowEntry, ps);
                         try (ResultSet rs = ps.executeQuery()) {
 
@@ -178,22 +178,22 @@ public class Persistor {
         return sql;
     }
 
-    protected void setPSForSelectTarget(TableMetaData metaData, Map<String, EntryField> fields, PreparedStatement ps)
+    protected void setPSForSelectTarget(TableMetaData metaData, Map<String, EntryField<?>> fields, PreparedStatement ps)
             throws SQLException {
 
         List<String> primaryKeys = metaData.getPrimaryKeys();
         for (int i = 0; i < primaryKeys.size(); i++) {
-            EntryField entryField = fields.get(primaryKeys.get(i));
+            EntryField<?> entryField = fields.get(primaryKeys.get(i));
             ps.setObject(i + 1, entryField.getValue());
         }
     }
 
-    protected void setPSForInsertTarget(TableMetaData metaData, Map<String, EntryField> fields, PreparedStatement
+    protected void setPSForInsertTarget(TableMetaData metaData, Map<String, EntryField<?>> fields, PreparedStatement
             psTargetInsert) throws SQLException, SyncClientException {
 
         List<ColumnData> columnDataList = metaData.getColumnDataList();
         for (int i = 0; i < columnDataList.size(); i++) {
-            EntryField entryField = fields.get(columnDataList.get(i).getName());
+            EntryField<?> entryField = fields.get(columnDataList.get(i).getName());
             Object value = null;
             if (entryField != null) {
                 value = entryField.getValue();
@@ -202,29 +202,29 @@ public class Persistor {
         }
     }
 
-    protected void setPSForUpdateTarget(TableMetaData metaData, Map<String, EntryField> fields, PreparedStatement
+    protected void setPSForUpdateTarget(TableMetaData metaData, Map<String, EntryField<?>> fields, PreparedStatement
             psTargetUpdate) throws SQLException, SyncClientException {
 
         List<String> primaryKeys = metaData.getPrimaryKeys();
         List<String> nonPrimaryKeys = metaData.getNonPrimaryKeys();
 
         for (int i = 0; i < nonPrimaryKeys.size(); i++) {
-            EntryField entryField = fields.get(nonPrimaryKeys.get(i));
+            EntryField<?> entryField = fields.get(nonPrimaryKeys.get(i));
             convertEntryFieldToStatement(psTargetUpdate, entryField, i + 1);
         }
         for (int i = 0; i < primaryKeys.size(); i++) {
-            EntryField entryField = fields.get(primaryKeys.get(i));
+            EntryField<?> entryField = fields.get(primaryKeys.get(i));
             convertEntryFieldToStatement(psTargetUpdate, entryField, (nonPrimaryKeys.size() + 1 + i));
         }
     }
 
-    protected void setPSForDeleteTarget(TableMetaData metaData, Map<String, EntryField> fields, PreparedStatement
+    protected void setPSForDeleteTarget(TableMetaData metaData, Map<String, EntryField<?>> fields, PreparedStatement
             psTargetUpdate) throws SQLException, SyncClientException {
 
         List<String> primaryKeys = metaData.getPrimaryKeys();
 
         for (int i = 0; i < primaryKeys.size(); i++) {
-            EntryField entryField = fields.get(primaryKeys.get(i));
+            EntryField<?> entryField = fields.get(primaryKeys.get(i));
             convertEntryFieldToStatement(psTargetUpdate, entryField, i + 1);
         }
     }

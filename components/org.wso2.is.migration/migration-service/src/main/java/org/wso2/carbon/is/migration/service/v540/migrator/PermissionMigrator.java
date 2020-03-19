@@ -17,8 +17,8 @@
 package org.wso2.carbon.is.migration.service.v540.migrator;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v540.SQLConstants;
@@ -39,7 +39,13 @@ import java.util.Map;
 
 public class PermissionMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(PermissionMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(PermissionMigrator.class);
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     @Override
     public void migrate() throws MigrationClientException {

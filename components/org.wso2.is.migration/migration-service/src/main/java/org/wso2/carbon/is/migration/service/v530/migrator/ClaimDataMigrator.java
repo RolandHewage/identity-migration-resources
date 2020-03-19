@@ -19,8 +19,8 @@
 package org.wso2.carbon.is.migration.service.v530.migrator;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.CacheBackedLocalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.ClaimDialectDAO;
@@ -68,7 +68,7 @@ import static org.wso2.carbon.is.migration.util.Constant.SUPER_TENANT_ID;
 
 public class ClaimDataMigrator extends Migrator{
 
-    private static Log log = LogFactory.getLog(ClaimDataMigrator.class);
+    private static Logger log = LoggerFactory.getLogger(ClaimDataMigrator.class);
     //Is validation success. If not success, it will be created additional calims to be success
     private boolean isSuccess = true;
     //This is used to record error log
@@ -87,6 +87,11 @@ public class ClaimDataMigrator extends Migrator{
         migrateClaimData();
     }
 
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     public boolean migrateClaimData() throws MigrationClientException {
         List<Claim> claims = new ArrayList<>();

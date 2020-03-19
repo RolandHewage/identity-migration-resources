@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration.service.v510.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
@@ -34,7 +34,13 @@ import java.sql.SQLException;
  */
 public class IdentityDataCleaner extends Migrator {
 
-    private static final Log log = LogFactory.getLog(IdentityDataCleaner.class);
+    private static final Logger log = LoggerFactory.getLogger(IdentityDataCleaner.class);
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
+    }
 
     @Override
     public void migrate() throws MigrationClientException {
@@ -95,7 +101,7 @@ public class IdentityDataCleaner extends Migrator {
                                  accessTokenRS.getString("ACCESS_TOKEN"));
                         deleteDuplicateUserNamePS.setString(1, accessTokenRS.getString("ACCESS_TOKEN"));
                         log.info(deleteDuplicateUserNamePS.toString());
-                        log.info(deleteDuplicateUserNamePS);
+                        log.info("Prepared statement {}", deleteDuplicateUserNamePS);
                         int i = deleteDuplicateUserNamePS.executeUpdate();
                         log.info("MIGRATION-LOGS >> Deleting " + i);
                         log.info("MIGRATION-LOGS >> Executed query : " + deleteDuplicateUserNamePS.toString());

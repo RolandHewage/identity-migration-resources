@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.is.migration.config.Config;
@@ -52,7 +52,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class Utility {
 
-    private static Log log = LogFactory.getLog(Utility.class);
+    private static final Logger log = LoggerFactory.getLogger(Utility.class);
 
     public static String getMigrationResourceDirectoryPath() {
 

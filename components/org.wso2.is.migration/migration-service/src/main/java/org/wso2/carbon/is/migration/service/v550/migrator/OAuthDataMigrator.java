@@ -17,8 +17,8 @@ package org.wso2.carbon.is.migration.service.v550.migrator;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -42,8 +42,7 @@ import java.util.List;
 
 public class OAuthDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory
-            .getLog(org.wso2.carbon.is.migration.service.v550.migrator.OAuthDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(OAuthDataMigrator.class);
     boolean isTokenHashColumnsAvailable = false;
     boolean isAuthzCodeHashColumnAvailable = false;
     boolean isClientSecretHashColumnsAvailable = false;
@@ -59,6 +58,12 @@ public class OAuthDataMigrator extends Migrator {
         } catch (SQLException e) {
             throw new MigrationClientException("Error while adding hash columns", e);
         }
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     public void addHashColumns() throws MigrationClientException, SQLException {

@@ -16,8 +16,8 @@
 package org.wso2.carbon.is.migration;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.consent.mgt.core.util.ConsentConfigParser;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -46,8 +46,8 @@ public class DataSourceManager {
     private DataSource umDataSource;
     private DataSource consentDataSource;
 
-    private static final Log log = LogFactory.getLog(DataSourceManager.class);
-    private static DataSourceManager dataSourceManager = null ;
+    private static final Logger log = LoggerFactory.getLogger(DataSourceManager.class);
+    private static DataSourceManager dataSourceManager = null;
 
 
     private DataSourceManager()  {

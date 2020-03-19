@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClient;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.config.Config;
@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class MigrationClientImpl implements MigrationClient {
 
-    private static final Log log = LogFactory.getLog(MigrationClientImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MigrationClientImpl.class);
 
     @Override
     public void execute() throws MigrationClientException {

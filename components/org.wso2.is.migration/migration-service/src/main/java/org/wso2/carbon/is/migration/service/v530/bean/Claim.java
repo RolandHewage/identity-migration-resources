@@ -23,6 +23,7 @@ import java.util.List;
  * Claim  representation for a claim.
  */
 public class Claim {
+
     private String claimURI;
     private String displayTag;
     private String description;

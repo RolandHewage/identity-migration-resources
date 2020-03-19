@@ -1,7 +1,7 @@
 package org.wso2.carbon.is.migration.service.v530.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -24,13 +24,20 @@ import java.sql.SQLException;
 import javax.xml.parsers.DocumentBuilder;
 
 public class PermissionDataMigrator extends Migrator {
-    private static final Log log = LogFactory.getLog(PermissionDataMigrator.class);
+
+    private static final Logger log = LoggerFactory.getLogger(PermissionDataMigrator.class);
 
     private static final String RESOURCES_XML = "resources.xml";
 
     @Override
     public void migrate() throws MigrationClientException {
         migratePermissionData();
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     public void migratePermissionData() throws MigrationClientException {

@@ -20,6 +20,8 @@ package org.wso2.carbon.is.migration.service.v530.migrator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v530.RegistryDataManager;
@@ -29,11 +31,17 @@ import org.wso2.carbon.is.migration.service.v530.RegistryDataManager;
  */
 public class OIDCScopeDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(OIDCScopeDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(OIDCScopeDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
         copyOIDCScopeData();
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
     public void copyOIDCScopeData() {

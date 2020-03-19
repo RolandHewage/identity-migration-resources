@@ -17,8 +17,8 @@
 package org.wso2.carbon.is.migration.service.v530.dao;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.claim.metadata.mgt.dao.ClaimDialectDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -45,7 +45,7 @@ import java.util.Random;
  */
 public class ClaimDAO {
 
-    private static Log log = LogFactory.getLog(ClaimDialectDAO.class);
+    private static Logger log = LoggerFactory.getLogger(ClaimDialectDAO.class);
 
     private static ClaimDAO claimDAO = new ClaimDAO();
 

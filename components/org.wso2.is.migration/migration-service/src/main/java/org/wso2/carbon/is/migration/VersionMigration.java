@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.config.Config;
 import org.wso2.carbon.is.migration.config.MigratorConfig;
@@ -34,14 +34,23 @@ import java.util.List;
  * Abstract class for version migration.
  */
 public abstract class VersionMigration {
-    private static final Log log = LogFactory.getLog(VersionMigration.class);
+
+    private static final Logger log = LoggerFactory.getLogger(VersionMigration.class);
+
     public void migrate() throws MigrationClientException {
+
+        String dryRun = System.getProperty(Constant.DRY_RUN);
+
         List<Migrator> migrators = getMigrators();
         for (Migrator migrator : migrators) {
             log.info(Constant.MIGRATION_LOG + "Version : " + getCurrentVersion() +", Migration Step : " +
                      migrator.getClass().getSimpleName() + " of order : " + migrator.getMigratorConfig().getOrder() +
                     " is starting........................... ");
-            migrator.migrate();
+            if (dryRun != null) {
+                migrator.dryRun();
+            } else {
+                migrator.migrate();
+            }
         }
     }
 

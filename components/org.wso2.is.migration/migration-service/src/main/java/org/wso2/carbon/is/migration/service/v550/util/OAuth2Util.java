@@ -15,8 +15,8 @@
 */
 package org.wso2.carbon.is.migration.service.v550.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.tokenprocessor.EncryptionDecryptionPersistenceProcessor;
 import org.wso2.carbon.identity.oauth.tokenprocessor.TokenPersistenceProcessor;
@@ -24,7 +24,7 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 
 public class OAuth2Util {
 
-    private static Log log = LogFactory.getLog(OAuth2Util.class);
+    private static Logger log = LoggerFactory.getLogger(OAuth2Util.class);
     private static final String CIPHER_TRANSFORMATION_SYSTEM_PROPERTY = "org.wso2.CipherTransformation";
 
     public static boolean isEncryptionWithTransformationEnabled() throws IdentityOAuth2Exception {

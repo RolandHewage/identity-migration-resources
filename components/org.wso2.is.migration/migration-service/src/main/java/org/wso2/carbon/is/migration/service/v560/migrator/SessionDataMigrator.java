@@ -15,8 +15,8 @@
  */
 package org.wso2.carbon.is.migration.service.v560.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.is.migration.service.Migrator;
@@ -30,7 +30,7 @@ import java.sql.SQLException;
  */
 public class SessionDataMigrator extends Migrator {
 
-    private static final Log log = LogFactory.getLog(SessionDataMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(SessionDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
@@ -46,5 +46,11 @@ public class SessionDataMigrator extends Migrator {
                 throw new MigrationClientException("Error while updating session expiry times. ", e);
             }
         }
+    }
+
+    @Override
+    public void dryRun() throws MigrationClientException {
+
+        log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 }

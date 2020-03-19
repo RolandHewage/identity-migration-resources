@@ -56,8 +56,8 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
 
             for (JournalEntry entry : journalEntryList) {
 
-                String authorizationCode = (String) getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE);
-                String authorizationCodeHash = (String) getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE_HASH);
+                String authorizationCode = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE);
+                String authorizationCodeHash = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE_HASH);
 
                 AuthorizationCodeInfo authorizationCodeInfo = new AuthorizationCodeInfo(authorizationCode,
                                                                                         authorizationCodeHash);
