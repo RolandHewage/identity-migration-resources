@@ -335,8 +335,14 @@ versions:
      name: "EmailTemplateDataMigrator"
      order: 5
    -
-     name: "UserIDMigrator"
+     name: "SchemaMigrator"
      order: 6
+     parameters:
+       location: "step2"
+       schema: "um"
+   -
+     name: "UserIDMigrator"
+     order: 7
      parameters:
        # Migrate all the tenants and all the user store domains in it.
        migrateAll: true
