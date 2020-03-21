@@ -71,5 +71,4 @@ public class Constant {
 
     public static final String USER_ID_CLAIM = "http://wso2.org/claims/userid";
     public static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
-    public static final String SCIM_ID_CLAIM = "http://wso2.org/claims/scimid";
 }
