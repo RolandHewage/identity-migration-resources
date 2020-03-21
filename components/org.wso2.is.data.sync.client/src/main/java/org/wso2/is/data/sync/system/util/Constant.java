@@ -54,6 +54,7 @@ public class Constant {
     public static final String COLUMN_TYPE_BLOB = "BLOB";
     public static final String COLUMN_TYPE_INT = "INT";
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
+    public static final String COLUMN_TYPE_SERIAL = "SERIAL";
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_ACTION = "ACTION";
