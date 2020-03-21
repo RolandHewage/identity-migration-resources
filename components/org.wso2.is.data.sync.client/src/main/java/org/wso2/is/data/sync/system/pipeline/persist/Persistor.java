@@ -94,8 +94,9 @@ public class Persistor {
                                     if (ENTRY_FILED_ACTION_DELETE.equals(entry.getOperation())) {
                                         setPSForDeleteTarget(tableMetaData, rowEntry, psDelete);
                                         if (log.isDebugEnabled()) {
-                                            log.debug("Deleting entry: " + psUpdate);
+                                            log.debug("Deleting entry: " + psDelete);
                                         }
+                                        psDelete.executeUpdate();
                                     } else if (ENTRY_FILED_ACTION_INSERT.equals(entry.getOperation()) ||
                                                ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
 

@@ -49,10 +49,13 @@ public class Constant {
     public static final String JDBC_META_DATA_COLUMN_DEF = "COLUMN_DEF";
     public static final String JDBC_META_DATA_COLUMN_SIZE = "COLUMN_SIZE";
     public static final String COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
+    public static final String COLUMN_TYPE_TIMESTAMP_WITHOUT_TIME_ZONE = "TIMESTAMP WITHOUT TIME ZONE";
     public static final String COLUMN_TYPE_CHAR = "CHAR";
     public static final String COLUMN_TYPE_VARCHAR = "VARCHAR";
     public static final String COLUMN_TYPE_BLOB = "BLOB";
     public static final String COLUMN_TYPE_INT = "INT";
+    public static final String COLUMN_TYPE_INT4 = "INT4";
+    public static final String COLUMN_TYPE_INT8 = "INT8";
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
     public static final String COLUMN_TYPE_SERIAL = "SERIAL";
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
@@ -110,4 +113,6 @@ public class Constant {
     public static final String DBSCRIPTS_LOCATION = "dbscripts";
     public static final String SYNC_TOOL_SCRIPT_LOCATION = "sync-tool";
     public static final String SQL_FILE_EXTENSION = ".sql";
+    public static final String APPLICATION_NAME = "ApplicationName";
+    public static final String POSTGRESQL_JDBC_DRIVER = "PostgreSQL JDBC Driver";
 }

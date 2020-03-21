@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
+import static org.wso2.is.data.sync.system.util.Constant.APPLICATION_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BIGINT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BLOB;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_CHAR;
@@ -42,6 +43,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
 import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_DEF;
+import static org.wso2.is.data.sync.system.util.Constant.POSTGRESQL_JDBC_DRIVER;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
@@ -179,6 +181,10 @@ public class CommonUtil {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ColumnData> columnDataList = new ArrayList<>();
 
+            if (isTableNameCaseSensitive(connection)) {
+                tableName = tableName.toLowerCase();
+            }
+
             try(ResultSet resultSet = metaData.getColumns(null, null, tableName, null)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
@@ -197,13 +203,31 @@ public class CommonUtil {
         }
     }
 
+    /**
+     * Check whether the database dialect define table names as case sensitive.
+     *
+     * @param connection JDBC connection.
+     * @return True if case sensitive, else false.
+     * @throws SQLException Thrown if client info retrieval failed.
+     */
+    public static boolean isTableNameCaseSensitive(Connection connection) throws SQLException {
+
+        String applicationName = connection.getClientInfo(APPLICATION_NAME);
+
+        return StringUtils.isNotEmpty(applicationName) && applicationName.equals(POSTGRESQL_JDBC_DRIVER);
+    }
+
     public static List<String> getPrimaryKeys(String tableName, Connection connection) throws SyncClientException {
 
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             List<String> primaryKeys = new ArrayList<>();
 
-            try(ResultSet resultSet = metaData.getPrimaryKeys(null, null, tableName)) {
+            if (isTableNameCaseSensitive(connection)) {
+                tableName = tableName.toLowerCase();
+            }
+
+            try (ResultSet resultSet = metaData.getPrimaryKeys(null, null, tableName)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString("COLUMN_NAME");
                     primaryKeys.add(name);

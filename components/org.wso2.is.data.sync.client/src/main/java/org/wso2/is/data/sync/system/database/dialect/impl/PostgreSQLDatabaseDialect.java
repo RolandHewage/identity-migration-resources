@@ -32,11 +32,12 @@ import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLAT
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_CREATE_TRIGGER_POSTGRES;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TABLE_MYSQL;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TRIGGER_POSTGRES;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_SERIAL;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_ACTION;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BIGINT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
-import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT4;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT8;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_SERIAL;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP_WITHOUT_TIME_ZONE;
 import static org.wso2.is.data.sync.system.util.Constant.SYNC_OPERATION_DELETE;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_ATTRIBUTE_PRIMARY_KEY;
 
@@ -138,9 +139,11 @@ public class PostgreSQLDatabaseDialect extends ANSIDatabaseDialect {
 
         String columnEntryString;
 
-        if (COLUMN_TYPE_TIMESTAMP.equalsIgnoreCase(columnEntry.getType()) ||
+        if (COLUMN_TYPE_TIMESTAMP_WITHOUT_TIME_ZONE.equalsIgnoreCase(columnEntry.getType()) ||
+                COLUMN_TYPE_SERIAL.equalsIgnoreCase(columnEntry.getType()) ||
                 COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
-                COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
+                COLUMN_TYPE_INT4.equalsIgnoreCase(columnEntry.getType()) ||
+                COLUMN_TYPE_INT8.equalsIgnoreCase(columnEntry.getType())) {
 
             /*
             Let the database assign default sizes for the filtered column.
@@ -162,7 +165,7 @@ public class PostgreSQLDatabaseDialect extends ANSIDatabaseDialect {
                     columnEntry.getSize());
 
             if (columnEntry.getDefaultValue() != null) {
-                columnEntryString = columnEntryString + " DEFAULT '" + columnEntry.getDefaultValue() + "'";
+                columnEntryString = columnEntryString + " DEFAULT " + columnEntry.getDefaultValue();
             }
         }
 
