@@ -59,6 +59,19 @@ public interface DatabaseDialect {
     List<String> generateDropTrigger(String name) throws SyncClientException;
 
     /**
+     * Generate SQL statements for deleting a trigger.
+     *
+     * @param triggerName     Name of the trigger to be dropped.
+     * @param targetTableName Name of the target table which the trigger should be created on.
+     * @return List of SQL statements related to trigger deletion.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
+    default List<String> generateDropTrigger(String triggerName, String targetTableName) throws SyncClientException {
+
+        return generateDropTrigger(triggerName);
+    }
+
+    /**
      *
      * Generate SQL statements for deleting a table.
      *
