@@ -115,4 +115,5 @@ public class Constant {
     public static final String SQL_FILE_EXTENSION = ".sql";
     public static final String APPLICATION_NAME = "ApplicationName";
     public static final String POSTGRESQL_JDBC_DRIVER = "PostgreSQL JDBC Driver";
+    public static final String FOREIGN_KEY_VIOLATION_ERROR_CODE_POSTGRESQL = "23503";
 }

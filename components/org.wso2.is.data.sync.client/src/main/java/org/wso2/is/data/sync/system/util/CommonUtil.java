@@ -181,7 +181,7 @@ public class CommonUtil {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ColumnData> columnDataList = new ArrayList<>();
 
-            if (isTableNameCaseSensitive(connection)) {
+            if (isTableNamesMaintainedInLowerCase(connection)) {
                 tableName = tableName.toLowerCase();
             }
 
@@ -204,13 +204,13 @@ public class CommonUtil {
     }
 
     /**
-     * Check whether the database dialect define table names as case sensitive.
+     * Check whether the database dialect maintains table names in lower case. (Eg: Postgres)
      *
      * @param connection JDBC connection.
-     * @return True if case sensitive, else false.
+     * @return True if maintained in lower case, else false.
      * @throws SQLException Thrown if client info retrieval failed.
      */
-    public static boolean isTableNameCaseSensitive(Connection connection) throws SQLException {
+    public static boolean isTableNamesMaintainedInLowerCase(Connection connection) throws SQLException {
 
         String applicationName = connection.getClientInfo(APPLICATION_NAME);
 
@@ -223,7 +223,7 @@ public class CommonUtil {
             DatabaseMetaData metaData = connection.getMetaData();
             List<String> primaryKeys = new ArrayList<>();
 
-            if (isTableNameCaseSensitive(connection)) {
+            if (isTableNamesMaintainedInLowerCase(connection)) {
                 tableName = tableName.toLowerCase();
             }
 

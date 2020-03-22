@@ -16,6 +16,7 @@
 
 package org.wso2.is.data.sync.system.pipeline.persist;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.database.ColumnData;
@@ -47,6 +48,7 @@ import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
 import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_DELETE;
 import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_INSERT;
 import static org.wso2.is.data.sync.system.util.Constant.ENTRY_FILED_ACTION_UPDATE;
+import static org.wso2.is.data.sync.system.util.Constant.FOREIGN_KEY_VIOLATION_ERROR_CODE_POSTGRESQL;
 
 /**
  * The persistence stage of the data sync pipeline.
@@ -123,8 +125,16 @@ public class Persistor {
                                 TransactionResult result = new TransactionResult(entry, true);
                                 transactionResults.add(result);
                             } catch (SQLException e) {
-                                if (e instanceof SQLIntegrityConstraintViolationException) {
-                                    //ignore. this will be recovered.
+                                if (e instanceof SQLIntegrityConstraintViolationException ||
+                                        /*
+                                        In Postgres, the thrown 'PGSQLException' does not extend from
+                                        'SQLIntegrityConstraintViolationException'.
+                                        Hence, we need to handle it with the 'SQL State' for the current operation,
+                                        which is '23503', indicating that there was a foreign key constraint violation.
+                                         */
+                                        (StringUtils.isNotEmpty(e.getSQLState()) &&
+                                                e.getSQLState().equals(FOREIGN_KEY_VIOLATION_ERROR_CODE_POSTGRESQL))) {
+                                    // Ignore. this will be recovered.
                                     if (log.isDebugEnabled()) {
                                         log.debug("SQL constraint violation occurred while data sync. ", e);
                                     }
