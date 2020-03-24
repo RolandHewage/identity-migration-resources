@@ -17,6 +17,8 @@
 package org.wso2.is.data.sync.system.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.database.ColumnData;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.EntryField;
@@ -35,7 +37,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.TimeZone;
 
-import static org.wso2.is.data.sync.system.util.Constant.APPLICATION_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BIGINT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BLOB;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_CHAR;
@@ -43,7 +44,7 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
 import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_DEF;
-import static org.wso2.is.data.sync.system.util.Constant.POSTGRESQL_JDBC_DRIVER;
+import static org.wso2.is.data.sync.system.util.Constant.POSTGRESQL_PRODUCT_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
@@ -55,6 +56,7 @@ import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_TYPE_NAM
 
 public class CommonUtil {
 
+    private static Log log = LogFactory.getLog(CommonUtil.class);
 
     private CommonUtil() {
 
@@ -181,7 +183,7 @@ public class CommonUtil {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ColumnData> columnDataList = new ArrayList<>();
 
-            if (isTableNamesMaintainedInLowerCase(connection)) {
+            if (isIdentifierNamesMaintainedInLowerCase(connection)) {
                 tableName = tableName.toLowerCase();
             }
 
@@ -204,17 +206,22 @@ public class CommonUtil {
     }
 
     /**
-     * Check whether the database dialect maintains table names in lower case. (Eg: Postgres)
+     * Check whether the database dialect maintains identifier (i.e. table, column) names in lower case. (Eg: Postgres)
      *
      * @param connection JDBC connection.
      * @return True if maintained in lower case, else false.
-     * @throws SQLException Thrown if client info retrieval failed.
      */
-    public static boolean isTableNamesMaintainedInLowerCase(Connection connection) throws SQLException {
+    public static boolean isIdentifierNamesMaintainedInLowerCase(Connection connection) {
 
-        String applicationName = connection.getClientInfo(APPLICATION_NAME);
+        String applicationName = null;
 
-        return StringUtils.isNotEmpty(applicationName) && applicationName.equals(POSTGRESQL_JDBC_DRIVER);
+        try {
+            applicationName = connection.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving database metadata.");
+        }
+
+        return StringUtils.isNotEmpty(applicationName) && applicationName.equals(POSTGRESQL_PRODUCT_NAME);
     }
 
     public static List<String> getPrimaryKeys(String tableName, Connection connection) throws SyncClientException {
@@ -223,7 +230,7 @@ public class CommonUtil {
             DatabaseMetaData metaData = connection.getMetaData();
             List<String> primaryKeys = new ArrayList<>();
 
-            if (isTableNamesMaintainedInLowerCase(connection)) {
+            if (isIdentifierNamesMaintainedInLowerCase(connection)) {
                 tableName = tableName.toLowerCase();
             }
 
@@ -240,7 +247,38 @@ public class CommonUtil {
         }
     }
 
+    /**
+     * Retrieve a value from journal entry.
+     *
+     * @param entry Journal Entry.
+     * @param key   Key of the required entry field.
+     * @return Value of the target entry field.
+     * @deprecated Use getObjectValueFromEntry(JournalEntry entry, String key, boolean isLowerCaseIdentifiers).
+     */
+    @Deprecated
     public static <T> T getObjectValueFromEntry(JournalEntry entry, String key) {
+
+        EntryField<?> entryField = entry.get(key);
+        T value = null;
+        if (entryField != null) {
+            value = (T) entryField.getValue();
+        }
+        return value;
+    }
+
+    /**
+     * Retrieve a value from journal entry.
+     *
+     * @param entry                  Journal Entry.
+     * @param key                    Key of the required entry field.
+     * @param isLowerCaseIdentifiers Whether the database dialect mains identifiers in lower case.
+     * @return Value of the target entry field.
+     */
+    public static <T> T getObjectValueFromEntry(JournalEntry entry, String key, boolean isLowerCaseIdentifiers) {
+
+        if (isLowerCaseIdentifiers) {
+            key = key.toLowerCase();
+        }
 
         EntryField<?> entryField = entry.get(key);
         T value = null;

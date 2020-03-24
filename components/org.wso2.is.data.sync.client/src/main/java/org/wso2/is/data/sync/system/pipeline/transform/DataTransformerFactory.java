@@ -110,6 +110,10 @@ public class DataTransformerFactory {
             return 6;
         } else if ("5.7.0".equals(version)) {
             return 7;
+        } else if ("5.8.0".equals(version)) {
+            return 8;
+        } else if ("5.9.0".equals(version)) {
+            return 9;
         }
         return -1;
     }
