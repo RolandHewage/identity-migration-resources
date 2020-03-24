@@ -85,11 +85,13 @@ public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
                     // Executing the query will return no results, if the needed database scheme is not there.
                     try (ResultSet results = preparedStatement.executeQuery()) {
                         if (results.next()) {
+                            connection.rollback();
                             return true;
                         }
                     }
                 } catch (SQLException ignore) {
                     //Ignore. Exception can be thrown when the table does not exist.
+                    connection.rollback();
                 }
             }
         } catch (SQLException e) {

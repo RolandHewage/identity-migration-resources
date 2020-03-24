@@ -70,13 +70,13 @@ public class SchemaUtil {
                     // Executing the query will return no results, if the needed database scheme is not there.
                     try (ResultSet results = preparedStatement.executeQuery()) {
                         if (results.next()) {
+                            connection.commit();
                             return true;
                         }
                     }
                 } catch (SQLException ignore) {
                     //Ignore. Exception can be thrown when the table does not exist.
-                } finally {
-                    connection.commit();
+                    connection.rollback();
                 }
             } catch (SQLException e) {
                 try {
