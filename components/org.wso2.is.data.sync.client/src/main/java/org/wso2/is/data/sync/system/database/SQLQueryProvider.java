@@ -81,6 +81,8 @@ public class SQLQueryProvider {
     public static final String SQL_TEMPLATE_DROP_TRIGGER_MYSQL = "DROP TRIGGER IF EXISTS %s";
     public static final String SQL_TEMPLATE_DROP_TRIGGER_POSTGRES = "DROP TRIGGER IF EXISTS %s ON %s";
     public static final String SQL_TEMPLATE_DROP_TRIGGER_ORACLE = "DROP TRIGGER %s";
+    public static final String SQL_TEMPLATE_SELECT_SOURCE_IDP_ID = "SELECT ID FROM IDP INNER JOIN %s " +
+            "ON %s.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = 'LOCAL' LIMIT 1";
 
     private static Map<String, String> queryHolder = new HashMap<>();
 

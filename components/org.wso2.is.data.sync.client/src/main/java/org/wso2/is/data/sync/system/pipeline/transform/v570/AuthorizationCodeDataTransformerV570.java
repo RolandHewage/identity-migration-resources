@@ -33,6 +33,7 @@ import org.wso2.is.data.sync.system.util.OAuth2Util;
 import java.util.List;
 
 import static org.wso2.is.data.sync.system.util.CommonUtil.getObjectValueFromEntry;
+import static org.wso2.is.data.sync.system.util.CommonUtil.isIdentifierNamesMaintainedInLowerCase;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.PROPERTY_NAME_ALGORITHM;
@@ -53,11 +54,14 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
         try {
             boolean encryptionWithTransformationEnabled = OAuth2Util.isEncryptionWithTransformationEnabled();
             boolean tokenEncryptionEnabled = OAuth2Util.isTokenEncryptionEnabled();
+            boolean isColumnNameInsLowerCase = isIdentifierNamesMaintainedInLowerCase(context.getTargetConnection());
 
             for (JournalEntry entry : journalEntryList) {
 
-                String authorizationCode = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE);
-                String authorizationCodeHash = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE_HASH);
+                String authorizationCode = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE,
+                        isColumnNameInsLowerCase);
+                String authorizationCodeHash = getObjectValueFromEntry(entry, COLUMN_AUTHORIZATION_CODE_HASH,
+                        isColumnNameInsLowerCase);
 
                 AuthorizationCodeInfo authorizationCodeInfo = new AuthorizationCodeInfo(authorizationCode,
                                                                                         authorizationCodeHash);
@@ -69,17 +73,17 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
                         } else {
                             reHashWithHashingAlgorithm(authorizationCodeInfo, hashingAlgorithm);
                         }
-                        updateJournalEntryForCode(entry, authorizationCodeInfo);
+                        updateJournalEntryForCode(entry, authorizationCodeInfo, isColumnNameInsLowerCase);
                     } catch (CryptoException e) {
                         throw new SyncClientException("Error while transforming encrypted authorization code.", e);
                     }
                 } else if (!tokenEncryptionEnabled) {
                     if (StringUtils.isBlank(authorizationCodeHash)) {
                         hashAuthorizationCode(authorizationCodeInfo);
-                        updateJournalEntryForCode(entry, authorizationCodeInfo);
                     } else {
                         reHashWithHashingAlgorithm(authorizationCodeInfo, hashingAlgorithm);
                     }
+                    updateJournalEntryForCode(entry, authorizationCodeInfo, isColumnNameInsLowerCase);
                 }
             }
         } catch (IdentityOAuth2Exception e) {
@@ -92,7 +96,7 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
     private void reHashWithHashingAlgorithm(AuthorizationCodeInfo authorizationCodeInfo, String hashAlgorithm) {
 
         JSONObject authorizationCOdeHashObject;
-        String authorizationCode = authorizationCodeInfo.getAuthorizationCode();
+        String authorizationCode = authorizationCodeInfo.getAuthorizationCodeHash();
 
         try {
             //If hash column already is a JSON value, no need to update the record

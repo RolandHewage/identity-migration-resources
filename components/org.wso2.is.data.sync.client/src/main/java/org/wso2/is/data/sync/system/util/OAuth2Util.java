@@ -25,15 +25,24 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.EntryField;
 import org.wso2.is.data.sync.system.pipeline.JournalEntry;
+import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import org.wso2.is.data.sync.system.pipeline.transform.model.AuthorizationCodeInfo;
 import org.wso2.is.data.sync.system.pipeline.transform.model.TokenInfo;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.wso2.carbon.core.util.CryptoUtil.getDefaultCryptoUtil;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_IDP_ID;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE_HASH;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_IDP_ID;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
 
@@ -188,6 +197,14 @@ public class OAuth2Util {
         return authorizationCodeInfo;
     }
 
+    /**
+     * Update a value of a token journal entry.
+     *
+     * @param entry     Journal entry.
+     * @param tokenInfo Token information.
+     * @deprecated Use updateJournalEntryForToken(JournalEntry entry, TokenInfo tokenInfo,
+     */
+    @Deprecated
     public static void updateJournalEntryForToken(JournalEntry entry, TokenInfo tokenInfo) {
 
         entry.addEntryField(COLUMN_ACCESS_TOKEN, new EntryField<>(tokenInfo.getAccessToken()));
@@ -196,11 +213,94 @@ public class OAuth2Util {
         entry.addEntryField(COLUMN_REFRESH_TOKEN_HASH, new EntryField<>(tokenInfo.getRefreshTokenHash()));
     }
 
+    /**
+     * Update a value of a authorization code journal entry.
+     *
+     * @param entry                 Journal entry.
+     * @param authorizationCodeInfo Authorization Code information.
+     * @deprecated Use updateJournalEntryForCode(JournalEntry entry, AuthorizationCodeInfo authorizationCodeInfo,
+     * boolean isLowerCaseIdentifiers)
+     */
+    @Deprecated
     public static void updateJournalEntryForCode(JournalEntry entry, AuthorizationCodeInfo authorizationCodeInfo) {
 
         entry.addEntryField(COLUMN_AUTHORIZATION_CODE, new EntryField<>(authorizationCodeInfo.getAuthorizationCode()));
         entry.addEntryField(COLUMN_AUTHORIZATION_CODE_HASH, new EntryField<>(authorizationCodeInfo
-                                                                                 .getAuthorizationCodeHash()));
+                .getAuthorizationCodeHash()));
+    }
+
+    /**
+     * Update a value of a token journal entry.
+     *
+     * @param entry                  Journal entry.
+     * @param tokenInfo              Token information.
+     * @param isLowerCaseIdentifiers Whether the database dialect mains identifiers in lower case.
+     */
+    public static void updateJournalEntryForToken(JournalEntry entry, TokenInfo tokenInfo,
+                                                  boolean isLowerCaseIdentifiers) {
+
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_ACCESS_TOKEN.toLowerCase() : COLUMN_ACCESS_TOKEN,
+                new EntryField<>(tokenInfo.getAccessToken()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_REFRESH_TOKEN.toLowerCase() : COLUMN_REFRESH_TOKEN,
+                new EntryField<>(tokenInfo.getRefreshToken()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_ACCESS_TOKEN_HASH.toLowerCase() : COLUMN_ACCESS_TOKEN_HASH,
+                new EntryField<>(tokenInfo.getAccessTokenHash()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_REFRESH_TOKEN_HASH.toLowerCase() : COLUMN_REFRESH_TOKEN_HASH
+                , new EntryField<>(tokenInfo.getRefreshTokenHash()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_IDP_ID.toLowerCase() : COLUMN_IDP_ID,
+                new EntryField<>(tokenInfo.getIdpId()));
+    }
+
+    /**
+     * Update a value of a authorization code journal entry.
+     *
+     * @param entry                  Journal entry.
+     * @param authorizationCodeInfo  Authorization code information.
+     * @param isLowerCaseIdentifiers Whether the database dialect mains identifiers in lower case.
+     */
+    public static void updateJournalEntryForCode(JournalEntry entry, AuthorizationCodeInfo authorizationCodeInfo,
+                                                 boolean isLowerCaseIdentifiers) {
+
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_AUTHORIZATION_CODE.toLowerCase() : COLUMN_AUTHORIZATION_CODE
+                , new EntryField<>(authorizationCodeInfo.getAuthorizationCode()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_AUTHORIZATION_CODE_HASH.toLowerCase()
+                : COLUMN_AUTHORIZATION_CODE_HASH, new EntryField<>(authorizationCodeInfo
+                .getAuthorizationCodeHash()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_IDP_ID.toLowerCase() : COLUMN_IDP_ID,
+                new EntryField<>(authorizationCodeInfo.getIdpId()));
+    }
+
+    /**
+     * Get idpId for the specified table name.
+     *
+     * @param journalEntryList A list of journal entries.
+     * @param context          Pipeline context.
+     * @param tableName        Target table name.
+     * @return Value of idpId column.
+     * @throws SyncClientException Thrown if the idp retrieval failed.
+     */
+    public static int getIdpId(List<JournalEntry> journalEntryList, PipelineContext context, String tableName)
+            throws SyncClientException {
+
+        int idpId = -1;
+
+        if (!journalEntryList.isEmpty()) {
+            try {
+                Connection connection = context.getSourceConnection();
+                String sqlQuery = String.format(SQL_TEMPLATE_SELECT_SOURCE_IDP_ID, tableName, tableName);
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    idpId = resultSet.getInt(1);
+                }
+
+            } catch (SQLException e) {
+                throw new SyncClientException("An error occurred while getting idpId for the table: " + tableName, e);
+            }
+        }
+
+        return idpId;
     }
 }
 

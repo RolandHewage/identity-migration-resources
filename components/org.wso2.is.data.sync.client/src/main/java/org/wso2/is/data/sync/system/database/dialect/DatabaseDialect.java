@@ -49,13 +49,14 @@ public interface DatabaseDialect {
     List<String> generateCreateTable(Table table) throws SyncClientException;
 
     /**
-     *
      * Generate SQL statements for deleting a trigger.
      *
      * @param name Name of the trigger to be dropped.
      * @return List of SQL statements related to trigger deletion.
      * @throws SyncClientException If error occurs while generating SQL statements.
+     * @deprecated Use generateDropTrigger(String triggerName, String targetTableName).
      */
+    @Deprecated
     List<String> generateDropTrigger(String name) throws SyncClientException;
 
     /**
