@@ -75,12 +75,12 @@ public class UserIDMigrator extends Migrator {
     private static final String UPDATE_USER_ID_SQL =
             "UPDATE UM_USER " +
             "SET UM_USER_ID = ? " +
-            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?;";
+            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
 
     private static final String GET_USER_ID =
             "SELECT UM_USER_ID " +
             "FROM UM_USER " +
-            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?;";
+            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
 
     private static final String DEFAULT_PROFILE = "default";
 
