@@ -288,13 +288,13 @@ public class OAuth2Util {
             try {
                 Connection connection = context.getSourceConnection();
                 String sqlQuery = String.format(SQL_TEMPLATE_SELECT_SOURCE_IDP_ID, tableName, tableName);
-                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
-                ResultSet resultSet = preparedStatement.executeQuery();
-
-                if (resultSet.next()) {
-                    idpId = resultSet.getInt(1);
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        if (resultSet.next()) {
+                            idpId = resultSet.getInt(1);
+                        }
+                    }
                 }
-
             } catch (SQLException e) {
                 throw new SyncClientException("An error occurred while getting idpId for the table: " + tableName, e);
             }
