@@ -49,11 +49,15 @@ public class Constant {
     public static final String JDBC_META_DATA_COLUMN_DEF = "COLUMN_DEF";
     public static final String JDBC_META_DATA_COLUMN_SIZE = "COLUMN_SIZE";
     public static final String COLUMN_TYPE_TIMESTAMP = "TIMESTAMP";
+    public static final String COLUMN_TYPE_TIMESTAMP_WITHOUT_TIME_ZONE = "TIMESTAMP WITHOUT TIME ZONE";
     public static final String COLUMN_TYPE_CHAR = "CHAR";
     public static final String COLUMN_TYPE_VARCHAR = "VARCHAR";
     public static final String COLUMN_TYPE_BLOB = "BLOB";
     public static final String COLUMN_TYPE_INT = "INT";
+    public static final String COLUMN_TYPE_INT4 = "INT4";
+    public static final String COLUMN_TYPE_INT8 = "INT8";
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
+    public static final String COLUMN_TYPE_SERIAL = "SERIAL";
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_ACTION = "ACTION";
@@ -82,6 +86,11 @@ public class Constant {
 
     public static final String COLUMN_AUTHORIZATION_CODE = "AUTHORIZATION_CODE";
     public static final String COLUMN_AUTHORIZATION_CODE_HASH = "AUTHORIZATION_CODE_HASH";
+    public static final String COLUMN_USER_DOMAIN = "USER_DOMAIN";
+    public static final String COLUMN_IDP_ID = "IDP_ID";
+
+    public static final String TABLE_IDN_OAUTH2_AUTHORIZATION_CODE = "IDN_OAUTH2_AUTHORIZATION_CODE";
+    public static final String TABLE_IDN_OAUTH2_ACCESS_TOKEN = "IDN_OAUTH2_ACCESS_TOKEN";
 
     public static final String COLUMN_UM_USER_ID = "UM_USER_ID";
 
@@ -111,4 +120,7 @@ public class Constant {
     public static final String DBSCRIPTS_LOCATION = "dbscripts";
     public static final String SYNC_TOOL_SCRIPT_LOCATION = "sync-tool";
     public static final String SQL_FILE_EXTENSION = ".sql";
+    public static final String POSTGRESQL_PRODUCT_NAME = "PostgreSQL";
+    public static final String FOREIGN_KEY_VIOLATION_ERROR_CODE_POSTGRESQL = "23503";
+    public static final String FEDERATED = "FEDERATED";
 }

@@ -66,10 +66,23 @@ public class SQLQueryProvider {
     public static final String SQL_TEMPLATE_CREATE_TRIGGER_MYSQL_KEY = "SQL_TEMPLATE_CREATE_TRIGGER_MYSQL";
     public static final String SQL_TEMPLATE_CREATE_TRIGGER_MYSQL = "CREATE TRIGGER %s %s %s ON %s %s " +
                                                                    "BEGIN INSERT INTO %s (%s) VALUES (%s); END";
+    public static final String SQL_TEMPLATE_CREATE_TRIGGER_POSTGRES = "CREATE TRIGGER %s %s %s ON %s %s " +
+            "EXECUTE PROCEDURE %s()";
+
+    public static final String SQL_TEMPLATE_CREATE_FUNCTION_POSTGRES = "CREATE OR REPLACE FUNCTION %s() " +
+            "RETURNS TRIGGER AS $%s$" +
+            "   BEGIN" +
+            "      INSERT INTO %s (%s) VALUES (%s);" +
+            "      RETURN NEW;" +
+            "   END;" +
+            "$%s$ LANGUAGE plpgsql;";
 
     public static final String SQL_TEMPLATE_DROP_TRIGGER_MYSQL_KEY = "SQL_TEMPLATE_DROP_TRIGGER_MYSQL";
     public static final String SQL_TEMPLATE_DROP_TRIGGER_MYSQL = "DROP TRIGGER IF EXISTS %s";
+    public static final String SQL_TEMPLATE_DROP_TRIGGER_POSTGRES = "DROP TRIGGER IF EXISTS %s ON %s";
     public static final String SQL_TEMPLATE_DROP_TRIGGER_ORACLE = "DROP TRIGGER %s";
+    public static final String SQL_TEMPLATE_SELECT_SOURCE_IDP_ID = "SELECT ID FROM IDP INNER JOIN %s " +
+            "ON %s.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = 'LOCAL' LIMIT 1";
 
     private static Map<String, String> queryHolder = new HashMap<>();
 
