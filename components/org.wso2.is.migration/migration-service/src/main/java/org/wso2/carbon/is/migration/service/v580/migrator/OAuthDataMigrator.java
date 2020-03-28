@@ -27,6 +27,9 @@ import org.wso2.carbon.is.migration.util.Constant;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * OAuthDataMigrator.
+ */
 public class OAuthDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(OAuthDataMigrator.class);

@@ -20,6 +20,9 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * PipelineContext.
+ */
 public class PipelineContext {
 
     private Connection sourceConnection;

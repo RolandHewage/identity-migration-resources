@@ -74,7 +74,7 @@ public class OracleDatabaseDialect extends ANSIDatabaseDialect {
         // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
         // INSERT INTO {targetTableName} ({columnNames}) VALUES ({values}); END;
         String triggerStatement = String.format(triggerStr, triggerName, triggerType, triggerEvent, sourceTableName,
-                             selectionPolicy, targetTableName, columnJoiner, columnValueJoiner);
+                selectionPolicy, targetTableName, columnJoiner, columnValueJoiner);
         sqlStatements.add(triggerStatement);
         return sqlStatements;
     }

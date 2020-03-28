@@ -25,12 +25,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * OAuthDataMigrator.
+ */
 public class OAuthDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(OAuthDataMigrator.class);
-    private static String hashingAlgo = OAuthServerConfiguration.getInstance().getHashAlgorithm();
     private static final String ALGORITHM = "algorithm";
     private static final String HASH = "hash";
+    private static String hashingAlgo = OAuthServerConfiguration.getInstance().getHashAlgorithm();
 
     @Override
     public void migrate() throws MigrationClientException {
@@ -167,7 +170,8 @@ public class OAuthDataMigrator extends Migrator {
                         }
 
                         OauthTokenInfo updatedOauthTokenInfo =
-                                getHashedTokenInfoFromEncryptedToken(tokenInfo, newEncryptedAccessToken, newEncryptedRefreshToken,
+                                getHashedTokenInfoFromEncryptedToken(tokenInfo, newEncryptedAccessToken,
+                                        newEncryptedRefreshToken,
                                         decryptedAccessToken,
                                         decryptedRefreshToken);
                         updatedOauthTokenList.add(updatedOauthTokenInfo);
@@ -325,7 +329,8 @@ public class OAuthDataMigrator extends Migrator {
         return updatedAuthzCodeInfo;
     }
 
-    private List<AuthzCodeInfo> updateAuthzCodeHashColumnValues(List<AuthzCodeInfo> authzCodeInfos, String hashAlgorithm)
+    private List<AuthzCodeInfo> updateAuthzCodeHashColumnValues(List<AuthzCodeInfo> authzCodeInfos,
+                                                                String hashAlgorithm)
             throws IdentityOAuth2Exception, CryptoException {
 
         List<AuthzCodeInfo> updatedAuthzCodeList = new ArrayList<>();
@@ -340,21 +345,21 @@ public class OAuthDataMigrator extends Migrator {
                     if (!isBase64DecodeAndIsSelfContainedCipherText(authzCode)) {
                         // Existing codes are not encrypted with OAEP.
                         byte[] decryptedAuthzCode = CryptoUtil.getDefaultCryptoUtil()
-                                                                .base64DecodeAndDecrypt(authzCode, "RSA");
+                                .base64DecodeAndDecrypt(authzCode, "RSA");
                         String newEncryptedAuthzCode = CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode
                                 (decryptedAuthzCode);
                         TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
                         String authzCodeHash = tokenPersistenceProcessor
                                 .getProcessedAuthzCode(new String(decryptedAuthzCode, Charsets.UTF_8));
                         AuthzCodeInfo updatedAuthzCodeInfo = (new AuthzCodeInfo(newEncryptedAuthzCode,
-                                                                                  authzCodeInfo.getCodeId()));
+                                authzCodeInfo.getCodeId()));
                         updatedAuthzCodeInfo.setAuthorizationCodeHash(authzCodeHash);
                         updatedAuthzCodeList.add(updatedAuthzCodeInfo);
                     } else {
                         if (StringUtils.isBlank(authzCodeInfo.getAuthorizationCodeHash())) {
 
                             byte[] decryptedAuthzCode = CryptoUtil.getDefaultCryptoUtil()
-                                                                    .base64DecodeAndDecrypt(authzCode);
+                                    .base64DecodeAndDecrypt(authzCode);
 
                             TokenPersistenceProcessor tokenPersistenceProcessor = new HashingPersistenceProcessor();
                             String authzCodeHash = tokenPersistenceProcessor

@@ -40,6 +40,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * OAuthDataMigrator.
+ */
 public class OAuthDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(OAuthDataMigrator.class);
@@ -49,6 +52,7 @@ public class OAuthDataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         try {
             addHashColumns();
             deleteClientSecretHashColumn();
@@ -188,7 +192,6 @@ public class OAuthDataMigrator extends Migrator {
         }
     }
 
-
     private List<OauthTokenInfo> transformFromOldToNewEncryption(List<OauthTokenInfo> oauthTokenList)
             throws MigrationClientException {
 
@@ -203,7 +206,8 @@ public class OAuthDataMigrator extends Migrator {
                 try {
                     boolean accessTokenSelfContained = isBase64DecodeAndIsSelfContainedCipherText(accessToken);
                     if (!accessTokenSelfContained) {
-                        byte[] decryptedAccessToken = CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(accessToken,
+                        byte[] decryptedAccessToken = CryptoUtil.getDefaultCryptoUtil()
+                                .base64DecodeAndDecrypt(accessToken,
                                 "RSA");
                         String newEncryptedAccessToken =
                                 CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedAccessToken);
@@ -241,13 +245,15 @@ public class OAuthDataMigrator extends Migrator {
                 try {
                     boolean refreshTokenSelfContained = isBase64DecodeAndIsSelfContainedCipherText(refreshToken);
                     if (!refreshTokenSelfContained) {
-                        byte[] decryptedRefreshToken = CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(refreshToken,
+                        byte[] decryptedRefreshToken = CryptoUtil.getDefaultCryptoUtil()
+                                .base64DecodeAndDecrypt(refreshToken,
                                 "RSA");
                         String newEncryptedRefreshToken =
                                 CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedRefreshToken);
                         String refreshTokenHash =
-                                hashingPersistenceProcessor.getProcessedAccessTokenIdentifier(new String(decryptedRefreshToken
-                                        , Charsets.UTF_8));
+                                hashingPersistenceProcessor
+                                        .getProcessedAccessTokenIdentifier(new String(decryptedRefreshToken,
+                                                Charsets.UTF_8));
                         if (updatedTokenInfo == null) {
                             updatedTokenInfo = new OauthTokenInfo(oauthTokenInfo);
                         }
@@ -374,7 +380,8 @@ public class OAuthDataMigrator extends Migrator {
     }
 
     /**
-     * This method will generate hash values of authorization codes and update the authorization code table with those values
+     * This method will generate hash values of authorization codes and update the authorization
+     * code table with those values.
      *
      * @param authzCodeInfoList
      * @throws MigrationClientException
@@ -452,7 +459,7 @@ public class OAuthDataMigrator extends Migrator {
     }
 
     /**
-     * Method to migrate old encrypted client secrets to new encrypted client secrets
+     * Method to migrate old encrypted client secrets to new encrypted client secrets.
      *
      * @throws MigrationClientException
      */

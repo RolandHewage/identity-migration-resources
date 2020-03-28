@@ -16,7 +16,9 @@
 
 package org.wso2.is.data.sync.system.database.dialect;
 
+/**
+ * QueryGenerator.
+ */
 public class QueryGenerator {
-
 
 }

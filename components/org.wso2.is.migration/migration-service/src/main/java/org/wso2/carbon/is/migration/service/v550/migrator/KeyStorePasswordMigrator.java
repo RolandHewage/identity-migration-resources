@@ -24,12 +24,16 @@ import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v550.RegistryDataManager;
 import org.wso2.carbon.is.migration.util.Constant;
 
+/**
+ * KeyStorePasswordMigrator.
+ */
 public class KeyStorePasswordMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(KeyStorePasswordMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
+
         try {
             migrateKeystorePasswords();
         } catch (Exception e) {

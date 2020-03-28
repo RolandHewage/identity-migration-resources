@@ -16,6 +16,9 @@
 
 package org.wso2.is.data.sync.system.database;
 
+/**
+ * SQLStatement.
+ */
 public class SQLStatement {
 
     private String scheme;
@@ -48,9 +51,9 @@ public class SQLStatement {
     public String toString() {
 
         return "SQLStatement{" +
-               "scheme='" + scheme + '\'' +
-               ", statement='" + statement + '\'' +
-               ", type='" + type + '\'' +
-               '}';
+                "scheme='" + scheme + '\'' +
+                ", statement='" + statement + '\'' +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

@@ -39,10 +39,6 @@ import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.Tenant;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,6 +52,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 
@@ -65,10 +66,43 @@ import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 public class EmailTemplateDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(EmailTemplateDataMigrator.class);
-
+    private static final String EMAIL_ADMIN_CONFIG = "email-admin-config.xml";
     private RegistryResourceMgtService registryResourceMgtService = new RegistryResourceMgtServiceImpl();
 
-    private static final String EMAIL_ADMIN_CONFIG = "email-admin-config.xml";
+    private static Map<String, String> getEmailContent(OMElement templateElement) {
+
+        Map<String, String> emailContentMap = new HashMap<>();
+        Iterator it = templateElement.getChildElements();
+        while (it.hasNext()) {
+            OMElement element = (OMElement) it.next();
+            String elementName = element.getLocalName();
+            String elementText = element.getText();
+            if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_SUBJECT, elementName)) {
+                emailContentMap.put(Constant.TEMPLATE_SUBJECT, elementText);
+            } else if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_BODY, elementName)) {
+                emailContentMap.put(Constant.TEMPLATE_BODY, elementText);
+            } else if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_FOOTER, elementName)) {
+                emailContentMap.put(Constant.TEMPLATE_FOOTER, elementText);
+            }
+        }
+        return emailContentMap;
+    }
+
+    private static String getNormalizedName(String displayName) {
+
+        if (StringUtils.isNotBlank(displayName)) {
+            return displayName.replaceAll("\\s+", "").toLowerCase();
+        }
+        throw new IllegalArgumentException("Invalid template type name provided : " + displayName);
+    }
+
+    private static Collection createTemplateType(String normalizedTemplateName, String templateDisplayName) {
+
+        Collection collection = new CollectionImpl();
+        collection.addProperty(Constant.EMAIL_TEMPLATE_NAME, normalizedTemplateName);
+        collection.addProperty(Constant.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME, templateDisplayName);
+        return collection;
+    }
 
     @Override
     public void dryRun() throws MigrationClientException {
@@ -219,40 +253,5 @@ public class EmailTemplateDataMigrator extends Migrator {
         byte[] contentByteArray = content.getBytes(StandardCharsets.UTF_8);
         templateResource.setContent(contentByteArray);
         return templateResource;
-    }
-
-    private static Map<String, String> getEmailContent(OMElement templateElement) {
-
-        Map<String, String> emailContentMap = new HashMap<>();
-        Iterator it = templateElement.getChildElements();
-        while (it.hasNext()) {
-            OMElement element = (OMElement) it.next();
-            String elementName = element.getLocalName();
-            String elementText = element.getText();
-            if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_SUBJECT, elementName)) {
-                emailContentMap.put(Constant.TEMPLATE_SUBJECT, elementText);
-            } else if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_BODY, elementName)) {
-                emailContentMap.put(Constant.TEMPLATE_BODY, elementText);
-            } else if (StringUtils.equalsIgnoreCase(Constant.TEMPLATE_FOOTER, elementName)) {
-                emailContentMap.put(Constant.TEMPLATE_FOOTER, elementText);
-            }
-        }
-        return emailContentMap;
-    }
-
-    private static String getNormalizedName(String displayName) {
-
-        if (StringUtils.isNotBlank(displayName)) {
-            return displayName.replaceAll("\\s+", "").toLowerCase();
-        }
-        throw new IllegalArgumentException("Invalid template type name provided : " + displayName);
-    }
-
-    private static Collection createTemplateType(String normalizedTemplateName, String templateDisplayName) {
-
-        Collection collection = new CollectionImpl();
-        collection.addProperty(Constant.EMAIL_TEMPLATE_NAME, normalizedTemplateName);
-        collection.addProperty(Constant.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME, templateDisplayName);
-        return collection;
     }
 }

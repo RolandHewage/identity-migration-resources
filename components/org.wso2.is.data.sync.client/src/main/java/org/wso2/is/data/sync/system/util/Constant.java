@@ -16,6 +16,9 @@
 
 package org.wso2.is.data.sync.system.util;
 
+/**
+ * Constant.
+ */
 public class Constant {
 
     public static final String SCHEMA_TYPE_CARBON = "carbon";

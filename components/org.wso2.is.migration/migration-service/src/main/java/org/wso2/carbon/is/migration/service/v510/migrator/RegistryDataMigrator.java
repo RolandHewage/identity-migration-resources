@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v510.migrator;
 
 import org.slf4j.Logger;
@@ -43,11 +43,11 @@ public class RegistryDataMigrator extends Migrator {
     private static final String LOGOUT_URL = "logoutURL";
     private static final String DEFAULT_CONST = "[default]";
 
-
     private static final Logger log = LoggerFactory.getLogger(RegistryDataMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
+
         migrateRegistryData();
     }
 
@@ -58,18 +58,19 @@ public class RegistryDataMigrator extends Migrator {
     }
 
     public void migrateRegistryData() throws MigrationClientException {
+
         log.info("MIGRATION-LOGS >> Going to start : migrateRegistryData.");
         //migrating super tenant configurations
         try {
             migrateSAMLConfiguration();
             log.info("MIGRATION-LOGS >> SAML Service Provider details are migrated successfully for tenant : " +
-                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         } catch (Exception e) {
             if (!isContinueOnError()) {
                 throw new MigrationClientException("Error while executing the migration.", e);
             }
             log.error("MIGRATION-ERROR-LOGS-039 >> Error while migrating registry data for tenant : " +
-                      MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
         }
 
         //migrating tenant configurations
@@ -114,6 +115,7 @@ public class RegistryDataMigrator extends Migrator {
     }
 
     private void migrateSAMLConfiguration() throws MigrationClientException {
+
         log.info("MIGRATION-LOGS >> Going to start : migrateSAMLConfiguration.");
         Registry registry = (UserRegistry) PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getRegistry(RegistryType.SYSTEM_CONFIGURATION);
@@ -141,21 +143,21 @@ public class RegistryDataMigrator extends Migrator {
                                 }
                                 if (defaultAcsUrl != null) {
                                     resource.setProperty(IdentityRegistryResources.PROP_SAML_SSO_ASSERTION_CONS_URLS,
-                                                         acsUrls);
+                                            acsUrls);
                                     resource.setProperty(
                                             IdentityRegistryResources.PROP_DEFAULT_SAML_SSO_ASSERTION_CONS_URL,
                                             defaultAcsUrl);
                                 }
                             } else if (acsUrls.size() == 1) {
                                 resource.setProperty(IdentityRegistryResources
-                                                             .PROP_DEFAULT_SAML_SSO_ASSERTION_CONS_URL, acsUrls.get(0));
+                                        .PROP_DEFAULT_SAML_SSO_ASSERTION_CONS_URL, acsUrls.get(0));
                             }
                         } else if (resource.getProperty(SAMLSSO_ASSERTION_CONSUMER_URL) != null) {
                             String samlssoAssertionConsumerURL = resource.getProperty(SAMLSSO_ASSERTION_CONSUMER_URL);
                             resource.setProperty(IdentityRegistryResources.PROP_SAML_SSO_ASSERTION_CONS_URLS,
-                                                 samlssoAssertionConsumerURL);
+                                    samlssoAssertionConsumerURL);
                             resource.setProperty(IdentityRegistryResources.PROP_DEFAULT_SAML_SSO_ASSERTION_CONS_URL,
-                                                 samlssoAssertionConsumerURL);
+                                    samlssoAssertionConsumerURL);
                             resource.removeProperty(SAMLSSO_ASSERTION_CONSUMER_URL);
                         }
 

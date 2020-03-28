@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.is.migration.service.v560.util;
 
+/**
+ * SQLConstants.
+ */
 public class SQLConstants {
 
     public static final String UPDATE_IDN_AUTH_SESSION_STORE = "UPDATE IDN_AUTH_SESSION_STORE SET " +

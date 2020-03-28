@@ -1,32 +1,33 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v510;
 
 /**
- * SQL Queries constants
+ * SQL Queries constants.
  */
 public class SQLQueries {
 
-    public static final String SELECT_FROM_CONSUMER_APPS = "SELECT ID, USERNAME, USER_DOMAIN FROM IDN_OAUTH_CONSUMER_APPS";
+    public static final String SELECT_FROM_CONSUMER_APPS = "SELECT ID, USERNAME, USER_DOMAIN " +
+            "FROM IDN_OAUTH_CONSUMER_APPS";
 
     public static final String UPDATE_CONSUMER_APPS = "UPDATE IDN_OAUTH_CONSUMER_APPS SET USERNAME=?, USER_DOMAIN=? " +
             "WHERE ID=?";
 
-    public static final String SELECT_FROM_ACCESS_TOKEN = "SELECT ACCESS_TOKEN, TOKEN_SCOPE, AUTHZ_USER, TOKEN_ID FROM " +
-            "IDN_OAUTH2_ACCESS_TOKEN";
+    public static final String SELECT_FROM_ACCESS_TOKEN = "SELECT ACCESS_TOKEN, TOKEN_SCOPE, AUTHZ_USER, " +
+            "TOKEN_ID FROM IDN_OAUTH2_ACCESS_TOKEN";
 
     public static final String INSERT_SCOPE_ASSOCIATION = "INSERT INTO IDN_OAUTH2_ACCESS_TOKEN_SCOPE (TOKEN_ID, " +
             "TOKEN_SCOPE) VALUES (?, ?)";
@@ -65,8 +66,8 @@ public class SQLQueries {
     public static final String ALTER_TOKEN_ID_NOT_NULL_DB2 = "ALTER TABLE IDN_OAUTH2_ACCESS_TOKEN ALTER COLUMN " +
             "TOKEN_ID SET NOT NULL";
 
-    public static final String SELECT_FROM_AUTHORIZATION_CODE = "SELECT AUTHORIZATION_CODE, AUTHZ_USER, USER_DOMAIN FROM " +
-            "IDN_OAUTH2_AUTHORIZATION_CODE";
+    public static final String SELECT_FROM_AUTHORIZATION_CODE = "SELECT AUTHORIZATION_CODE, AUTHZ_USER, " +
+            "USER_DOMAIN FROM IDN_OAUTH2_AUTHORIZATION_CODE";
 
     public static final String UPDATE_USER_NAME_AUTHORIZATION_CODE = "UPDATE IDN_OAUTH2_AUTHORIZATION_CODE SET " +
             "AUTHZ_USER=?, TENANT_ID=?, USER_DOMAIN=?, CODE_ID=?, SUBJECT_IDENTIFIER=? WHERE AUTHORIZATION_CODE=?";

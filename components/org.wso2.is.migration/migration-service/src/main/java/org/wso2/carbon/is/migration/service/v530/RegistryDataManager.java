@@ -22,8 +22,6 @@ package org.wso2.carbon.is.migration.service.v530;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -52,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -66,14 +65,13 @@ import static org.wso2.carbon.identity.recovery.IdentityRecoveryConstants.Questi
 import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
 import static org.wso2.carbon.registry.core.RegistryConstants.TAG_MEDIA_TYPE;
 
+/**
+ * RegistryDataManager.
+ */
 public class RegistryDataManager {
 
-    private static RegistryDataManager instance = new RegistryDataManager();
-
     private static final Logger log = LoggerFactory.getLogger(RegistryDataManager.class);
-
     private static final String SCOPE_RESOURCE_PATH = "/oidc";
-
     private static final String EMAIL_TEMPLATE_OLD_REG_LOCATION = "/identity/config/emailTemplate";
     private static final String EMAIL_TEMPLATE_NEW_REG_LOCATION_ROOT = "/identity/email/";
     private static final Set<String> TEMPLATE_NAMES = new HashSet<String>() {{
@@ -87,7 +85,6 @@ public class RegistryDataManager {
         add("passwordReset");
         add("temporaryPassword");
     }};
-
     private static final Map<String, String> PLACEHOLDERS_MAP = new HashMap<String, String>() {{
         put("\\{first-name\\}", "{{user.claim.givenname}}");
         put("\\{user-name\\}", "{{user-name}}");
@@ -97,22 +94,17 @@ public class RegistryDataManager {
         put("\\{tenant-domain\\}", "{{tenant-domain}}");
         put("\\{temporary-password\\}", "{{temporary-password}}");
     }};
-
-
     /*
         Constants related challenge question migration.
      */
     private static final String OLD_CHALLENGE_QUESTIONS_PATH =
             "/repository/components/org.wso2.carbon.identity.mgt/questionCollection";
     private static final String NEW_CHALLENGE_QUESTIONS_PATH = "/identity/questionCollection";
-
     private static final String OLD_QUESTION_SET_PROPERTY = "questionSetId";
     private static final String OLD_QUESTION_PROPERTY = "question";
-
-
     private static final String DEFAULT_LOCALE = "en_US";
     private static final String TEMPLATE_NAME = "migratedQuestion%d";
-
+    private static RegistryDataManager instance = new RegistryDataManager();
 
     private RegistryDataManager() {
 
@@ -121,6 +113,70 @@ public class RegistryDataManager {
     public static RegistryDataManager getInstance() {
 
         return instance;
+    }
+
+    private static Map<String, String> loadScopeConfigFile() throws FileNotFoundException, IdentityException {
+
+        Map<String, String> scopes = new HashMap<>();
+        String carbonHome = System.getProperty("carbon.home");
+        String confXml = Paths.get(carbonHome,
+                new String[]{"repository", "conf", "identity", "oidc-scope-config.xml"}).toString();
+        File configfile = new File(confXml);
+        if (!configfile.exists()) {
+            String errMsg = "OIDC scope-claim Configuration File is not present at: " + confXml;
+            throw new FileNotFoundException(errMsg);
+        }
+
+        XMLStreamReader parser = null;
+        FileInputStream stream = null;
+        try {
+            stream = new FileInputStream(configfile);
+            parser = XMLInputFactory.newInstance().createXMLStreamReader(stream);
+            StAXOMBuilder builder = new StAXOMBuilder(parser);
+            OMElement documentElement = builder.getDocumentElement();
+            Iterator iterator = documentElement.getChildElements();
+
+            while (iterator.hasNext()) {
+                OMElement omElement = (OMElement) iterator.next();
+                String configType = omElement.getAttributeValue(new QName("id"));
+                scopes.put(configType, loadClaimConfig(omElement));
+            }
+        } catch (XMLStreamException ex) {
+            throw IdentityException.error("Error while loading scope config.", ex);
+        } finally {
+            try {
+                if (parser != null) {
+                    parser.close();
+                }
+
+                if (stream != null) {
+                    IdentityIOStreamUtils.closeInputStream(stream);
+                }
+            } catch (XMLStreamException ex) {
+                log.error("Error while closing XML stream", ex);
+            }
+
+        }
+
+        return scopes;
+    }
+
+    private static String loadClaimConfig(OMElement configElement) {
+
+        StringBuilder claimConfig = new StringBuilder();
+        Iterator it = configElement.getChildElements();
+
+        while (it.hasNext()) {
+            OMElement element = (OMElement) it.next();
+            if ("Claim".equals(element.getLocalName())) {
+                String commaSeparatedClaimNames = element.getText();
+                if (StringUtils.isNotBlank(commaSeparatedClaimNames)) {
+                    claimConfig.append(commaSeparatedClaimNames.trim());
+                }
+            }
+        }
+
+        return claimConfig.toString();
     }
 
     @Deprecated
@@ -190,7 +246,6 @@ public class RegistryDataManager {
             }
         }
     }
-
 
     private void migrateTenantEmailTemplates() throws IdentityException {
 
@@ -314,7 +369,6 @@ public class RegistryDataManager {
         }
     }
 
-
     private void migrateChallengeQuestionsForTenant() throws Exception {
         // read the old questions
         Registry registry = PrivilegedCarbonContext.getThreadLocalCarbonContext().getRegistry(SYSTEM_CONFIGURATION);
@@ -350,9 +404,8 @@ public class RegistryDataManager {
         }
     }
 
-
     private Resource createRegistryResource(ChallengeQuestion question) throws RegistryException,
-                                                                               UnsupportedEncodingException {
+            UnsupportedEncodingException {
 
         Resource resource = new ResourceImpl();
         resource.setContent(question.getQuestion().getBytes("UTF-8"));
@@ -380,7 +433,6 @@ public class RegistryDataManager {
         return NEW_CHALLENGE_QUESTIONS_PATH + PATH_SEPARATOR + questionSetId + PATH_SEPARATOR + questionId +
                 PATH_SEPARATOR + locale;
     }
-
 
     private void startTenantFlow(Tenant tenant) {
 
@@ -472,78 +524,14 @@ public class RegistryDataManager {
 
         Map<String, String> scopes = loadScopeConfigFile();
         Registry registry = PrivilegedCarbonContext.getThreadLocalCarbonContext().getRegistry(SYSTEM_CONFIGURATION);
-        if(!registry.resourceExists(SCOPE_RESOURCE_PATH)) {
+        if (!registry.resourceExists(SCOPE_RESOURCE_PATH)) {
             Resource resource = registry.newResource();
-                for (Map.Entry<String, String> entry : scopes.entrySet()) {
-                    resource.setProperty(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                resource.setProperty(entry.getKey(), entry.getValue());
             }
 
             registry.put("/oidc", resource);
         }
     }
-
-    private static Map<String, String> loadScopeConfigFile() throws FileNotFoundException, IdentityException {
-
-        Map<String, String> scopes = new HashMap<>();
-        String carbonHome = System.getProperty("carbon.home");
-        String confXml = Paths.get(carbonHome,
-                new String[]{"repository", "conf", "identity", "oidc-scope-config.xml"}).toString();
-        File configfile = new File(confXml);
-        if(!configfile.exists()) {
-            String errMsg = "OIDC scope-claim Configuration File is not present at: " + confXml;
-            throw new FileNotFoundException(errMsg);
-        }
-
-        XMLStreamReader parser = null;
-        FileInputStream stream = null;
-        try {
-            stream = new FileInputStream(configfile);
-            parser = XMLInputFactory.newInstance().createXMLStreamReader(stream);
-            StAXOMBuilder builder = new StAXOMBuilder(parser);
-            OMElement documentElement = builder.getDocumentElement();
-            Iterator iterator = documentElement.getChildElements();
-
-            while(iterator.hasNext()) {
-                OMElement omElement = (OMElement)iterator.next();
-                String configType = omElement.getAttributeValue(new QName("id"));
-                scopes.put(configType, loadClaimConfig(omElement));
-            }
-        } catch (XMLStreamException ex) {
-            throw IdentityException.error("Error while loading scope config.", ex);
-        } finally {
-            try {
-                if(parser != null) {
-                    parser.close();
-                }
-
-                if(stream != null) {
-                    IdentityIOStreamUtils.closeInputStream(stream);
-                }
-            } catch (XMLStreamException ex) {
-                log.error("Error while closing XML stream", ex);
-            }
-
-        }
-
-        return scopes;
-    }
-
-    private static String loadClaimConfig(OMElement configElement) {
-        StringBuilder claimConfig = new StringBuilder();
-        Iterator it = configElement.getChildElements();
-
-        while(it.hasNext()) {
-            OMElement element = (OMElement)it.next();
-            if("Claim".equals(element.getLocalName())) {
-                String commaSeparatedClaimNames = element.getText();
-                if(StringUtils.isNotBlank(commaSeparatedClaimNames)) {
-                    claimConfig.append(commaSeparatedClaimNames.trim());
-                }
-            }
-        }
-
-        return claimConfig.toString();
-    }
-
 
 }

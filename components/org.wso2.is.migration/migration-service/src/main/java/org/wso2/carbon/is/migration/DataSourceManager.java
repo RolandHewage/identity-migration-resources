@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration;
 
 import org.apache.axiom.om.OMElement;
@@ -31,6 +31,7 @@ import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -42,15 +43,14 @@ import javax.xml.namespace.QName;
  */
 public class DataSourceManager {
 
+    private static final Logger log = LoggerFactory.getLogger(DataSourceManager.class);
+    private static DataSourceManager dataSourceManager = null;
     private DataSource dataSource;
     private DataSource umDataSource;
     private DataSource consentDataSource;
 
-    private static final Logger log = LoggerFactory.getLogger(DataSourceManager.class);
-    private static DataSourceManager dataSourceManager = null;
+    private DataSourceManager() {
 
-
-    private DataSourceManager()  {
         try {
             initIdentityDataSource();
             initUMDataSource();
@@ -62,13 +62,15 @@ public class DataSourceManager {
     }
 
     public static DataSourceManager getInstance() {
-        if(DataSourceManager.dataSourceManager == null){
+
+        if (DataSourceManager.dataSourceManager == null) {
             DataSourceManager.dataSourceManager = new DataSourceManager();
         }
         return DataSourceManager.dataSourceManager;
     }
 
     public DataSource getDataSource(Schema schema) throws MigrationClientException {
+
         if (schema.getName().equals(Schema.IDENTITY.getName())) {
             return dataSource;
         } else if (schema.getName().equals(Schema.UM.getName())) {
@@ -82,6 +84,7 @@ public class DataSourceManager {
     }
 
     public DataSource getDataSource(String schema) throws MigrationClientException {
+
         if (schema.equals(Schema.IDENTITY.getName())) {
             return dataSource;
         } else if (schema.equals(Schema.UM.getName())) {
@@ -94,7 +97,6 @@ public class DataSourceManager {
         throw new MigrationClientException("DataSource is not available for " + schema);
     }
 
-
     /**
      * Init Oracle specific database.
      */
@@ -104,9 +106,9 @@ public class DataSourceManager {
         try {
             conn = dataSource.getConnection();
             if ("oracle".equals(DatabaseCreator.getDatabaseType(conn)) && ISMigrationServiceDataHolder
-                                                                                  .getIdentityOracleUser() == null) {
+                    .getIdentityOracleUser() == null) {
                 ISMigrationServiceDataHolder.setIdentityOracleUser(dataSource.getConnection().getMetaData()
-                                                                           .getUserName());
+                        .getUserName());
                 log.info(Constant.MIGRATION_LOG + "Initialized identity database in Oracle.");
             }
         } catch (Exception e) {
@@ -121,13 +123,12 @@ public class DataSourceManager {
             }
         }
 
-
         try {
             conn = umDataSource.getConnection();
             if ("oracle".equals(DatabaseCreator.getDatabaseType(conn)) && ISMigrationServiceDataHolder
-                                                                                  .getUmOracleUser() == null) {
+                    .getUmOracleUser() == null) {
                 ISMigrationServiceDataHolder.setUmOracleUser(umDataSource.getConnection().getMetaData()
-                                                                           .getUserName());
+                        .getUserName());
                 log.info(Constant.MIGRATION_LOG + "Initialized user management database in Oracle.");
             }
         } catch (Exception e) {
@@ -176,8 +177,8 @@ public class DataSourceManager {
 
             if (persistenceManagerConfigElem == null) {
                 String errorMsg = "Identity Persistence Manager configuration is not available in " +
-                                  "identity.xml file. Terminating the JDBC Persistence Manager " +
-                                  "initialization. This may affect certain functionality.";
+                        "identity.xml file. Terminating the JDBC Persistence Manager " +
+                        "initialization. This may affect certain functionality.";
                 log.error(errorMsg);
                 throw new MigrationClientException(errorMsg);
             }
@@ -187,8 +188,8 @@ public class DataSourceManager {
 
             if (dataSourceElem == null) {
                 String errorMsg = "DataSource Element is not available for JDBC Persistence " +
-                                  "Manager in identity.xml file. Terminating the JDBC Persistence Manager " +
-                                  "initialization. This might affect certain features.";
+                        "Manager in identity.xml file. Terminating the JDBC Persistence Manager " +
+                        "initialization. This might affect certain features.";
                 log.error(errorMsg);
                 throw new MigrationClientException(errorMsg);
             }
@@ -216,8 +217,9 @@ public class DataSourceManager {
      * @throws MigrationClientException
      */
     private void initUMDataSource() throws MigrationClientException {
+
         umDataSource = DatabaseUtil.getRealmDataSource(ISMigrationServiceDataHolder.getRealmService()
-                                                               .getBootstrapRealmConfiguration());
+                .getBootstrapRealmConfiguration());
         if (umDataSource == null) {
             String errorMsg = "UM Datasource initialization error.";
             throw new MigrationClientException(errorMsg);
@@ -225,11 +227,12 @@ public class DataSourceManager {
     }
 
     /**
-     * Initialize Consent Data Source
+     * Initialize Consent Data Source.
      *
      * @throws MigrationClientException
      */
     private void initConsentDataSource() throws MigrationClientException {
+
         ConsentConfigParser configParser = new ConsentConfigParser();
         String dataSourceName = configParser.getConsentDataSource();
 

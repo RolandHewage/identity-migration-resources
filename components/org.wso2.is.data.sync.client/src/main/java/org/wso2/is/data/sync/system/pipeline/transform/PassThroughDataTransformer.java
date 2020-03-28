@@ -38,7 +38,7 @@ public class PassThroughDataTransformer implements DataTransformer {
 
         if (log.isDebugEnabled()) {
             log.debug("PassThroughDataTransformer is engaged for table: " + context.getPipelineConfiguration()
-                                                                                   .getTableName());
+                    .getTableName());
         }
         return journalEntryList;
     }

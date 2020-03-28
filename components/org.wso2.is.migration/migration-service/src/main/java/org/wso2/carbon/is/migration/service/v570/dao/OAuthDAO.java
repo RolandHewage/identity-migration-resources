@@ -10,23 +10,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * OAuthDAO.
+ */
 public class OAuthDAO {
-
-    private static OAuthDAO instance = new OAuthDAO();
 
     public static final String UPDATE_ACCESS_TOKEN = "UPDATE IDN_OAUTH2_ACCESS_TOKEN SET ACCESS_TOKEN=?, " +
             "REFRESH_TOKEN=?, ACCESS_TOKEN_HASH=?, REFRESH_TOKEN_HASH=? WHERE TOKEN_ID=?";
-
     public static final String RETRIEVE_ALL_TOKENS = "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, " +
             "ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH FROM IDN_OAUTH2_ACCESS_TOKEN";
-
     public static final String RETRIEVE_ALL_AUTHORIZATION_CODES = "SELECT AUTHORIZATION_CODE, CODE_ID, " +
             "AUTHORIZATION_CODE_HASH FROM IDN_OAUTH2_AUTHORIZATION_CODE";
-
     public static final String UPDATE_AUTHORIZATION_CODE =
             "UPDATE IDN_OAUTH2_AUTHORIZATION_CODE SET AUTHORIZATION_CODE=?, AUTHORIZATION_CODE_HASH=? WHERE CODE_ID=?";
+    private static OAuthDAO instance = new OAuthDAO();
 
-    private OAuthDAO() { }
+    private OAuthDAO() {
+
+    }
 
     public static OAuthDAO getInstance() {
 
@@ -34,7 +35,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to retrieve access token records from database
+     * Method to retrieve access token records from database.
      *
      * @param connection
      * @return list of token info
@@ -58,7 +59,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to persist modified token hash in database
+     * Method to persist modified token hash in database.
      *
      * @param updatedOauthTokenList
      * @param connection
@@ -81,7 +82,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to retrieve all the authorization codes from the database
+     * Method to retrieve all the authorization codes from the database.
      *
      * @param connection
      * @return list of authorization codes
@@ -107,7 +108,7 @@ public class OAuthDAO {
      * Method to update the authorization code table with modified authorization code hashes.
      *
      * @param updatedAuthzCodeList List of updated authorization codes
-     * @param connection database connection
+     * @param connection           database connection
      * @throws SQLException
      */
     public void updateNewAuthzCodeHash(List<AuthzCodeInfo> updatedAuthzCodeList, Connection connection)

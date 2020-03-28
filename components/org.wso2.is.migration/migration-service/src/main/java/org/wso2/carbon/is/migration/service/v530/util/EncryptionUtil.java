@@ -21,9 +21,13 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
+/**
+ * EncryptionUtil.
+ */
 public class EncryptionUtil {
 
     public static String getNewEncryptedValue(String encryptedValue) throws CryptoException {
+
         if (StringUtils.isNotEmpty(encryptedValue) && !isNewlyEncrypted(encryptedValue)) {
             byte[] decryptedPassword = CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(encryptedValue, "RSA");
             return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedPassword);
@@ -32,6 +36,7 @@ public class EncryptionUtil {
     }
 
     public static boolean isNewlyEncrypted(String encryptedValue) throws CryptoException {
+
         return CryptoUtil.getDefaultCryptoUtil().base64DecodeAndIsSelfContainedCipherText(encryptedValue);
     }
 }

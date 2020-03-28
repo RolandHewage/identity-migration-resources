@@ -29,6 +29,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * MigrationValidator.
+ */
 public class MigrationValidator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(MigrationValidator.class);

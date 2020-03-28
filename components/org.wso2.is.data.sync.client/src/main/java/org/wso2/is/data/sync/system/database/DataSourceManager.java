@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -43,6 +44,9 @@ import static org.wso2.is.data.sync.system.util.Constant.DELIMITER_DOUBLE_SLASH;
 import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_DB2_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
 
+/**
+ * DataSourceManager.
+ */
 public class DataSourceManager {
 
     private Map<String, DataSourceEntry> sourceEntryList = new HashMap<>();
@@ -74,7 +78,7 @@ public class DataSourceManager {
                 sourceDataSourceType = getDataSourceType(sourceDataSource);
             } catch (SQLException e) {
                 throw new SyncClientException("Error while creating connection with data source: " +
-                                              sourceJndiName + " of schema: " + schemaType);
+                        sourceJndiName + " of schema: " + schemaType);
             }
 
             String targetDataSourceType;
@@ -82,7 +86,7 @@ public class DataSourceManager {
                 targetDataSourceType = getDataSourceType(sourceDataSource);
             } catch (SQLException e) {
                 throw new SyncClientException("Error while creating connection with data source: " +
-                                              targetJndiName + " of schema: " + schemaType);
+                        targetJndiName + " of schema: " + schemaType);
             }
 
             sourceEntryList.put(schemaType, new DataSourceEntry(sourceDataSource, sourceDataSourceType));

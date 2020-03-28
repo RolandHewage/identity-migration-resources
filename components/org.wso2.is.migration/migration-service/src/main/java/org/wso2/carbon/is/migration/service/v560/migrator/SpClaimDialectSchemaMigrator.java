@@ -29,8 +29,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * SpClaimDialectSchemaMigrator.
+ */
 public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
-    private static final Logger log = LoggerFactory.getLogger(SpClaimDialectSchemaMigrator.class);
 
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_MYSQL = "SELECT ID FROM SP_CLAIM_DIALECT LIMIT 1";
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_DB2SQL = "SELECT ID FROM SP_CLAIM_DIALECT FETCH FIRST" +
@@ -38,6 +40,7 @@ public class SpClaimDialectSchemaMigrator extends SchemaMigrator {
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_MSSQL = "SELECT TOP 1 ID FROM SP_CLAIM_DIALECT";
     public static final String IS_SP_CLAIM_DIALECT_TABLE_EXISTS_ORACLE = "SELECT ID FROM SP_CLAIM_DIALECT WHERE " +
             "ROWNUM < 2";
+    private static final Logger log = LoggerFactory.getLogger(SpClaimDialectSchemaMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {

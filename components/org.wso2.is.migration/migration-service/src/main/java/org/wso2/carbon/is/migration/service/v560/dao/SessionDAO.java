@@ -18,6 +18,7 @@ package org.wso2.carbon.is.migration.service.v560.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 import static org.wso2.carbon.is.migration.service.v560.util.SQLConstants.UPDATE_IDN_AUTH_SESSION_STORE;
 
 /**

@@ -65,25 +65,23 @@ import static org.wso2.carbon.is.migration.util.Constant.TENANT_DOMAIN;
 import static org.wso2.carbon.is.migration.util.Constant.USERNAME_CLAIM;
 import static org.wso2.carbon.is.migration.util.Constant.USER_ID_CLAIM;
 
+/**
+ * UserIDMigrator.
+ */
 public class UserIDMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(UserIDMigrator.class);
-
-    private int increment = 100;
-    private int offset = 0;
-
     private static final String UPDATE_USER_ID_SQL =
             "UPDATE UM_USER " +
-            "SET UM_USER_ID = ? " +
-            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
-
+                    "SET UM_USER_ID = ? " +
+                    "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
     private static final String GET_USER_ID =
             "SELECT UM_USER_ID " +
-            "FROM UM_USER " +
-            "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
-
+                    "FROM UM_USER " +
+                    "WHERE UM_USER_NAME = ? AND UM_TENANT_ID = ?";
     private static final String DEFAULT_PROFILE = "default";
-
+    private int increment = 100;
+    private int offset = 0;
     private RealmService realmService = ISMigrationServiceDataHolder.getRealmService();
     private ReportUtil reportUtil;
     private int numberOfDomains;
@@ -103,7 +101,7 @@ public class UserIDMigrator extends Migrator {
 
             // If migrate all property is there, we have to migrate all the tenants.
             if (migrationProperties.containsKey(MIGRATE_ALL) && ((Boolean) migrationProperties.get(MIGRATE_ALL))) {
-                Tenant [] tenants = getAllTenants();
+                Tenant[] tenants = getAllTenants();
                 // Clear all other properties before we add our ones since we don't need other properties.
                 migrationProperties.clear();
                 for (Tenant tenant : tenants) {
@@ -241,7 +239,7 @@ public class UserIDMigrator extends Migrator {
             log.info("User id migration completed.");
         } catch (UserStoreException | SQLException e) {
             String message = String.format("Error occurred while updating user id for the user. user id updating " +
-                    "process stopped at the offset %d in domain %s in tenant %s", userCounter, userStoreDomain,
+                            "process stopped at the offset %d in domain %s in tenant %s", userCounter, userStoreDomain,
                     tenantDomain);
             log.error(message, e);
             throw new MigrationClientException(message, e);
@@ -307,7 +305,7 @@ public class UserIDMigrator extends Migrator {
         }
 
         String message = String.format("%s Tenant domain: %s | User Store domain: %s | Type: %s | SCIM Enabled: %s | " +
-                        "Suggestion: %s", tag, tenant, domain, type, scimEnabled, suggestion);
+                "Suggestion: %s", tag, tenant, domain, type, scimEnabled, suggestion);
         reportUtil.writeMessage(message);
         numberOfDomains++;
     }
@@ -352,7 +350,7 @@ public class UserIDMigrator extends Migrator {
         abstractUserStoreManager.setUserClaimValue(username, USERNAME_CLAIM, username, DEFAULT_PROFILE);
     }
 
-    private String [] getAllDomainNames(AbstractUserStoreManager abstractUserStoreManager) {
+    private String[] getAllDomainNames(AbstractUserStoreManager abstractUserStoreManager) {
 
         List<String> domainNames = new ArrayList<>();
 

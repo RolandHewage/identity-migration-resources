@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.is.migration.service.v540.bean;
 
+/**
+ * Permission.
+ */
 public class Permission {
 
     private int id;
@@ -77,10 +80,12 @@ public class Permission {
     }
 
     public int getUniqueId() {
+
         return uniqueId;
     }
 
     public void setUniqueId(int uniqueId) {
+
         this.uniqueId = uniqueId;
     }
 

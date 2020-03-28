@@ -42,6 +42,9 @@ import static org.wso2.is.data.sync.system.util.OAuth2Util.hashAuthorizationCode
 import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedAuthorizationCode;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForCode;
 
+/**
+ * AuthorizationCodeDataTransformerV570.
+ */
 @VersionAdvice(version = "5.7.0", tableName = "IDN_OAUTH2_AUTHORIZATION_CODE")
 public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
 
@@ -64,7 +67,7 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
                         isColumnNameInsLowerCase);
 
                 AuthorizationCodeInfo authorizationCodeInfo = new AuthorizationCodeInfo(authorizationCode,
-                                                                                        authorizationCodeHash);
+                        authorizationCodeHash);
                 if (encryptionWithTransformationEnabled) {
                     try {
                         transformEncryptedAuthorizationCode(authorizationCodeInfo);
@@ -88,7 +91,7 @@ public class AuthorizationCodeDataTransformerV570 implements DataTransformer {
             }
         } catch (IdentityOAuth2Exception e) {
             throw new SyncClientException("Error while checking authorization code encryption server configurations",
-                                          e);
+                    e);
         }
         return journalEntryList;
     }

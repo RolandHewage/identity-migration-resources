@@ -25,7 +25,7 @@ import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v530.RegistryDataManager;
 
 /**
- * Migration implementation for Challenge questions
+ * Migration implementation for Challenge questions.
  */
 public class ChallengeQuestionDataMigrator extends Migrator {
 
@@ -33,6 +33,7 @@ public class ChallengeQuestionDataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         migrateChallengeQuestionData();
     }
 
@@ -42,7 +43,7 @@ public class ChallengeQuestionDataMigrator extends Migrator {
         log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
-    public void migrateChallengeQuestionData()  {
+    public void migrateChallengeQuestionData() {
 
         RegistryDataManager registryDataManager = RegistryDataManager.getInstance();
         try {

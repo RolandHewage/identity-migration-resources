@@ -34,7 +34,6 @@ import org.wso2.carbon.identity.claim.metadata.mgt.model.LocalClaim;
 import org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
-import org.wso2.carbon.is.migration.service.v5100.migrator.UserIDMigrator;
 import org.wso2.carbon.is.migration.service.v540.util.FileBasedClaimBuilder;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Utility;
@@ -45,7 +44,6 @@ import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.claim.ClaimMapping;
 import org.wso2.carbon.user.core.claim.inmemory.ClaimConfig;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class handles the claim data migration.

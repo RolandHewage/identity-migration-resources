@@ -17,7 +17,7 @@
 package org.wso2.carbon.is.migration.service.v540;
 
 /**
- * Holds the SQL queries and related constants
+ * Holds the SQL queries and related constants.
  */
 public class SQLConstants {
 

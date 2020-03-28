@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -254,7 +255,8 @@ public class ClaimDataMigrator extends Migrator {
      * @param claimMapping      claim mappings
      * @throws ClaimMetadataException ClaimMetadataException
      */
-    private void addLocalClaimMapping(int tenantId, String primaryDomainName, String claimURI, ClaimMapping claimMapping) throws ClaimMetadataException {
+    private void addLocalClaimMapping(int tenantId, String primaryDomainName, String claimURI,
+                                      ClaimMapping claimMapping) throws ClaimMetadataException {
 
         List<AttributeMapping> mappedAttributes = new ArrayList<>();
         if (StringUtils.isNotBlank(claimMapping.getMappedAttribute())) {

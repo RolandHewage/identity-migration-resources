@@ -42,6 +42,7 @@ public class Claim {
 
     public Claim(String claimURI, String displayTag, String description, String regEx, boolean supportedByDefault,
                  boolean required, int displayOrder, boolean readOnly, int tenantId, String dialectURI) {
+
         this.claimURI = claimURI;
         this.displayTag = displayTag;
         this.description = description;
@@ -55,6 +56,7 @@ public class Claim {
     }
 
     public List<MappedAttribute> getAttributes() {
+
         if (attributes == null) {
             return new ArrayList<>();
         }
@@ -62,104 +64,135 @@ public class Claim {
     }
 
     public void setAttributes(List<MappedAttribute> attributes) {
+
         this.attributes = attributes;
     }
 
     public String getClaimURI() {
+
         return claimURI;
     }
 
     public void setClaimURI(String claimURI) {
+
         this.claimURI = claimURI;
     }
 
     public String getDisplayTag() {
+
         return displayTag;
     }
 
     public void setDisplayTag(String displayTag) {
+
         this.displayTag = displayTag;
     }
 
     public String getDescription() {
+
         return description;
     }
 
     public void setDescription(String description) {
+
         this.description = description;
     }
 
     public String getRegEx() {
+
         return regEx;
     }
 
     public void setRegEx(String regEx) {
+
         this.regEx = regEx;
     }
 
     public boolean isSupportedByDefault() {
+
         return supportedByDefault;
     }
 
     public void setSupportedByDefault(boolean supportedByDefault) {
+
         this.supportedByDefault = supportedByDefault;
     }
 
     public boolean isRequired() {
+
         return required;
     }
 
     public void setRequired(boolean required) {
+
         this.required = required;
     }
 
     public int getDisplayOrder() {
+
         return displayOrder;
     }
 
     public void setDisplayOrder(int displayOrder) {
+
         this.displayOrder = displayOrder;
     }
 
     public boolean isReadOnly() {
+
         return readOnly;
     }
 
     public void setReadOnly(boolean readOnly) {
+
         this.readOnly = readOnly;
     }
 
     public int getTenantId() {
+
         return tenantId;
     }
 
     public void setTenantId(int tenantId) {
+
         this.tenantId = tenantId;
     }
 
     public String getDialectURI() {
+
         return dialectURI;
     }
 
     public void setDialectURI(String dialectURI) {
+
         this.dialectURI = dialectURI;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Claim claim = (Claim) o;
 
-        if (tenantId != claim.tenantId) return false;
-        if (!claimURI.equals(claim.claimURI)) return false;
+        if (tenantId != claim.tenantId) {
+            return false;
+        }
+        if (!claimURI.equals(claim.claimURI)) {
+            return false;
+        }
         return dialectURI.equals(claim.dialectURI);
-
     }
 
     @Override
     public int hashCode() {
+
         int result = claimURI.hashCode();
         result = 31 * result + tenantId;
         result = 31 * result + dialectURI.hashCode();

@@ -21,21 +21,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * OAuthDAO.
+ */
 public class OAuthDAO {
 
     private static OAuthDAO instance = new OAuthDAO();
 
-    private final String UPDATE_TOKENS_OF_LOCAL_USERS = "UPDATE IDN_OAUTH2_ACCESS_TOKEN " +
+    private static final String UPDATE_TOKENS_OF_LOCAL_USERS = "UPDATE IDN_OAUTH2_ACCESS_TOKEN " +
             "SET IDP_ID = (SELECT ID FROM IDP " +
             "WHERE IDN_OAUTH2_ACCESS_TOKEN.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = \'LOCAL\') " +
             "WHERE USER_DOMAIN != \'FEDERATED\'";
 
-    private final String UPDATE_AUTH_CODES_OF_LOCAL_USERS = "UPDATE IDN_OAUTH2_AUTHORIZATION_CODE " +
+    private static final String UPDATE_AUTH_CODES_OF_LOCAL_USERS = "UPDATE IDN_OAUTH2_AUTHORIZATION_CODE " +
             "SET IDP_ID = (SELECT ID FROM IDP " +
             "WHERE IDN_OAUTH2_AUTHORIZATION_CODE.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = \'LOCAL\') " +
             "WHERE USER_DOMAIN != \'FEDERATED\'";
 
-    private OAuthDAO() { }
+    private OAuthDAO() {
+
+    }
 
     public static OAuthDAO getInstance() {
 
@@ -43,7 +48,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to persist IDP ID in database
+     * Method to persist IDP ID in database.
      *
      * @param connection
      * @throws SQLException
@@ -56,7 +61,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to persist IDP ID in database
+     * Method to persist IDP ID in database.
      *
      * @param connection
      * @throws SQLException

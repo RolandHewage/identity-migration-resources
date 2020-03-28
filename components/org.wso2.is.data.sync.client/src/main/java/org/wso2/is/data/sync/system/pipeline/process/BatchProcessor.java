@@ -33,11 +33,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SYNC_ID_KEY;
-import static org.wso2.is.data.sync.system.database.SQLQueryProvider.getQuery;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_INSERT_SYNC_ID_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_MAX_SYNC_ID_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_SYNC_DATA_MYSQL_KEY;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SYNC_ID_KEY;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.getQuery;
 import static org.wso2.is.data.sync.system.util.CommonUtil.convertResultToEntryField;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
@@ -48,9 +48,8 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_SYNC_ID;
 
 /**
  * Initial step of the data sync pipeline.
- *
+ * <p>
  * The batch processor prepares a list of {@link JournalEntry} by polling a journal instance in the source database.
- *
  */
 public class BatchProcessor {
 
@@ -83,7 +82,7 @@ public class BatchProcessor {
         if (sourceMaxSyncId > targetSyncId) {
             log.info("Fetching sync data for table: " + tableName + " from source table: " + syncTableName);
             journalEntryList = getSyncDataList(syncTableName, tableMetaData,
-                                               targetSyncId, batchSize, sourceConnection);
+                    targetSyncId, batchSize, sourceConnection);
             log.info("Fetched: " + journalEntryList.size() + " records for syncing for: " + tableName);
         } else {
             log.info("No data to sync for: " + tableName);
@@ -94,7 +93,6 @@ public class BatchProcessor {
     private List<JournalEntry> getSyncDataList(String syncTableName, TableMetaData
             tableMetaData, int targetSyncId, int batchSize, Connection sourceCon) throws SyncClientException {
 
-
         List<JournalEntry> journalEntryList = new ArrayList<>();
         // SELECT SYNC_ID, %s FROM %s WHERE SYNC_ID > ? AND SYNC_ID < ? GROUP
         // BY %s ORDER BY SYNC_ID ASC
@@ -102,7 +100,7 @@ public class BatchProcessor {
         sql = String.format(sql, tableMetaData.getColumns(), syncTableName);
         try (PreparedStatement ps = sourceCon.prepareStatement(sql)) {
             ps.setInt(1, targetSyncId);
-            ps.setInt(2, targetSyncId + batchSize +1);
+            ps.setInt(2, targetSyncId + batchSize + 1);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -153,7 +151,7 @@ public class BatchProcessor {
             }
         } catch (SQLException e) {
             throw new SyncClientException("Error while retrieving table metadata of target table: " +
-                                          syncVersionTableName, e);
+                    syncVersionTableName, e);
         }
         return targetSyncId;
     }
@@ -176,7 +174,7 @@ public class BatchProcessor {
             }
         } catch (SQLException e) {
             throw new SyncClientException("Error while retrieving table metadata of target table: " +
-                                          syncTableName, e);
+                    syncTableName, e);
         }
         return sourceMaxSyncId;
     }

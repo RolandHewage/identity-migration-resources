@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.is.migration.service.v540.bean;
 
+/**
+ * RolePermission.
+ */
 public class RolePermission {
 
     private int id;

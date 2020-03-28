@@ -1,23 +1,21 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v510.migrator;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -44,6 +42,7 @@ public class IdentityDataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         migrateIdentityData();
     }
 
@@ -54,9 +53,10 @@ public class IdentityDataMigrator extends Migrator {
     }
 
     /**
-     * migrate data in the identity database and finalize the database table restructuring
+     * migrate data in the identity database and finalize the database table restructuring.
      */
     public void migrateIdentityData() throws MigrationClientException {
+
         log.info("MIGRATION-LOGS >> Going to start : migrateIdentityData.");
         Connection identityConnection = null;
         PreparedStatement selectFromAccessTokenPS = null;
@@ -99,10 +99,10 @@ public class IdentityDataMigrator extends Migrator {
                             updateConsumerAppsPS.setString(1, username);
                             updateConsumerAppsPS.setString(2, userDomain);
                             updateConsumerAppsPS.setInt(3, id);
-                            if(isBatchUpdate()) {
+                            if (isBatchUpdate()) {
                                 isConsumerAppsAvail = true;
                                 updateConsumerAppsPS.addBatch();
-                            }else{
+                            } else {
                                 updateConsumerAppsPS.executeUpdate();
                                 log.info("MIGRATION-LOGS >> Executed query : " + updateConsumerAppsPS.toString());
                             }
@@ -117,7 +117,7 @@ public class IdentityDataMigrator extends Migrator {
                         }
                     }
                 }
-                if(isConsumerAppsAvail && isBatchUpdate()) {
+                if (isConsumerAppsAvail && isBatchUpdate()) {
                     int[] ints = updateConsumerAppsPS.executeBatch();
                     log.info("MIGRATION-LOGS >> Executed query : " + updateConsumerAppsPS.toString());
                 }
@@ -168,9 +168,9 @@ public class IdentityDataMigrator extends Migrator {
                                 insertTokenIdPS.setString(1, tokenId);
                                 insertTokenIdPS.setString(2, accessToken);
 
-                                if(isBatchUpdate()) {
+                                if (isBatchUpdate()) {
                                     insertTokenIdPS.addBatch();
-                                }else{
+                                } else {
                                     insertTokenIdPS.executeUpdate();
                                     log.info("MIGRATION-LOGS >> Executed query : " + insertTokenIdPS.toString());
                                 }
@@ -187,9 +187,9 @@ public class IdentityDataMigrator extends Migrator {
                                 updateUserNamePS.setString(3, userDomain);
                                 updateUserNamePS.setString(4, authzUser);
                                 updateUserNamePS.setString(5, accessToken);
-                                if(isBatchUpdate()) {
+                                if (isBatchUpdate()) {
                                     updateUserNamePS.addBatch();
-                                }else{
+                                } else {
                                     updateConsumerAppsPS.executeUpdate();
                                     log.info("MIGRATION-LOGS >> Executed query : " + updateConsumerAppsPS.toString());
                                 }
@@ -203,9 +203,9 @@ public class IdentityDataMigrator extends Migrator {
                             try {
                                 insertTokenScopeHashPS.setString(1, DigestUtils.md5Hex(scopeString));
                                 insertTokenScopeHashPS.setString(2, accessToken);
-                                if(isBatchUpdate()) {
+                                if (isBatchUpdate()) {
                                     insertTokenScopeHashPS.addBatch();
-                                }else{
+                                } else {
                                     insertTokenScopeHashPS.executeUpdate();
                                     log.info("MIGRATION-LOGS >> Executed query : " + insertTokenScopeHashPS.toString());
                                 }
@@ -226,19 +226,19 @@ public class IdentityDataMigrator extends Migrator {
                                     try {
                                         insertScopeAssociationPS.setString(1, tokenId);
                                         insertScopeAssociationPS.setString(2, scope);
-                                        if(isBatchUpdate()) {
+                                        if (isBatchUpdate()) {
                                             insertScopeAssociationPS.addBatch();
-                                        }else{
+                                        } else {
                                             insertScopeAssociationPS.executeUpdate();
                                             log.info("MIGRATION-LOGS >> Executed query : " +
-                                                     insertScopeAssociationPS.toString());
+                                                    insertScopeAssociationPS.toString());
                                         }
                                     } catch (Exception e) {
                                         log.error("MIGRATION-ERROR-LOGS-016 >> Error while executing the migration.",
-                                                  e);
+                                                e);
                                         if (!isContinueOnError()) {
                                             throw new MigrationClientException("Error while executing the migration.",
-                                                                               e);
+                                                    e);
                                         }
                                     }
                                 }
@@ -251,7 +251,7 @@ public class IdentityDataMigrator extends Migrator {
                         }
                     }
                 }
-                if(isBatchUpdate()) {
+                if (isBatchUpdate()) {
                     try {
                         insertTokenIdPS.executeBatch();
                         log.info("MIGRATION-LOGS >> Executed query : " + insertTokenIdPS.toString());
@@ -330,12 +330,12 @@ public class IdentityDataMigrator extends Migrator {
                                 updateUserNameAuthorizationCodePS.setString(4, UUID.randomUUID().toString());
                                 updateUserNameAuthorizationCodePS.setString(5, authzUser);
                                 updateUserNameAuthorizationCodePS.setString(6, authorizationCode);
-                                if(isBatchUpdate()) {
+                                if (isBatchUpdate()) {
                                     updateUserNameAuthorizationCodePS.addBatch();
-                                }else{
+                                } else {
                                     updateUserNameAuthorizationCodePS.executeUpdate();
                                     log.info("MIGRATION-LOGS >> Executed query : "
-                                             + updateUserNameAuthorizationCodePS.toString());
+                                            + updateUserNameAuthorizationCodePS.toString());
                                 }
                             } catch (Exception e) {
                                 log.error("MIGRATION-ERROR-LOGS-023 >> Error while executing the migration.", e);
@@ -354,7 +354,7 @@ public class IdentityDataMigrator extends Migrator {
                         }
                     }
                 }
-                if(isBatchUpdate()) {
+                if (isBatchUpdate()) {
                     updateUserNameAuthorizationCodePS.executeBatch();
                     log.info("MIGRATION-LOGS >> Executed query : " + updateUserNameAuthorizationCodePS.toString());
                 }
@@ -383,9 +383,9 @@ public class IdentityDataMigrator extends Migrator {
                             updateIdnAssociatedIdPS.setString(1, UserCoreUtil.extractDomainFromName(username));
                             updateIdnAssociatedIdPS.setString(2, UserCoreUtil.removeDomainFromName(username));
                             updateIdnAssociatedIdPS.setInt(3, id);
-                            if(isBatchUpdate()) {
+                            if (isBatchUpdate()) {
                                 updateIdnAssociatedIdPS.addBatch();
-                            }else{
+                            } else {
                                 updateIdnAssociatedIdPS.executeUpdate();
                                 log.info("MIGRATION-LOGS >> Executed query : " + updateIdnAssociatedIdPS.toString());
                             }
@@ -400,7 +400,7 @@ public class IdentityDataMigrator extends Migrator {
                         }
                     }
                 }
-                if(isBatchUpdate()) {
+                if (isBatchUpdate()) {
                     updateIdnAssociatedIdPS.executeBatch();
                     log.info("MIGRATION-LOGS >> Executed query : " + updateIdnAssociatedIdPS.toString());
                 }

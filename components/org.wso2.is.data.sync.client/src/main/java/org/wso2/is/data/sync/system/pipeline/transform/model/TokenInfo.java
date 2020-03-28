@@ -16,6 +16,9 @@
 
 package org.wso2.is.data.sync.system.pipeline.transform.model;
 
+/**
+ * TokenInfo.
+ */
 public class TokenInfo {
 
     private String accessToken;

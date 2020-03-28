@@ -44,6 +44,9 @@ import static org.wso2.is.data.sync.system.util.OAuth2Util.hashTokens;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedTokens;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForToken;
 
+/**
+ * OAuthTokenDataTransformerV570.
+ */
 @VersionAdvice(version = "5.7.0", tableName = "IDN_OAUTH2_ACCESS_TOKEN")
 public class OAuthTokenDataTransformerV570 implements DataTransformer {
 

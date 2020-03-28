@@ -36,12 +36,12 @@ import org.wso2.is.data.sync.system.pipeline.transform.v580.OAuthTokenDataTransf
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
+/**
+ * SyncService.
+ */
 public class SyncService {
 
     private Configuration configuration;
@@ -77,7 +77,7 @@ public class SyncService {
 
             DataTransformerFactory factory = new DataTransformerFactory(dataTransformers);
             PipelineConfiguration pipelineConfiguration = new PipelineConfiguration(configuration, table, schema,
-                                                                                    sourceDataSource, targetDataSource);
+                    sourceDataSource, targetDataSource);
             DataSyncPipeline dataSyncPipeline = new DataSyncPipeline(factory, pipelineConfiguration);
             dataSyncPipeline.build();
             long syncInterval = configuration.getSyncInterval();
