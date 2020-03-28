@@ -44,16 +44,19 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_INT;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_TIMESTAMP;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_VARCHAR;
 import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_DEF;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_NAME;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_SIZE;
+import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_TYPE_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.POSTGRESQL_PRODUCT_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_INSERT;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_UPDATE;
-import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_NAME;
-import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_COLUMN_SIZE;
-import static org.wso2.is.data.sync.system.util.Constant.JDBC_META_DATA_TYPE_NAME;
 
+/**
+ * CommonUtil.
+ */
 public class CommonUtil {
 
     private static Log log = LogFactory.getLog(CommonUtil.class);
@@ -106,13 +109,13 @@ public class CommonUtil {
 
         String columnEntryString;
         if (COLUMN_TYPE_TIMESTAMP.equalsIgnoreCase(columnEntry.getType()) ||
-            COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
-            COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
+                COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
+                COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
             columnEntryString = columnEntry.getName() + " " + columnEntry.getType();
         } else {
             String columnTemplate = "%s %s (%d)";
             columnEntryString = String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
-                                            columnEntry.getSize());
+                    columnEntry.getSize());
         }
         return columnEntryString;
     }
@@ -130,7 +133,8 @@ public class CommonUtil {
         return formattedName;
     }
 
-    public static EntryField<?> convertResultToEntryField(ResultSet resultSet, ColumnData columnData) throws SQLException {
+    public static EntryField<?> convertResultToEntryField(ResultSet resultSet, ColumnData columnData)
+            throws SQLException {
 
         String columnType = columnData.getType();
         String columnName = columnData.getName();
@@ -175,8 +179,6 @@ public class CommonUtil {
         }
     }
 
-
-
     public static List<ColumnData> getColumnData(String tableName, Connection connection) throws SyncClientException {
 
         try {
@@ -187,12 +189,12 @@ public class CommonUtil {
                 tableName = tableName.toLowerCase();
             }
 
-            try(ResultSet resultSet = metaData.getColumns(null, null, tableName, null)) {
+            try (ResultSet resultSet = metaData.getColumns(null, null, tableName, null)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
                     String type = resultSet.getString(JDBC_META_DATA_TYPE_NAME);
                     int size = resultSet.getInt(JDBC_META_DATA_COLUMN_SIZE);
-                    String columnDefaultVal =  resultSet.getString(JDBC_META_DATA_COLUMN_DEF);
+                    String columnDefaultVal = resultSet.getString(JDBC_META_DATA_COLUMN_DEF);
 
                     ColumnData columnData = new ColumnData(name, type, size);
                     columnData.setDefaultValue(columnDefaultVal);
@@ -243,7 +245,7 @@ public class CommonUtil {
             return primaryKeys;
         } catch (SQLException e) {
             throw new SyncClientException("Error while retrieving table primary metadata of source table: " + tableName,
-                                          e);
+                    e);
         }
     }
 

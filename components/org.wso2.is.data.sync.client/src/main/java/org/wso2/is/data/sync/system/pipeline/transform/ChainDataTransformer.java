@@ -33,6 +33,7 @@ public class ChainDataTransformer implements DataTransformer {
     @Override
     public List<JournalEntry> transform(List<JournalEntry> journalEntryList, PipelineContext context)
             throws SyncClientException {
+
         List<JournalEntry> nextResult = journalEntryList;
 
         for (DataTransformer dataTransformer : dataTransformers) {

@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v510.migrator;
 
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Identity Data cleaner implementation for Migration
+ * Identity Data cleaner implementation for Migration.
  */
 public class IdentityDataCleaner extends Migrator {
 
@@ -44,10 +44,12 @@ public class IdentityDataCleaner extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         cleanIdentityData();
     }
 
     public void cleanIdentityData() throws MigrationClientException {
+
         log.info("MIGRATION-LOGS >> Going to start : cleanIdentityData.");
         Connection identityConnection = null;
         PreparedStatement selectFromAccessTokenPS = null;
@@ -66,7 +68,7 @@ public class IdentityDataCleaner extends Migrator {
                 deleteDeleteRow = identityConnection.prepareStatement(SQLQueries.DELETE_USERNAME_WITH_SPACE);
                 int rowCount = deleteDeleteRow.executeUpdate();
                 log.info("MIGRATION-LOGS >> Deleting " + rowCount + " rows  having spaces in user name in " +
-                         "IDN_OAUTH2_ACCESS_TOKEN");
+                        "IDN_OAUTH2_ACCESS_TOKEN");
                 log.info("MIGRATION-LOGS >> Executed query : " + deleteDeleteRow.toString());
             } catch (Exception e) {
                 log.error("MIGRATION-ERROR-LOGS-009 >> Error while executing the migration.", e);
@@ -91,14 +93,14 @@ public class IdentityDataCleaner extends Migrator {
                     selectDuplicateUserNamePS.setString(1, accessTokenRS.getString("CONSUMER_KEY"));
                     selectDuplicateUserNamePS.setString(2, UserCoreUtil
                             .addTenantDomainToEntry(accessTokenRS.getString("AUTHZ_USER"),
-                                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
                     selectDuplicateUserNamePS.setString(3, accessTokenRS.getString("USER_TYPE"));
                     selectDuplicateUserNamePS.setString(4, accessTokenRS.getString("TOKEN_SCOPE"));
 
                     duplicateUserNameRS = selectDuplicateUserNamePS.executeQuery();
                     if (duplicateUserNameRS.next()) {
                         log.info("MIGRATION-LOGS >> deleting corrupted row : ACCESS_TOKEN-" +
-                                 accessTokenRS.getString("ACCESS_TOKEN"));
+                                accessTokenRS.getString("ACCESS_TOKEN"));
                         deleteDuplicateUserNamePS.setString(1, accessTokenRS.getString("ACCESS_TOKEN"));
                         log.info(deleteDuplicateUserNamePS.toString());
                         log.info("Prepared statement {}", deleteDuplicateUserNamePS);

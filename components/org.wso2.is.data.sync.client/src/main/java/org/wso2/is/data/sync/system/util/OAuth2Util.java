@@ -46,6 +46,9 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_IDP_ID;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
 
+/**
+ * OAuth2Util.
+ */
 public class OAuth2Util {
 
     private static final String CIPHER_TRANSFORMATION_SYSTEM_PROPERTY = "org.wso2.CipherTransformation";
@@ -57,14 +60,15 @@ public class OAuth2Util {
     }
 
     /**
-     * This method will check whether token encryption is enabled via identity.xml
+     * This method will check whether token encryption is enabled via identity.xml.
+     *
      * @return whether token encryption is enabled.
      * @throws IdentityOAuth2Exception
      */
     public static boolean isTokenEncryptionEnabled() throws IdentityOAuth2Exception {
 
         TokenPersistenceProcessor persistenceProcessor = OAuthServerConfiguration.getInstance()
-                                                                                 .getPersistenceProcessor();
+                .getPersistenceProcessor();
         return (persistenceProcessor instanceof EncryptionDecryptionPersistenceProcessor);
     }
 
@@ -101,7 +105,7 @@ public class OAuth2Util {
             tokenInfo.setRefreshTokenHash(refreshTokenHash);
         } catch (IdentityOAuth2Exception e) {
             throw new SyncClientException("Error while hashing access/refresh token with " +
-                                          "HashingPersistenceProcessor.", e);
+                    "HashingPersistenceProcessor.", e);
         }
         return tokenInfo;
     }
@@ -124,7 +128,7 @@ public class OAuth2Util {
             authorizationCodeInfo.setAuthorizationCodeHash(authorizationCodeHash);
         } catch (IdentityOAuth2Exception e) {
             throw new SyncClientException("Error while hashing access/refresh token with " +
-                                          "HashingPersistenceProcessor.", e);
+                    "HashingPersistenceProcessor.", e);
         }
         return authorizationCodeInfo;
     }

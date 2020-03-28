@@ -32,7 +32,7 @@ public interface DataTransformer {
      * Transform journal entries from one format to another.
      *
      * @param journalEntryList List of {@link JournalEntry} objects to be transformed.
-     * @param context Context of the current data sync pipeline
+     * @param context          Context of the current data sync pipeline
      * @return Transformed list of {@link JournalEntry}.
      * @throws SyncClientException If error occurs while data transformation.
      */

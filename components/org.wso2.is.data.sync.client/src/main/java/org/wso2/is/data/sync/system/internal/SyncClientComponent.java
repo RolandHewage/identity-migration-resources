@@ -36,14 +36,15 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_CONFIG_FILE_PATH;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_GENERATE_DDL;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_PREPARE_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_DATA;
 
+/**
+ * SyncClientComponent.
+ */
 @Component(
         name = "org.wso2.carbon.is.sync.client",
         immediate = true
@@ -58,7 +59,7 @@ public class SyncClientComponent {
      * -DsyncData - Enable data sync related operations.
      * -DprepareSync - creates the sync triggers and tables.
      * -DgenerateDDL - (works with -DprepareSync) only generates DDLs and write to a file.
-     *
+     * <p>
      * For additional configurations, see {@link ConfigurationBuilder}
      *
      * @param context ComponentContext.

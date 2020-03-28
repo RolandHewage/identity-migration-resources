@@ -16,6 +16,10 @@
 
 package org.wso2.is.data.sync.system.pipeline;
 
+/**
+ * EntryField.
+ * @param <T> Type.
+ */
 public class EntryField<T> {
 
     private T value;

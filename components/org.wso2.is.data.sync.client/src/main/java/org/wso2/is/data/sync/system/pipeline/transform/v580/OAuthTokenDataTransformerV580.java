@@ -17,26 +17,15 @@
 package org.wso2.is.data.sync.system.pipeline.transform.v580;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.VersionAdvice;
 import org.wso2.is.data.sync.system.pipeline.transform.model.TokenInfo;
-import org.wso2.is.data.sync.system.util.OAuth2Util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
-import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_IDP_ID;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getObjectValueFromEntry;
 import static org.wso2.is.data.sync.system.util.CommonUtil.isIdentifierNamesMaintainedInLowerCase;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
@@ -45,16 +34,13 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_USER_DOMAIN;
 import static org.wso2.is.data.sync.system.util.Constant.FEDERATED;
-import static org.wso2.is.data.sync.system.util.Constant.PROPERTY_NAME_ALGORITHM;
-import static org.wso2.is.data.sync.system.util.Constant.PROPERTY_NAME_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_IDN_OAUTH2_ACCESS_TOKEN;
-import static org.wso2.is.data.sync.system.util.Constant.TABLE_IDN_OAUTH2_AUTHORIZATION_CODE;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.getIdpId;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.hashTokens;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.transformEncryptedTokens;
-import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForCode;
 import static org.wso2.is.data.sync.system.util.OAuth2Util.updateJournalEntryForToken;
 
+/**
+ * OAuthTokenDataTransformerV580.
+ */
 @VersionAdvice(version = "5.8.0", tableName = "IDN_OAUTH2_ACCESS_TOKEN")
 public class OAuthTokenDataTransformerV580 implements DataTransformer {
 

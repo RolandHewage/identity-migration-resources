@@ -19,6 +19,9 @@ package org.wso2.is.data.sync.system.pipeline;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * JournalEntry.
+ */
 public class JournalEntry {
 
     private Map<String, EntryField<?>> rowEntry = new HashMap<>();

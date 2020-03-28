@@ -49,11 +49,11 @@ public class UMAPermissionTicketSchemaMigrator extends SchemaMigrator {
             if (!isColumnExist(connection, COLUMN_NAME_TOKEN_ID, TABLE_NAME_IDN_UMA_PERMISSION_TICKET)) {
 
                 log.info(COLUMN_NAME_TOKEN_ID + " column does not exist in the table " +
-                         TABLE_NAME_IDN_UMA_PERMISSION_TICKET + ". Hence adding the column.");
+                        TABLE_NAME_IDN_UMA_PERMISSION_TICKET + ". Hence adding the column.");
                 super.migrate();
             } else {
                 log.info(COLUMN_NAME_TOKEN_ID + " column already exist in the table " +
-                         TABLE_NAME_IDN_UMA_PERMISSION_TICKET + ". Hence skipping.");
+                        TABLE_NAME_IDN_UMA_PERMISSION_TICKET + ". Hence skipping.");
             }
         } catch (SQLException e) {
             log.error("Error while obtaining connection from identity data source.", e);

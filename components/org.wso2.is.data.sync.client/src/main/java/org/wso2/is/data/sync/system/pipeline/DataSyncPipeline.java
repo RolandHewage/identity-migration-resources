@@ -18,12 +18,12 @@ package org.wso2.is.data.sync.system.pipeline;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.is.data.sync.system.config.Configuration;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
-import org.wso2.is.data.sync.system.pipeline.process.BatchProcessor;
 import org.wso2.is.data.sync.system.pipeline.persist.Persistor;
+import org.wso2.is.data.sync.system.pipeline.process.BatchProcessor;
 import org.wso2.is.data.sync.system.pipeline.result.ResultHandler;
 import org.wso2.is.data.sync.system.pipeline.result.TransactionResult;
-import org.wso2.is.data.sync.system.config.Configuration;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformerFactory;
 
@@ -42,13 +42,13 @@ import java.util.List;
  */
 public class DataSyncPipeline {
 
+    private static final Log log = LogFactory.getLog(DataSyncPipeline.class);
     private Persistor persistor;
     private DataTransformer dataTransformer;
     private BatchProcessor batchProcessor;
     private ResultHandler resultHandler;
     private DataTransformerFactory dataTransformerFactory;
     private PipelineConfiguration pipelineConfiguration;
-    private static final Log log = LogFactory.getLog(DataSyncPipeline.class);
     private boolean active = true;
 
     public DataSyncPipeline(DataTransformerFactory dataTransformerFactory, PipelineConfiguration

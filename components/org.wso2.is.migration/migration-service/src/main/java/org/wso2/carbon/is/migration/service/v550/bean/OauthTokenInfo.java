@@ -15,6 +15,9 @@
  */
 package org.wso2.carbon.is.migration.service.v550.bean;
 
+/**
+ * OauthTokenInfo.
+ */
 public class OauthTokenInfo {
 
     private String tokenId;
@@ -24,58 +27,71 @@ public class OauthTokenInfo {
     private String refreshTokenHash;
 
     public OauthTokenInfo(String tokenId) {
+
         this.tokenId = tokenId;
     }
 
     public OauthTokenInfo(String accessToken, String refreshToken, String tokenId) {
+
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.tokenId = tokenId;
     }
 
     public OauthTokenInfo(OauthTokenInfo oauthTokenInfo) {
+
         this(oauthTokenInfo.getAccessToken(), oauthTokenInfo.getRefreshToken(), oauthTokenInfo.getTokenId());
         accessTokenHash = oauthTokenInfo.getAccessTokenHash();
         refreshTokenHash = oauthTokenInfo.getRefreshTokenHash();
     }
 
     public String getAccessTokenHash() {
+
         return accessTokenHash;
     }
 
     public void setAccessTokenHash(String accessTokenHash) {
+
         this.accessTokenHash = accessTokenHash;
     }
 
     public String getRefreshTokenHash() {
+
         return refreshTokenHash;
     }
 
     public void setRefreshTokenHash(String refreshTokenhash) {
+
         this.refreshTokenHash = refreshTokenhash;
     }
 
     public String getAccessToken() {
+
         return accessToken;
     }
 
     public void setAccessToken(String accessToken) {
+
         this.accessToken = accessToken;
     }
 
     public String getRefreshToken() {
+
         return refreshToken;
     }
 
     public void setRefreshToken(String refreshToken) {
+
         this.refreshToken = refreshToken;
     }
 
     public String getTokenId() {
+
         return tokenId;
     }
 
     public void setTokenId(String tokenId) {
+
         this.tokenId = tokenId;
     }
 

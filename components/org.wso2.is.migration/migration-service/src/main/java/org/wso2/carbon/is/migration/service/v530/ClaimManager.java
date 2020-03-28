@@ -30,23 +30,25 @@ import org.wso2.carbon.is.migration.service.v530.dao.ClaimDAO;
 import java.util.List;
 
 /**
- * Claim Manager
+ * Claim Manager.
  */
 public class ClaimManager {
 
     private static Logger log = LoggerFactory.getLogger(ClaimDialectDAO.class);
-    private ClaimDAO claimDAO = ClaimDAO.getInstance();
     private static ClaimManager claimManager = new ClaimManager();
+    private ClaimDAO claimDAO = ClaimDAO.getInstance();
 
     private ClaimManager() {
+
     }
 
     public static ClaimManager getInstance() {
+
         return claimManager;
     }
 
     /**
-     * Adding claim dialects
+     * Adding claim dialects.
      *
      * @param claimList
      * @throws ISMigrationException
@@ -60,11 +62,11 @@ public class ClaimManager {
             if (id == 0) {
                 claimDAO.addClaimDialect(claim.getDialectURI(), claim.getTenantId());
                 report.append("\n\n Added claim Dialect : " + claim.getDialectURI() + " in tenant domain :" +
-                              IdentityTenantUtil.getTenantDomain(claim.getTenantId()));
+                        IdentityTenantUtil.getTenantDomain(claim.getTenantId()));
 
                 if (log.isDebugEnabled()) {
                     log.debug("\n\n Added claim Dialect : " + claim.getDialectURI() + " in tenant domain :" +
-                              IdentityTenantUtil.getTenantDomain(claim.getTenantId()));
+                            IdentityTenantUtil.getTenantDomain(claim.getTenantId()));
                 }
             }
         }
@@ -73,7 +75,7 @@ public class ClaimManager {
     }
 
     /**
-     * Adding local claims
+     * Adding local claims.
      *
      * @param claimCList
      * @throws ISMigrationException
@@ -86,25 +88,25 @@ public class ClaimManager {
             if (ClaimConstants.LOCAL_CLAIM_DIALECT_URI.equalsIgnoreCase(claim.getDialectURI())) {
                 claimDAO.addLocalClaim(claim);
                 report.append("\n Added Local Claim: " + claim.getDialectURI() + " in tenant domain :" +
-                              IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + ", Mapped Attributes :");
+                        IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + ", Mapped Attributes :");
                 for (MappedAttribute mappedAttribute : claim.getAttributes()) {
                     if (mappedAttribute.getDomain() == null) {
                         report.append(" " + IdentityUtil.getPrimaryDomainName() + "/" +
-                                      mappedAttribute.getAttribute() + " ,");
+                                mappedAttribute.getAttribute() + " ,");
                     } else {
                         report.append(" " + mappedAttribute.getDomain() + "/" +
-                                      mappedAttribute.getAttribute() + " ,");
+                                mappedAttribute.getAttribute() + " ,");
                     }
                 }
                 report.append("\n");
 
                 if (log.isDebugEnabled()) {
                     log.debug("\n Added Local Claim " + claim.getDialectURI() + " in tenant domain :" +
-                              IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + "Mapped Attributes :");
+                            IdentityTenantUtil.getTenantDomain(claim.getTenantId()) + "Mapped Attributes :");
                     for (MappedAttribute mappedAttribute : claim.getAttributes()) {
                         if (mappedAttribute.getDomain() == null) {
                             log.debug(" " + IdentityUtil.getPrimaryDomainName() + "/" + mappedAttribute.getAttribute()
-                                      + "" + " ,");
+                                    + "" + " ,");
                         } else {
                             log.debug(" " + mappedAttribute.getDomain() + "/" + mappedAttribute.getAttribute() + " ,");
                         }
@@ -116,7 +118,7 @@ public class ClaimManager {
     }
 
     /**
-     * Adding external claims
+     * Adding external claims.
      *
      * @param claims
      * @throws ISMigrationException

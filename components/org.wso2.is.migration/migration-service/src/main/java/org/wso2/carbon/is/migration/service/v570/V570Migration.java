@@ -19,14 +19,20 @@ package org.wso2.carbon.is.migration.service.v570;
 
 import org.wso2.carbon.is.migration.VersionMigration;
 
+/**
+ * V570Migration.
+ */
 public class V570Migration extends VersionMigration {
+
     @Override
     public String getPreviousVersion() {
+
         return "5.6.0";
     }
 
     @Override
     public String getCurrentVersion() {
+
         return "5.7.0";
     }
 }

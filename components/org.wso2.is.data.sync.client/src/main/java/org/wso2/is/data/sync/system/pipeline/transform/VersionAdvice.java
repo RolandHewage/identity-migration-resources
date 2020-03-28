@@ -29,6 +29,7 @@ import java.lang.annotation.Target;
 public @interface VersionAdvice {
 
     String version();
+
     String tableName();
 
 }

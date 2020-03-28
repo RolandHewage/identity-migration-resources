@@ -20,6 +20,9 @@ import org.wso2.is.data.sync.system.config.Configuration;
 
 import javax.sql.DataSource;
 
+/**
+ * PipelineConfiguration.
+ */
 public class PipelineConfiguration {
 
     private Configuration configuration;

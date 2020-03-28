@@ -41,7 +41,7 @@ public class DataTransformerFactory {
      * Builds and return an instance of {@link ChainDataTransformer} which contains an ordered list of data
      * transformers required for the data sync pipeline.
      *
-     * @param tableName Name of the data sync table.
+     * @param tableName     Name of the data sync table.
      * @param sourceVersion Data sync source product version.
      * @param targetVersion Data sync target product version.
      * @return Instance of a ChainDataTransformer;
@@ -61,7 +61,7 @@ public class DataTransformerFactory {
 
                 if (tfVersion < 0) {
                     log.warn("Custom transformer: " + dataTransformer.getClass().getName() + " supports an invalid " +
-                             "product version: " + version);
+                            "product version: " + version);
                     continue;
                 }
                 boolean canTransform = canTransform(sourceVersion, targetVersion, tableName, advice, tfVersion);
@@ -69,7 +69,7 @@ public class DataTransformerFactory {
                 if (canTransform) {
                     tempDataTransformers.add(createNewInstance(dataTransformer));
                     log.info("Custom transformer: " + dataTransformer.getClass().getName() + " with version: " +
-                             version +" available for table: " + tableName);
+                            version + " available for table: " + tableName);
                     hasCustomTransformer = true;
                 }
             }
@@ -88,8 +88,8 @@ public class DataTransformerFactory {
                                  int tfVersion) {
 
         return advice.tableName().equals(table) &&
-               (resolveVersion(sourceVersion) <= tfVersion) &&
-               (resolveVersion(targetVersion) >= tfVersion);
+                (resolveVersion(sourceVersion) <= tfVersion) &&
+                (resolveVersion(targetVersion) >= tfVersion);
     }
 
     private int resolveVersion(String version) {

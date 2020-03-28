@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.is.migration.service.v530;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
@@ -39,6 +37,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.StringTokenizer;
+
 import javax.sql.DataSource;
 
 import static org.wso2.carbon.is.migration.util.Constant.IDENTITY_DB_SCRIPT;
@@ -57,12 +56,13 @@ public class MigrationDatabaseCreator {
     private String delimiter = ";";
 
     public MigrationDatabaseCreator(DataSource dataSource, DataSource umDataSource) {
+
         this.dataSource = dataSource;
         this.umDataSource = umDataSource;
     }
 
     /**
-     * Execute Migration Script
+     * Execute Migration Scriptd.
      *
      * @throws Exception
      */
@@ -79,7 +79,7 @@ public class MigrationDatabaseCreator {
             DatabaseMetaData meta = conn.getMetaData();
 
             String dbscriptName = getIdentityDbScriptLocation(databaseType, Constants.VERSION_5_2_0,
-                                                              Constants.VERSION_5_3_0);
+                    Constants.VERSION_5_3_0);
             executeSQLScript(dbscriptName);
             conn.commit();
             if (log.isTraceEnabled()) {
@@ -161,7 +161,7 @@ public class MigrationDatabaseCreator {
     }
 
     /**
-     * executes content in SQL script
+     * executes content in SQL script.
      *
      * @return StringBuffer
      * @throws Exception
@@ -240,7 +240,7 @@ public class MigrationDatabaseCreator {
     }
 
     /**
-     * executes given sql
+     * executes given sql.
      *
      * @param sql
      * @throws Exception
@@ -304,11 +304,12 @@ public class MigrationDatabaseCreator {
     }
 
     /**
-     * rollback the transaction
+     * rollback the transaction.
      *
      * @param dbConnection database connection
      */
     public void rollbackTransaction(Connection dbConnection) {
+
         try {
             if (dbConnection != null) {
                 dbConnection.rollback();

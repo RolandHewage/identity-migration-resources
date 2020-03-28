@@ -38,6 +38,7 @@ public class DataSourceEntry {
     }
 
     public String getType() {
+
         return type;
     }
 }

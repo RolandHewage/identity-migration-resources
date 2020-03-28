@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.is.migration.service.v530.migrator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -27,7 +25,7 @@ import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v530.RegistryDataManager;
 
 /**
- * Migration implementation for OIDC scope data migration
+ * Migration implementation for OIDC scope data migration.
  */
 public class OIDCScopeDataMigrator extends Migrator {
 
@@ -35,6 +33,7 @@ public class OIDCScopeDataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         copyOIDCScopeData();
     }
 

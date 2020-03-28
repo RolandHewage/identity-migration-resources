@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.is.migration.service.v550;
 
+/**
+ * SQLConstants.
+ */
 public class SQLConstants {
 
     public static final String RETRIEVE_ACCESS_TOKEN_TABLE_MYSQL =

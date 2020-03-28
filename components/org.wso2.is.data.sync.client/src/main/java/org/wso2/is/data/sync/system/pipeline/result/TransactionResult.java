@@ -18,6 +18,9 @@ package org.wso2.is.data.sync.system.pipeline.result;
 
 import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 
+/**
+ * TransactionResult.
+ */
 public class TransactionResult {
 
     private JournalEntry journalEntry;

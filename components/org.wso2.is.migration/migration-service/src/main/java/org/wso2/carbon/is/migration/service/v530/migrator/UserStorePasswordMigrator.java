@@ -40,17 +40,22 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+/**
+ * UserStorePasswordMigrator.
+ */
 public class UserStorePasswordMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(UserStorePasswordMigrator.class);
 
     @Override
     public void migrate() throws MigrationClientException {
+
         log.info(Constant.MIGRATION_LOG + "Migration starting on Secondary User Stores");
         updateSuperTenantConfigs();
         updateTenantConfigs();
@@ -96,6 +101,7 @@ public class UserStorePasswordMigrator extends Migrator {
     }
 
     private void updateSuperTenantConfigs() {
+
         try {
             File[] userstoreConfigs = getUserStoreConfigFiles(Constant.SUPER_TENANT_ID);
             for (File file : userstoreConfigs) {
@@ -113,11 +119,11 @@ public class UserStorePasswordMigrator extends Migrator {
         String carbonHome = System.getProperty(Constant.CARBON_HOME);
         String userStorePath;
         if (tenantId == Constant.SUPER_TENANT_ID) {
-            userStorePath = Paths.get(carbonHome, new String[] { "repository", "deployment", "server", "userstores" })
+            userStorePath = Paths.get(carbonHome, new String[]{"repository", "deployment", "server", "userstores"})
                     .toString();
         } else {
             userStorePath = Paths
-                    .get(carbonHome, new String[] { "repository", "tenants", String.valueOf(tenantId), "userstores" })
+                    .get(carbonHome, new String[]{"repository", "tenants", String.valueOf(tenantId), "userstores"})
                     .toString();
         }
         File[] files = new File(userStorePath).listFiles();

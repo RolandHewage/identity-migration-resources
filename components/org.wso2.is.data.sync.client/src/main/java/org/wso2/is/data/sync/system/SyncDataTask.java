@@ -29,12 +29,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncDataTask implements Runnable {
 
+    private static final Log log = LogFactory.getLog(SyncDataTask.class);
     private DataSyncPipeline dataSyncPipeline;
     private String table;
     private String schema;
     private long syncInterval;
     private volatile boolean active;
-    private static final Log log = LogFactory.getLog(SyncDataTask.class);
 
     public SyncDataTask(DataSyncPipeline dataSyncPipeline, String table, String schema, long syncInterval) {
 

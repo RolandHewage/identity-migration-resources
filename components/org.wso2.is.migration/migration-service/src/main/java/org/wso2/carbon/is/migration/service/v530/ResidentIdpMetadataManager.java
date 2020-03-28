@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.is.migration.service.v530;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.is.migration.service.v530.dao.IdpMetaDataDAO;
@@ -31,11 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Migrates default governance connector properties for tenants created on IS 5.2.0
+ * Migrates default governance connector properties for tenants created on IS 5.2.0.
  */
 public class ResidentIdpMetadataManager {
-
-    private Logger log = LoggerFactory.getLogger(ResidentIdpMetadataManager.class);
 
     // Default governance connector properties
     private static final Map<String, String> DEFAULT_PROPERTIES = new HashMap<String, String>() {{
@@ -58,7 +54,7 @@ public class ResidentIdpMetadataManager {
         put("passwordHistory.AlreadyWritten", String.valueOf(true));
         put("passwordPolicy.pattern", "^((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*])).{0,100}$");
         put("passwordPolicy.errorMsg", "Password pattern policy violated. Password should contain a digit[0-9], " +
-                                       "a lower case letter[a-z], an upper case letter[A-Z], one of !@#$%&* characters");
+                "a lower case letter[a-z], an upper case letter[A-Z], one of !@#$%&* characters");
         put("passwordPolicy.enable", String.valueOf(false));
         put("passwordPolicy.min.length", String.valueOf(6));
         put("passwordPolicy.max.length", String.valueOf(12));
@@ -88,7 +84,7 @@ public class ResidentIdpMetadataManager {
         put("Recovery.AdminPasswordReset.OTP", String.valueOf(false));
         put("admin-forced-password-reset.AlreadyWritten", String.valueOf(true));
     }};
-
+    private Logger log = LoggerFactory.getLogger(ResidentIdpMetadataManager.class);
 
     @Deprecated
     public void migrateResidentIdpMetaData(boolean migrateActiveTenantsOnly) throws Exception {
@@ -103,7 +99,7 @@ public class ResidentIdpMetadataManager {
             try {
                 if (migrateActiveTenantsOnly && !tenant.isActive()) {
                     log.info("Tenant " + tenant.getDomain() + " is inactive. Skipping Resident IDP " +
-                             "metadata migration!!!!");
+                            "metadata migration!!!!");
                     continue;
                 }
 
@@ -116,7 +112,8 @@ public class ResidentIdpMetadataManager {
 
                 // already available resident idp property names
                 List<String> availablePropertyNames = idpMetaDataDAO.getAvailableConfigNames(tenant.getId(), idpId);
-                List<IdpMetaDataDAO.IdpMetaData> idpMetaDataToAdd = new ArrayList<>(); // default properties that we need to add
+                // Default properties that we need to add.
+                List<IdpMetaDataDAO.IdpMetaData> idpMetaDataToAdd = new ArrayList<>();
                 // we try and insert the missing properties
                 for (Map.Entry<String, String> entry : DEFAULT_PROPERTIES.entrySet()) {
                     // first check if the connector property is already defined in the resident IDP
@@ -125,7 +122,7 @@ public class ResidentIdpMetadataManager {
                         log.info(String.format(msg, entry.getKey(), entry.getValue(), tenant.getDomain()));
 
                         idpMetaDataToAdd.add(new IdpMetaDataDAO.IdpMetaData(idpId, entry.getKey(), entry.getValue(),
-                                                                            null, tenant.getId()));
+                                null, tenant.getId()));
                     }
                 }
                 // write the missing properties to the DB
@@ -148,7 +145,7 @@ public class ResidentIdpMetadataManager {
             try {
                 if (migrateActiveTenantsOnly && !tenant.isActive()) {
                     log.info("Tenant " + tenant.getDomain() + " is inactive. Skipping Resident IDP " +
-                             "metadata migration!!!!");
+                            "metadata migration!!!!");
                     continue;
                 }
 
@@ -161,7 +158,8 @@ public class ResidentIdpMetadataManager {
 
                 // already available resident idp property names
                 List<String> availablePropertyNames = idpMetaDataDAO.getAvailableConfigNames(tenant.getId(), idpId);
-                List<IdpMetaDataDAO.IdpMetaData> idpMetaDataToAdd = new ArrayList<>(); // default properties that we need to add
+                // Default properties that we need to add.
+                List<IdpMetaDataDAO.IdpMetaData> idpMetaDataToAdd = new ArrayList<>();
                 // we try and insert the missing properties
                 for (Map.Entry<String, String> entry : DEFAULT_PROPERTIES.entrySet()) {
                     // first check if the connector property is already defined in the resident IDP
@@ -170,7 +168,7 @@ public class ResidentIdpMetadataManager {
                         log.info(String.format(msg, entry.getKey(), entry.getValue(), tenant.getDomain()));
 
                         idpMetaDataToAdd.add(new IdpMetaDataDAO.IdpMetaData(idpId, entry.getKey(), entry.getValue(),
-                                                                            null, tenant.getId()));
+                                null, tenant.getId()));
                     }
                 }
                 // write the missing properties to the DB

@@ -43,6 +43,48 @@ import static org.wso2.is.data.sync.system.util.Constant.TABLE_ATTRIBUTE_PRIMARY
  */
 public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
 
+    public static String generateColumnList(List<ColumnData> columnData) {
+
+        StringJoiner columnJoiner = new StringJoiner(", ");
+
+        for (ColumnData columnEntry : columnData) {
+            columnJoiner.add(getColumnEntryString(columnEntry));
+        }
+        return columnJoiner.toString();
+    }
+
+    private static String getColumnEntryString(ColumnData columnEntry) {
+
+        String columnEntryString;
+        if (COLUMN_TYPE_TIMESTAMP.equalsIgnoreCase(columnEntry.getType()) ||
+                COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
+                COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
+
+            // Let the database assign default sizes for the filtered column.
+            // Column format: "COLUMN_NAME COLUMN_TYPE DEFAULT DEFAULT_VALUE".
+            columnEntryString = columnEntry.getName() + " " + columnEntry.getType();
+            if (columnEntry.getDefaultValue() != null) {
+                columnEntryString = columnEntryString + " DEFAULT " + columnEntry.getDefaultValue();
+            }
+        } else {
+            // Setting the columns size for other columns.
+            // Column format: "COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE) eg: VARCHAR".
+            String columnTemplate = "%s %s (%d)";
+            columnEntryString = String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
+                    columnEntry.getSize());
+            if (columnEntry.getDefaultValue() != null) {
+                columnEntryString = columnEntryString + " DEFAULT '" + columnEntry.getDefaultValue() + "'";
+            }
+        }
+
+        if (columnEntry.isAutoIncrement()) {
+            // Setting the AUTO_INCREMENT attribute to a column.
+            // Column format: "COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE) AUTO_INCREMENT".
+            columnEntryString = columnEntryString + " " + COLUMN_ATTRIBUTE_AUTO_INCREMENT;
+        }
+        return columnEntryString;
+    }
+
     @Override
     public List<String> generateCreateTable(Table table) throws SyncClientException {
 
@@ -97,8 +139,8 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
         // INSERT INTO {targetTableName} ({columnNames}) VALUES ({values}); END;
         String triggerStatement = String.format(SQL_TEMPLATE_CREATE_TRIGGER_MYSQL, triggerName, triggerType,
-                                                triggerEvent, sourceTableName, selectionPolicy, targetTableName,
-                                                columnJoiner, columnValueJoiner);
+                triggerEvent, sourceTableName, selectionPolicy, targetTableName,
+                columnJoiner, columnValueJoiner);
         sqlStatements.add(triggerStatement);
         return sqlStatements;
     }
@@ -115,47 +157,5 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
 
         // DROP TABLE IF EXISTS %s
         return Collections.singletonList(String.format(SQL_TEMPLATE_DROP_TABLE_MYSQL, name));
-    }
-
-    public static String generateColumnList(List<ColumnData> columnData) {
-
-        StringJoiner columnJoiner = new StringJoiner(", ");
-
-        for (ColumnData columnEntry : columnData) {
-            columnJoiner.add(getColumnEntryString(columnEntry));
-        }
-        return columnJoiner.toString();
-    }
-
-    private static String getColumnEntryString(ColumnData columnEntry) {
-
-        String columnEntryString;
-        if (COLUMN_TYPE_TIMESTAMP.equalsIgnoreCase(columnEntry.getType()) ||
-            COLUMN_TYPE_INT.equalsIgnoreCase(columnEntry.getType()) ||
-            COLUMN_TYPE_BIGINT.equalsIgnoreCase(columnEntry.getType())) {
-
-            // Let the database assign default sizes for the filtered column.
-            // Column format: "COLUMN_NAME COLUMN_TYPE DEFAULT DEFAULT_VALUE".
-            columnEntryString = columnEntry.getName() + " " + columnEntry.getType();
-            if (columnEntry.getDefaultValue() !=  null) {
-                columnEntryString = columnEntryString + " DEFAULT " + columnEntry.getDefaultValue();
-            }
-        } else {
-            // Setting the columns size for other columns.
-            // Column format: "COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE) eg: VARCHAR".
-            String columnTemplate = "%s %s (%d)";
-            columnEntryString = String.format(columnTemplate, columnEntry.getName(), columnEntry.getType(),
-                                              columnEntry.getSize());
-            if (columnEntry.getDefaultValue() !=  null) {
-                columnEntryString = columnEntryString + " DEFAULT '" + columnEntry.getDefaultValue() + "'";
-            }
-        }
-
-        if (columnEntry.isAutoIncrement()) {
-            // Setting the AUTO_INCREMENT attribute to a column.
-            // Column format: "COLUMN_NAME COLUMN_TYPE (COLUMN_SIZE) AUTO_INCREMENT".
-            columnEntryString = columnEntryString + " " + COLUMN_ATTRIBUTE_AUTO_INCREMENT;
-        }
-        return columnEntryString;
     }
 }

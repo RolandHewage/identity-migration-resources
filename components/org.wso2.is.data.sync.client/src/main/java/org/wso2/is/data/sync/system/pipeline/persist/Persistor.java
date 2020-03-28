@@ -100,7 +100,7 @@ public class Persistor {
                                         }
                                         psDelete.executeUpdate();
                                     } else if (ENTRY_FILED_ACTION_INSERT.equals(entry.getOperation()) ||
-                                               ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
+                                            ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
 
                                         setPSForUpdateTarget(tableMetaData, rowEntry, psUpdate);
                                         if (log.isDebugEnabled()) {
@@ -113,7 +113,7 @@ public class Persistor {
 
                                         // Ignore delete operation on none extant target entry.
                                     } else if (ENTRY_FILED_ACTION_INSERT.equals(entry.getOperation()) ||
-                                               ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
+                                            ENTRY_FILED_ACTION_UPDATE.equals(entry.getOperation())) {
 
                                         setPSForInsertTarget(tableMetaData, rowEntry, psInsert);
                                         if (log.isDebugEnabled()) {

@@ -21,11 +21,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * IDPIDColumnAdditionInH2DAO.
+ */
 public class IDPIDColumnAdditionInH2DAO {
 
     private static IDPIDColumnAdditionInH2DAO instance = new IDPIDColumnAdditionInH2DAO();
 
-    private IDPIDColumnAdditionInH2DAO() { }
+    private IDPIDColumnAdditionInH2DAO() {
+
+    }
 
     public static IDPIDColumnAdditionInH2DAO getInstance() {
 
@@ -33,7 +38,7 @@ public class IDPIDColumnAdditionInH2DAO {
     }
 
     /**
-     * Method to persist IDP ID in database
+     * Method to persist IDP ID in database.
      *
      * @param connection
      * @throws SQLException
@@ -60,10 +65,10 @@ public class IDPIDColumnAdditionInH2DAO {
 
     public void updateUniqueConstraint(Connection connection) throws SQLException {
 
-       String dropConstraint =  "ALTER TABLE IDN_OAUTH2_ACCESS_TOKEN DROP CONSTRAINT CON_APP_KEY";
-       String addConstraint = "ALTER TABLE IDN_OAUTH2_ACCESS_TOKEN ADD CONSTRAINT CON_APP_KEY UNIQUE " +
-               "(CONSUMER_KEY_ID,AUTHZ_USER,TENANT_ID,USER_DOMAIN,USER_TYPE,TOKEN_SCOPE_HASH,TOKEN_STATE," +
-               "TOKEN_STATE_ID,IDP_ID);";
+        String dropConstraint = "ALTER TABLE IDN_OAUTH2_ACCESS_TOKEN DROP CONSTRAINT CON_APP_KEY";
+        String addConstraint = "ALTER TABLE IDN_OAUTH2_ACCESS_TOKEN ADD CONSTRAINT CON_APP_KEY UNIQUE " +
+                "(CONSUMER_KEY_ID,AUTHZ_USER,TENANT_ID,USER_DOMAIN,USER_TYPE,TOKEN_SCOPE_HASH,TOKEN_STATE," +
+                "TOKEN_STATE_ID,IDP_ID);";
 
         executeUpdate(connection, dropConstraint);
         executeUpdate(connection, addConstraint);

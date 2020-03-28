@@ -24,11 +24,9 @@ import org.wso2.is.data.sync.system.database.SchemaTableMapping;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.wso2.is.data.sync.system.util.Constant.DEFAULT_BATCH_SIZE;
@@ -46,6 +44,7 @@ import static org.wso2.is.data.sync.system.util.Constant.SCHEMA_TYPE_CONSENT;
 import static org.wso2.is.data.sync.system.util.Constant.SCHEMA_TYPE_IDENTITY;
 import static org.wso2.is.data.sync.system.util.Constant.SCHEMA_TYPE_REGISTRY;
 import static org.wso2.is.data.sync.system.util.Constant.SCHEMA_TYPE_UM;
+
 
 /**
  * This class represents the configuration data required for data sync client. Instance of this should be build from
@@ -69,14 +68,19 @@ public class Configuration {
         return sourceVersion;
     }
 
+    private void setSourceVersion(String sourceVersion) {
+
+        this.sourceVersion = sourceVersion;
+    }
+
     public String getTargetVersion() {
 
         return targetVersion;
     }
 
-    private void setBatchSize(int batchSize) {
+    private void setTargetVersion(String targetVersion) {
 
-        this.batchSize = batchSize;
+        this.targetVersion = targetVersion;
     }
 
     public int getBatchSize() {
@@ -84,19 +88,14 @@ public class Configuration {
         return batchSize;
     }
 
+    private void setBatchSize(int batchSize) {
+
+        this.batchSize = batchSize;
+    }
+
     public long getSyncInterval() {
 
         return syncInterval;
-    }
-
-    private void setSourceVersion(String sourceVersion) {
-
-        this.sourceVersion = sourceVersion;
-    }
-
-    private void setTargetVersion(String targetVersion) {
-
-        this.targetVersion = targetVersion;
     }
 
     private void setSyncInterval(long syncInterval) {
@@ -110,6 +109,7 @@ public class Configuration {
     }
 
     private void setSyncTables(List<String> syncTables) {
+
         this.syncTables = syncTables;
     }
 
@@ -124,9 +124,8 @@ public class Configuration {
     }
 
     /**
-     *
      * Configuration builder class for the data sync client.
-     *
+     * <p>
      * -DsourceVersion={version} - Source product version (Mandatory).
      * -DtargetVersion={version} - Target product version (Mandatory).
      * -DbatchSize={batch_size} - Size of a sync batch (Optional).
@@ -159,7 +158,7 @@ public class Configuration {
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + syncIntervalStr + " for sync interval. Using default sync interval: " +
-                         DEFAULT_SYNC_INTERVAL);
+                        DEFAULT_SYNC_INTERVAL);
             }
 
             configuration.setSyncInterval(syncInterval);
@@ -174,7 +173,7 @@ public class Configuration {
                 }
             } catch (NumberFormatException e) {
                 log.warn("Invalid input: " + batchSizeStr + " for batch size. Using default batch size: " +
-                         DEFAULT_BATCH_SIZE);
+                        DEFAULT_BATCH_SIZE);
             }
             configuration.setBatchSize(batchSize);
 
@@ -222,9 +221,9 @@ public class Configuration {
             if (isNull(umSchemaInfo) && isNull(regSchemaInfo) && isNull(identitySchemaInfo) && isNull
                     (consentSchemaInfo)) {
                 throw new SyncClientException(String.format("No input provided from schema info. At least one of %s, " +
-                                                            "%s, %s, %s should be provided.", JVM_PROPERTY_UM_SCHEMA,
-                                                            JVM_PROPERTY_REG_SCHEMA, JVM_PROPERTY_CONSENT_SCHEMA,
-                                                            JVM_PROPERTY_IDENTITY_SCHEMA));
+                                "%s, %s, %s should be provided.", JVM_PROPERTY_UM_SCHEMA,
+                        JVM_PROPERTY_REG_SCHEMA, JVM_PROPERTY_CONSENT_SCHEMA,
+                        JVM_PROPERTY_IDENTITY_SCHEMA));
             }
 
             addToSchemaInfoList(schemaInfoList, umSchemaInfo);
@@ -259,15 +258,15 @@ public class Configuration {
                     targetJndi = split[1];
                 } else {
                     throw new SyncClientException("Property: " + propertyName + " should be in the format. " +
-                                                  "-D" + propertyName + "=<source jndi name>,<target jndi name>");
+                            "-D" + propertyName + "=<source jndi name>,<target jndi name>");
                 }
                 if (StringUtils.isNotBlank(sourceJndi) && StringUtils.isNotBlank(targetJndi)) {
                     schemaInfo = new SchemaInfo(schemaType, sourceJndi.trim(), targetJndi.trim(),
-                                                  schemaTableMapping.get(schemaType));
+                            schemaTableMapping.get(schemaType));
                 } else {
                     throw new SyncClientException("<source jndi name> and <target jndi name> for Property: " +
-                                                  propertyName + " cannot be empty. Example format: " +
-                                                  "-D" + propertyName + "=<source jndi name>,<target jndi name>");
+                            propertyName + " cannot be empty. Example format: " +
+                            "-D" + propertyName + "=<source jndi name>,<target jndi name>");
 
                 }
             }
@@ -283,7 +282,7 @@ public class Configuration {
             configuration.setTargetVersion(targetVersion.trim());
         }
 
-            private String getProperty(String propertyName, boolean mandatory, Properties properties)
+        private String getProperty(String propertyName, boolean mandatory, Properties properties)
                 throws SyncClientException {
 
             String property = properties.getProperty(propertyName);
@@ -296,7 +295,7 @@ public class Configuration {
             }
             if (mandatory && StringUtils.isBlank(property)) {
                 throw new SyncClientException("Mandatory system property: " + property + "is required for data " +
-                                              "synchronization operations.");
+                        "synchronization operations.");
             }
             return property;
         }

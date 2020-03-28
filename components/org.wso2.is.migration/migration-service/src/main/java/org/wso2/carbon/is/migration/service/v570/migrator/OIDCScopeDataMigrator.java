@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -56,6 +57,9 @@ import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID;
 import static org.wso2.carbon.identity.oauth.common.OAuthConstants.SCOPE_RESOURCE_PATH;
 
+/**
+ * OIDCScopeDataMigrator.
+ */
 public class OIDCScopeDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(OIDCScopeDataMigrator.class);
@@ -65,8 +69,25 @@ public class OIDCScopeDataMigrator extends Migrator {
     private static final String CLAIM = "Claim";
     private Map<String, String> scopeConfigFile = null;
 
+    private static String loadClaimConfig(OMElement configElement) {
+
+        StringBuilder claimConfig = new StringBuilder();
+        Iterator it = configElement.getChildElements();
+        while (it.hasNext()) {
+            OMElement element = (OMElement) it.next();
+            if (CLAIM.equals(element.getLocalName())) {
+                String commaSeparatedClaimNames = element.getText();
+                if (StringUtils.isNotBlank(commaSeparatedClaimNames)) {
+                    claimConfig.append(commaSeparatedClaimNames.trim());
+                }
+            }
+        }
+        return claimConfig.toString();
+    }
+
     @Override
     public void migrate() throws MigrationClientException {
+
         migrateOIDCScopes();
     }
 
@@ -90,7 +111,8 @@ public class OIDCScopeDataMigrator extends Migrator {
             for (Tenant tenant : tenants) {
                 log.info(Constant.MIGRATION_LOG + "Started to migrate OIDC scopes for tenant: " + tenant.getDomain());
                 if (isIgnoreForInactiveTenants() && !tenant.isActive()) {
-                    log.info(Constant.MIGRATION_LOG + "Tenant " + tenant.getDomain() + " is inactive. Skipping oidc scope migration. ");
+                    log.info(Constant.MIGRATION_LOG + "Tenant " + tenant.getDomain()
+                            + " is inactive. Skipping oidc scope migration. ");
                     continue;
                 }
                 Properties scopes = getOIDCScopeProperties(tenant.getDomain());
@@ -107,6 +129,7 @@ public class OIDCScopeDataMigrator extends Migrator {
     }
 
     protected void addScopes(Properties properties, int tenantId) throws MigrationClientException {
+
         try {
             appendAdditionalProperties(properties);
             List<ScopeDTO> scopeDTOs = getScopeDTOs(properties);
@@ -162,8 +185,8 @@ public class OIDCScopeDataMigrator extends Migrator {
                 propertiesToReturn.setProperty(propertyKey, oidcScopesResource.getProperty(propertyKey));
             }
         } else {
-            log.error(Constant.MIGRATION_LOG + "OIDC scope resource cannot be found at " + SCOPE_RESOURCE_PATH + " for tenantDomain: "
-                    + tenantDomain);
+            log.error(Constant.MIGRATION_LOG + "OIDC scope resource cannot be found at " + SCOPE_RESOURCE_PATH
+                    + " for tenantDomain: " + tenantDomain);
         }
         return propertiesToReturn;
     }
@@ -183,11 +206,13 @@ public class OIDCScopeDataMigrator extends Migrator {
             File configfile = new File(confXml);
             if (!configfile.exists()) {
                 if (log.isDebugEnabled()) {
-                    log.debug(Constant.MIGRATION_LOG + "Additional OIDC scope-claim Configuration File is not present at: " + confXml);
+                    log.debug(Constant.MIGRATION_LOG + "Additional OIDC scope-claim Configuration File " +
+                            "is not present at: " + confXml);
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug(Constant.MIGRATION_LOG + "Additional OIDC scope-claim Configuration File is present at: " + confXml);
+                    log.debug(Constant.MIGRATION_LOG + "Additional OIDC scope-claim Configuration File is present at: "
+                            + confXml);
                 }
                 scopeConfigFile = loadScopeConfigFile(configfile);
             }
@@ -196,13 +221,14 @@ public class OIDCScopeDataMigrator extends Migrator {
         if (scopeConfigFile != null) {
             for (Map.Entry<String, String> entry : scopeConfigFile.entrySet()) {
                 if (properties.getProperty(entry.getKey()) != null) {
-                    properties.setProperty(entry.getKey(), properties.getProperty(entry.getKey()) + SCOPE_CLAIM_SEPERATOR + entry.getValue());
+                    properties.setProperty(entry.getKey(), properties.getProperty(entry.getKey())
+                            + SCOPE_CLAIM_SEPERATOR + entry.getValue());
                 }
             }
         }
     }
 
-    private  Map<String, String> loadScopeConfigFile(File configfile) {
+    private Map<String, String> loadScopeConfigFile(File configfile) {
 
         Map<String, String> scopes = new HashMap<>();
         XMLStreamReader parser = null;
@@ -236,20 +262,5 @@ public class OIDCScopeDataMigrator extends Migrator {
             }
         }
         return scopes;
-    }
-
-    private static String loadClaimConfig(OMElement configElement) {
-        StringBuilder claimConfig = new StringBuilder();
-        Iterator it = configElement.getChildElements();
-        while (it.hasNext()) {
-            OMElement element = (OMElement) it.next();
-            if (CLAIM.equals(element.getLocalName())) {
-                String commaSeparatedClaimNames = element.getText();
-                if(StringUtils.isNotBlank(commaSeparatedClaimNames)){
-                    claimConfig.append(commaSeparatedClaimNames.trim());
-                }
-            }
-        }
-        return claimConfig.toString();
     }
 }

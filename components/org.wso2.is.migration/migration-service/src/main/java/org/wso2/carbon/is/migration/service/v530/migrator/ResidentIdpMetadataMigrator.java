@@ -25,7 +25,7 @@ import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v530.ResidentIdpMetadataManager;
 
 /**
- * Migrator implementation for Resident IDP Metadata
+ * Migrator implementation for Resident IDP Metadata.
  */
 public class ResidentIdpMetadataMigrator extends Migrator {
 
@@ -33,6 +33,7 @@ public class ResidentIdpMetadataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         migrateResidentIdpMetadata();
     }
 
@@ -40,7 +41,7 @@ public class ResidentIdpMetadataMigrator extends Migrator {
 
         try {
             new ResidentIdpMetadataManager().migrateResidentIdpMetaData(isIgnoreForInactiveTenants(),
-                                                                        isContinueOnError());
+                    isContinueOnError());
         } catch (Exception e) {
             String msg = "Error while migrating resident idp metadata";
             if (!isContinueOnError()) {

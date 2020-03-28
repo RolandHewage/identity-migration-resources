@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+
 import javax.crypto.Cipher;
 
 /**
@@ -45,15 +46,10 @@ public class SecondaryUserstoreCryptoUtil {
 
     private static final String CIPHER_TRANSFORMATION_SYSTEM_PROPERTY = "org.wso2.CipherTransformation";
     private static Log log = LogFactory.getLog(SecondaryUserstoreCryptoUtil.class);
+    private static SecondaryUserstoreCryptoUtil instance = new SecondaryUserstoreCryptoUtil();
     private String primaryKeyStoreAlias;
     private String primaryKeyStoreKeyPass;
     private Gson gson = new Gson();
-    private static SecondaryUserstoreCryptoUtil instance = new SecondaryUserstoreCryptoUtil();
-
-    public static SecondaryUserstoreCryptoUtil getInstance() {
-
-        return instance;
-    }
 
     private SecondaryUserstoreCryptoUtil() {
 
@@ -64,11 +60,17 @@ public class SecondaryUserstoreCryptoUtil {
                 SERVER_PRIVATE_KEY_PASSWORD);
     }
 
+    public static SecondaryUserstoreCryptoUtil getInstance() {
+
+        return instance;
+    }
+
     /**
-     * Encrypt a given plain text
+     * Encrypt a given plain text.
      *
      * @param plainTextBytes                The plaintext bytes to be encrypted
-     * @param cipherTransformation          The transformation that need to encrypt. If it is null, RSA is used as default
+     * @param cipherTransformation          The transformation that need to encrypt. If it is null, RSA is used as
+     *                                      default
      * @param returnSelfContainedCipherText Create self-contained cipher text if true, return simple encrypted
      *                                      ciphertext otherwise.
      * @return The cipher text bytes
@@ -125,7 +127,7 @@ public class SecondaryUserstoreCryptoUtil {
     }
 
     /**
-     * Encrypt a given plain text
+     * Encrypt a given plain text.
      *
      * @param plainTextBytes The plaintext bytes to be encrypted
      * @return The cipher text bytes (self-contained ciphertext)
@@ -203,7 +205,8 @@ public class SecondaryUserstoreCryptoUtil {
      * Base64 decode the given value and decrypt using the WSO2 WSAS key.
      * <p>
      * IMPORTANT: Since this decrypt method is provided to force required transformation, this will not decrypt
-     * self-contained ciphertexts. To decrypt self-contained ciphertext use base64DecodeAndDecrypt(byte[] cipherTextBytes)
+     * self-contained ciphertexts. To decrypt self-contained ciphertext use
+     * base64DecodeAndDecrypt(byte[] cipherTextBytes)
      *
      * @param base64CipherText Base64 encoded cipher text
      * @param transformation   The transformation used for encryption
@@ -217,7 +220,7 @@ public class SecondaryUserstoreCryptoUtil {
     }
 
     /**
-     * Function to validate whether provided is self-contained ciphertext
+     * Function to validate whether provided is self-contained ciphertext.
      *
      * @param cipherBytes interested cipher text byte array
      * @return true if provided cipher is encripted using custom transformation, false if it is RSA
@@ -228,7 +231,7 @@ public class SecondaryUserstoreCryptoUtil {
     }
 
     /**
-     * Function to Base64 decode the given value and validate whether provided is self-contained ciphertext
+     * Function to Base64 decode the given value and validate whether provided is self-contained ciphertext.
      *
      * @param base64CipherText interested cipher text byte array
      * @return true if provided cipher is self-contained cipher text
@@ -239,7 +242,7 @@ public class SecondaryUserstoreCryptoUtil {
     }
 
     /**
-     * Function to convert cipher byte array to {@link CipherHolder}
+     * Function to convert cipher byte array to {@link CipherHolder}.
      *
      * @param cipherText cipher text as a byte array
      * @return if cipher text is not a cipher with meta data

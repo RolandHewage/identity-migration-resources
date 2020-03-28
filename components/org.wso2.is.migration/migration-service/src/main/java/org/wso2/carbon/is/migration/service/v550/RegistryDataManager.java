@@ -1,18 +1,18 @@
 /*
-* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v550;
 
 import org.apache.axiom.om.OMElement;
@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -50,6 +51,9 @@ import javax.xml.stream.XMLStreamReader;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID;
 
+/**
+ * RegistryDataManager.
+ */
 public class RegistryDataManager {
 
     private static final String STS_SERVICE_GROUP = "org.wso2.carbon.sts";
@@ -62,16 +66,20 @@ public class RegistryDataManager {
     private static final String PRIVATE_KEY_PASS = "privatekeyPass";
     private static final String POLICY_PUBLISHER_RESOURCE_PATH = "/repository/identity/entitlement/publisher/";
     private static final String KEYSTORE_RESOURCE_PATH = "/repository/security/key-stores/";
-    private static final String SYSLOG = "/repository/components/org.wso2.carbon.logging/loggers/syslog/SYSLOG_PROPERTIES";
+    private static final String SYSLOG = "/repository/components/org.wso2.carbon.logging/loggers/syslog/" +
+            "SYSLOG_PROPERTIES";
     private static final String SECURITY_POLICY_RESOURCE_PATH = "/services/wso2carbon-sts/policies/";
     private static final String SERVICE_GROUPS_PATH = "/repository/axis2/service-groups/";
     private static final String CARBON_SEC_CONFIG = "CarbonSecConfig";
 
     private static RegistryDataManager instance = new RegistryDataManager();
 
-    private RegistryDataManager(){}
+    private RegistryDataManager() {
+
+    }
 
     public static RegistryDataManager getInstance() {
+
         return instance;
     }
 
@@ -153,7 +161,7 @@ public class RegistryDataManager {
     }
 
     /**
-     * Method to migrate encrypted password of key stores
+     * Method to migrate encrypted password of key stores.
      *
      * @param migrateActiveTenantsOnly
      * @throws Exception
@@ -190,9 +198,8 @@ public class RegistryDataManager {
         }
     }
 
-
     /**
-     * Method to migrate encrypted password of key stores
+     * Method to migrate encrypted password of key stores.
      *
      * @param migrateActiveTenantsOnly
      * @param continueOnError
@@ -234,7 +241,7 @@ public class RegistryDataManager {
     }
 
     /**
-     * Method to migrate encrypted password of SYSLOG_PROPERTIES registry resource
+     * Method to migrate encrypted password of SYSLOG_PROPERTIES registry resource.
      *
      * @param migrateActiveTenantsOnly
      * @throws UserStoreException,RegistryException,CryptoException,MigrationClientException
@@ -266,7 +273,7 @@ public class RegistryDataManager {
     }
 
     /**
-     * Method to migrate encrypted password of SYSLOG_PROPERTIES registry resource
+     * Method to migrate encrypted password of SYSLOG_PROPERTIES registry resource.
      *
      * @param continueOnError
      * @param migrateActiveTenantsOnly
@@ -308,7 +315,7 @@ public class RegistryDataManager {
     }
 
     /**
-     * Method to migrate encrypted password of service principle registry resource
+     * Method to migrate encrypted password of service principle registry resource.
      *
      * @param migrateActiveTenantsOnly
      * @throws CryptoException
@@ -331,7 +338,8 @@ public class RegistryDataManager {
         Set<Tenant> tenants = Utility.getTenants();
         for (Tenant tenant : tenants) {
             if (migrateActiveTenantsOnly && !tenant.isActive()) {
-                log.info("Tenant " + tenant.getDomain() + " is inactive. Skipping Service Principle Password migration!");
+                log.info("Tenant " + tenant.getDomain()
+                        + " is inactive. Skipping Service Principle Password migration!");
                 continue;
             }
             try {
@@ -347,7 +355,7 @@ public class RegistryDataManager {
     }
 
     /**
-     * Method to migrate encrypted password of service principle registry resource
+     * Method to migrate encrypted password of service principle registry resource.
      *
      * @param migrateActiveTenantsOnly
      * @param continueOnError
@@ -374,7 +382,8 @@ public class RegistryDataManager {
         Set<Tenant> tenants = Utility.getTenants();
         for (Tenant tenant : tenants) {
             if (migrateActiveTenantsOnly && !tenant.isActive()) {
-                log.info("Tenant " + tenant.getDomain() + " is inactive. Skipping Service Principle Password migration!");
+                log.info("Tenant " + tenant.getDomain()
+                        + " is inactive. Skipping Service Principle Password migration!");
                 continue;
             }
             try {
@@ -424,7 +433,7 @@ public class RegistryDataManager {
         updateRegistryProperties(registry, SYSLOG, new ArrayList<>(Arrays.asList(PASSWORD)));
     }
 
-    private void updateSecurityPolicyPassword (int tenantId) throws RegistryException, CryptoException,
+    private void updateSecurityPolicyPassword(int tenantId) throws RegistryException, CryptoException,
             XMLStreamException {
 
         InputStream resourceContent = null;
@@ -473,10 +482,10 @@ public class RegistryDataManager {
             }
         } finally {
             try {
-                if(parser != null) {
+                if (parser != null) {
                     parser.close();
                 }
-                if(resourceContent != null) {
+                if (resourceContent != null) {
                     IdentityIOStreamUtils.closeInputStream(resourceContent);
                 }
             } catch (XMLStreamException ex) {
@@ -518,10 +527,10 @@ public class RegistryDataManager {
 
         List<String> policyPaths = new ArrayList<>();
         if (registry.resourceExists(SERVICE_GROUPS_PATH)) {
-            Collection serviceGroups = (Collection)registry.get(SERVICE_GROUPS_PATH);
+            Collection serviceGroups = (Collection) registry.get(SERVICE_GROUPS_PATH);
             if (serviceGroups != null) {
                 for (String serviceGroupPath : serviceGroups.getChildren()) {
-                    if ( StringUtils.isNotEmpty(serviceGroupPath) &&
+                    if (StringUtils.isNotEmpty(serviceGroupPath) &&
                             serviceGroupPath.contains(STS_SERVICE_GROUP)) {
                         String policyCollectionPath = new StringBuilder().append(serviceGroupPath)
                                 .append(SECURITY_POLICY_RESOURCE_PATH).toString();

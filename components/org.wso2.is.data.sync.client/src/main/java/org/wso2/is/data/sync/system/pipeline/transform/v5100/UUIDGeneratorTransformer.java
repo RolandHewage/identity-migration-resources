@@ -27,6 +27,9 @@ import org.wso2.is.data.sync.system.util.Constant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * UUIDGeneratorTransformer.
+ */
 @VersionAdvice(version = "5.10.0", tableName = "UM_USER")
 public class UUIDGeneratorTransformer implements DataTransformer {
 

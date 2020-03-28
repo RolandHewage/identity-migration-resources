@@ -20,31 +20,38 @@ package org.wso2.carbon.is.migration.service.v530.bean;
  * Claim  representation for a claim.
  */
 public class MappedAttribute {
+
     private String attribute;
     private String domain;
 
     public MappedAttribute(String attribute) {
+
         this.attribute = attribute;
     }
 
     public MappedAttribute(String attribute, String domain) {
+
         this.attribute = attribute;
         this.domain = domain;
     }
 
     public String getAttribute() {
+
         return attribute;
     }
 
     public void setAttribute(String attribute) {
+
         this.attribute = attribute;
     }
 
     public String getDomain() {
+
         return domain;
     }
 
     public void setDomain(String domain) {
+
         this.domain = domain;
     }
 }

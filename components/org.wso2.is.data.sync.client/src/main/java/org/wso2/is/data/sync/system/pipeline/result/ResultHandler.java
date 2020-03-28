@@ -30,6 +30,9 @@ import java.util.List;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_UPDATE_SYNC_VERSION_KEY;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.getQuery;
 
+/**
+ * ResultHandler.
+ */
 public class ResultHandler {
 
     private static final Log log = LogFactory.getLog(ResultHandler.class);
@@ -60,12 +63,12 @@ public class ResultHandler {
             if (transactionSuccess) {
                 TransactionResult lastResult = transactionResults.get(transactionResults.size() - 1);
                 Integer lastSyncId = (Integer) lastResult.getJournalEntry().get(Constant.COLUMN_NAME_SYNC_ID)
-                                                         .getValue();
+                        .getValue();
                 try {
                     updateSyncVersion(syncVersionTableName, context.getTargetConnection(), lastSyncId);
                 } catch (SQLException e) {
                     log.error("Error while updating the last sync ID to: " + lastSyncId + " in table: " +
-                              syncVersionTableName);
+                            syncVersionTableName);
                 }
             }
         }

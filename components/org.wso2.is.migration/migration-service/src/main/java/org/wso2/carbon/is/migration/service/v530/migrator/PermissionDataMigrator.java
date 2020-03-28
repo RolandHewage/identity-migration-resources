@@ -21,8 +21,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.xml.parsers.DocumentBuilder;
 
+/**
+ * PermissionDataMigrator.
+ */
 public class PermissionDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionDataMigrator.class);
@@ -31,6 +35,7 @@ public class PermissionDataMigrator extends Migrator {
 
     @Override
     public void migrate() throws MigrationClientException {
+
         migratePermissionData();
     }
 
@@ -41,6 +46,7 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     public void migratePermissionData() throws MigrationClientException {
+
         Document permissionMap = getPermissionMap();
         if (permissionMap != null) {
             NodeList permissionsList = permissionMap.getElementsByTagName("permission");
@@ -52,6 +58,7 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     private Document getPermissionMap() {
+
         Document doc = null;
         try {
             File resourceFile = new File(Utility.getDataFilePath(RESOURCES_XML, getVersionConfig().getVersion()));
@@ -67,6 +74,7 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     protected void migrateOldPermission(Element permission) throws MigrationClientException {
+
         Connection umConnection = null;
         ResultSet oldPermissionsRS = null;
         try {
@@ -87,18 +95,20 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * Select permission entries in UM_PERMISSION Table
+     * Select permission entries in UM_PERMISSION Table.
      */
     private ResultSet selectExistingPermissions(String permission, Connection umConnection) throws SQLException {
+
         PreparedStatement selectPermissions = umConnection.prepareStatement(SQLConstants.SELECT_PERMISSION);
         selectPermissions.setString(1, permission);
         return selectPermissions.executeQuery();
     }
 
     /**
-     * Add new permissions to UM_PERMISSION Table
+     * Add new permissions to UM_PERMISSION Table.
      */
     private void addNewPermissions(ResultSet oldPermissionsRS, NodeList newPermList) throws MigrationClientException {
+
         Connection umConnection = null;
         try {
             umConnection = getDataSource().getConnection();
@@ -130,7 +140,7 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * Add new permission to UM_PERMISSION Table if not exists
+     * Add new permission to UM_PERMISSION Table if not exists.
      */
     private ResultSet addNewPermission(Connection umConnection, String action,
                                        int tenantId, int moduleId, String newPermValue) throws SQLException {
@@ -147,9 +157,10 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * Add new permission to role in UM_ROLE_PERMISSION Table if not exists
+     * Add new permission to role in UM_ROLE_PERMISSION Table if not exists.
      */
     private void assignNewPermissionForRoles(int oldPermUMId, int newPermUMId) throws MigrationClientException {
+
         Connection umConnection = null;
         try {
             umConnection = getDataSource().getConnection();
@@ -183,10 +194,11 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * Check whether permission already exists in UM_PERMISSION Table
+     * Check whether permission already exists in UM_PERMISSION Table.
      */
     private boolean isPermissionExists(Connection umConnection, String resource,
                                        String action, int tenantId, int moduleId) throws SQLException {
+
         boolean isExist = false;
         PreparedStatement countPermissions = umConnection.prepareStatement(SQLConstants.SELECT_PERMISSION_COUNT);
         countPermissions.setString(1, resource);
@@ -205,7 +217,7 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * Check whether permission already assigned for role in UM_ROLE_PERMISSION Table
+     * Check whether permission already assigned for role in UM_ROLE_PERMISSION Table.
      */
     private boolean isPermissionAssignedForRole(Connection umConnection, String roleName, int permID, int isAllowed,
                                                 int tenantId, int domainId) throws SQLException {
@@ -228,21 +240,24 @@ public class PermissionDataMigrator extends Migrator {
         IdentityDatabaseUtil.closeResultSet(countRS);
         return isExist;
     }
+
     /**
-     * Select roles with given permission in UM_ROLE_PERMISSION Table
+     * Select roles with given permission in UM_ROLE_PERMISSION Table.
      */
     private ResultSet selectExistingRolesWithPermissions(int permissionId, Connection umConnection)
             throws SQLException {
+
         PreparedStatement selectPermissions = umConnection.prepareStatement(SQLConstants.SELECT_ROLES_WITH_PERMISSION);
         selectPermissions.setInt(1, permissionId);
         return selectPermissions.executeQuery();
     }
 
     /**
-     * Select permission entries in UM_PERMISSION Table for given tenant
+     * Select permission entries in UM_PERMISSION Table for given tenant.
      */
     private ResultSet selectAddedPermissions(String permission, Connection umConnection,
                                              int tenantId) throws SQLException {
+
         PreparedStatement selectPermissions = umConnection.prepareStatement(SQLConstants.SELECT_PERMISSION_IN_TENANT);
         selectPermissions.setString(1, permission);
         selectPermissions.setInt(2, tenantId);
@@ -250,11 +265,12 @@ public class PermissionDataMigrator extends Migrator {
     }
 
     /**
-     * rollback the transaction
+     * rollback the transaction.
      *
      * @param dbConnection database connection
      */
     public void rollbackTransaction(Connection dbConnection) {
+
         try {
             if (dbConnection != null) {
                 dbConnection.rollback();

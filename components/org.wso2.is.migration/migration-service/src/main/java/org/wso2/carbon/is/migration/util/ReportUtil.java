@@ -27,6 +27,9 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Utility class to generate a file based report.
+ */
 public class ReportUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ReportUtil.class);
@@ -75,7 +78,7 @@ public class ReportUtil {
 
         Path path;
         if (fileName != null) {
-             path = Paths.get(filePath, fileName);
+            path = Paths.get(filePath, fileName);
         } else {
             path = Paths.get(filePath);
         }

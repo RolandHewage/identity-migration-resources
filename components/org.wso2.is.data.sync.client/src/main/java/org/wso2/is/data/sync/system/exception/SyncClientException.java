@@ -19,23 +19,27 @@ package org.wso2.is.data.sync.system.exception;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 
 /**
- * Represents exception in
+ * Represents exception in.
  */
 public class SyncClientException extends MigrationClientException {
 
     public SyncClientException(String message) {
+
         super(message);
     }
 
     public SyncClientException(String message, Throwable cause) {
+
         super(message, cause);
     }
 
     public SyncClientException(String errorCode, String message) {
+
         super(errorCode, message);
     }
 
     public SyncClientException(String errorCode, String message, Throwable cause) {
+
         super(errorCode, message, cause);
     }
 }

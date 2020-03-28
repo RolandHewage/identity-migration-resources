@@ -16,6 +16,9 @@
 
 package org.wso2.carbon.is.migration.service.v540.bean;
 
+/**
+ * UserPermission.
+ */
 public class UserPermission {
 
     private int id;

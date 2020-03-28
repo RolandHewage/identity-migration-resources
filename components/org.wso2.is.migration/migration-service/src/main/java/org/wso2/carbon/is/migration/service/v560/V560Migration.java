@@ -20,14 +20,20 @@ package org.wso2.carbon.is.migration.service.v560;
 
 import org.wso2.carbon.is.migration.VersionMigration;
 
+/**
+ * V560Migration.
+ */
 public class V560Migration extends VersionMigration {
+
     @Override
     public String getPreviousVersion() {
+
         return "5.5.0";
     }
 
     @Override
     public String getCurrentVersion() {
+
         return "5.6.0";
     }
 }

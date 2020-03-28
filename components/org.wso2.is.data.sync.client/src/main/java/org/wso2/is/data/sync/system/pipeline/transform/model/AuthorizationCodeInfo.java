@@ -16,6 +16,9 @@
 
 package org.wso2.is.data.sync.system.pipeline.transform.model;
 
+/**
+ * AuthorizationCodeInfo.
+ */
 public class AuthorizationCodeInfo {
 
     private String authorizationCode;

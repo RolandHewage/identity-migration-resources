@@ -36,11 +36,14 @@ import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_CO
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_CONSUMER_APPS_TABLE_ORACLE;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_CONSUMER_SECRET;
 
+/**
+ * OAuthDAO.
+ */
 public class OAuthDAO {
 
     private static final Logger log = LoggerFactory.getLogger(OAuthDAO.class);
-    private static OAuthDAO instance = new OAuthDAO();
     private static final String CONSUMER_SECRET_HASH = "CONSUMER_SECRET_HASH";
+    private static OAuthDAO instance = new OAuthDAO();
 
     private OAuthDAO() {
 
@@ -100,7 +103,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Method to retrieve all the client secrets from the database
+     * Method to retrieve all the client secrets from the database.
      *
      * @param connection
      * @return list of client secrets
@@ -121,7 +124,7 @@ public class OAuthDAO {
     }
 
     /**
-     * Update the client secrets encrypted with new algorithm to the database
+     * Update the client secrets encrypted with new algorithm to the database.
      *
      * @param updatedClientSecretList updated list of client secrets
      * @param connection              identity database connection
@@ -129,6 +132,7 @@ public class OAuthDAO {
      */
     public void updateNewClientSecrets(List<ClientSecretInfo> updatedClientSecretList, Connection connection)
             throws SQLException, MigrationClientException {
+
         connection.setAutoCommit(false);
         try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CONSUMER_SECRET)) {
             for (ClientSecretInfo clientSecretInfo : updatedClientSecretList) {
