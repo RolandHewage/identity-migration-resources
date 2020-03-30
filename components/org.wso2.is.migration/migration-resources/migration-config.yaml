@@ -177,6 +177,7 @@ versions:
     name: "OAuthDataMigrator"
     order: 3
     parameters:
+      batchSize: 10000
       schema: "identity"
    -
     name: "BPSProfileDataMigrator"
@@ -263,6 +264,7 @@ versions:
       name: "OAuthDataMigrator"
       order: 4
       parameters:
+        batchSize: 10000
         schema: "identity"
     -
       name: "OIDCScopeDataMigrator"

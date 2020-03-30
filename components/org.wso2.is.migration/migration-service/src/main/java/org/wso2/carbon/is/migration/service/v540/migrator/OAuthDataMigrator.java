@@ -139,15 +139,15 @@ public class OAuthDataMigrator extends Migrator {
             } else {
                 consumerApp.setApplicationAccessTokenExpiryTime(applicationAccessTokenExpiryTime);
             }
+
             if (expiryTimeConfiguration.getUserAccessTokenExpiryTime() != null) {
-                consumerApp.setUserAccessTokenExpiryTime(expiryTimeConfiguration.getApplicationAccessTokenExpiryTime
-                        () / 1000);
+                consumerApp.setUserAccessTokenExpiryTime(expiryTimeConfiguration.getUserAccessTokenExpiryTime() / 1000);
             } else {
                 consumerApp.setUserAccessTokenExpiryTime(userAccessTokenExpiryTime);
             }
+
             if (expiryTimeConfiguration.getRefreshTokenExpiryTime() != null) {
-                consumerApp.setRefreshTokenExpiryTime(expiryTimeConfiguration.getApplicationAccessTokenExpiryTime()
-                        / 1000);
+                consumerApp.setRefreshTokenExpiryTime(expiryTimeConfiguration.getRefreshTokenExpiryTime() / 1000);
             } else {
                 consumerApp.setRefreshTokenExpiryTime(refreshTokenExpiryTime);
             }

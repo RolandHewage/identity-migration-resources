@@ -27,7 +27,8 @@ import java.util.List;
 
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.ADD_AUTHORIZATION_CODE_HASH_COLUMN;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_AUTHORIZATION_CODES;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_DB2SQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_INFORMIX;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_MSSQL;
@@ -124,17 +125,29 @@ public class AuthzCodeDAO {
      * @return List of authorization codes.
      * @throws SQLException If an error occurs while retrieving codes.
      */
-    public List<AuthzCodeInfo> getAllAuthzCodesWithHashes(Connection connection) throws SQLException {
+    public List<AuthzCodeInfo> getAllAuthzCodesWithHashes(Connection connection, int offset, int limit)
+            throws SQLException {
+
+        String sql;
+        if (connection.getMetaData().getDriverName().contains("MySQL")
+                || connection.getMetaData().getDriverName().contains("H2")
+                || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+            sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
+        } else {
+            sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
+        }
 
         List<AuthzCodeInfo> authzCodeInfoList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement
-                (RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            while (resultSet.next()) {
-                AuthzCodeInfo authzCodeInfo = new AuthzCodeInfo(resultSet.getString("AUTHORIZATION_CODE"),
-                        resultSet.getString("CODE_ID"));
-                authzCodeInfo.setAuthorizationCodeHash(resultSet.getString("AUTHORIZATION_CODE_HASH"));
-                authzCodeInfoList.add(authzCodeInfo);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, offset);
+            preparedStatement.setInt(2, limit);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    AuthzCodeInfo authzCodeInfo = new AuthzCodeInfo(resultSet.getString("AUTHORIZATION_CODE"),
+                            resultSet.getString("CODE_ID"));
+                    authzCodeInfo.setAuthorizationCodeHash(resultSet.getString("AUTHORIZATION_CODE_HASH"));
+                    authzCodeInfoList.add(authzCodeInfo);
+                }
             }
         }
         return authzCodeInfoList;
