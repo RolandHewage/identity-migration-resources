@@ -15,22 +15,26 @@ import java.util.List;
  */
 public class OAuthDAO {
 
-    public static final String RETRIEVE_ALL_TOKENS_MYSQL =
+    public static final String RETRIEVE_PAGINATED_TOKENS_MYSQL =
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH " +
             "FROM IDN_OAUTH2_ACCESS_TOKEN " +
+            "ORDER BY TOKEN_ID " +
             "OFFSET ? LIMIT ?";
-    private static final String RETRIEVE_ALL_TOKENS_OTHER =
+    private static final String RETRIEVE_PAGINATED_TOKENS_OTHER =
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH " +
             "FROM IDN_OAUTH2_ACCESS_TOKEN " +
+            "ORDER BY TOKEN_ID " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String RETRIEVE_ALL_AUTHORIZATION_CODES_MYSQL =
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
+            "ORDER BY CODE_ID " +
             "OFFSET ? LIMIT ?";
     public static final String RETRIEVE_ALL_AUTHORIZATION_CODES_OTHER =
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
+            "ORDER BY CODE_ID " +
             "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String UPDATE_ACCESS_TOKEN = "UPDATE IDN_OAUTH2_ACCESS_TOKEN SET ACCESS_TOKEN=?, " +
@@ -62,9 +66,9 @@ public class OAuthDAO {
         if (connection.getMetaData().getDriverName().contains("MySQL")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-            sql = RETRIEVE_ALL_TOKENS_MYSQL;
+            sql = RETRIEVE_PAGINATED_TOKENS_MYSQL;
         } else {
-            sql = RETRIEVE_ALL_TOKENS_OTHER;
+            sql = RETRIEVE_PAGINATED_TOKENS_OTHER;
         }
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();

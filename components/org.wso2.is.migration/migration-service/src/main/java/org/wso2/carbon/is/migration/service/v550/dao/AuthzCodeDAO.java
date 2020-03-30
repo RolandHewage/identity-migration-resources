@@ -27,8 +27,8 @@ import java.util.List;
 
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.ADD_AUTHORIZATION_CODE_HASH_COLUMN;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_AUTHORIZATION_CODES;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_DB2SQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_INFORMIX;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AUTHORIZATION_CODE_TABLE_MSSQL;
@@ -132,9 +132,9 @@ public class AuthzCodeDAO {
         if (connection.getMetaData().getDriverName().contains("MySQL")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-            sql = RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
+            sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
         } else {
-            sql = RETRIEVE_ALL_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
+            sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
         }
 
         List<AuthzCodeInfo> authzCodeInfoList = new ArrayList<>();

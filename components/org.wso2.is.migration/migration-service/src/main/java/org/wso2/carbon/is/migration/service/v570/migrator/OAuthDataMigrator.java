@@ -37,7 +37,7 @@ public class OAuthDataMigrator extends Migrator {
     private static final String HASH = "hash";
     private static final String LIMIT = "batchSize";
 
-    private static final int DEFAULT_LIMIT = 10000;
+    private static final int DEFAULT_CHUNK_SIZE = 10000;
     private static String hashingAlgo = OAuthServerConfiguration.getInstance().getHashAlgorithm();
 
     @Override
@@ -45,13 +45,13 @@ public class OAuthDataMigrator extends Migrator {
 
         // Get the batch size from the configuration if it is provided. Or else use the default size of 10000.
         Properties migrationProperties = getMigratorConfig().getParameters();
-        int limit = DEFAULT_LIMIT;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
         if (migrationProperties.containsKey(LIMIT)) {
-            limit = (int) migrationProperties.get(LIMIT);
+            chunkSize = (int) migrationProperties.get(LIMIT);
         }
 
-        migrateTokenHash(limit);
-        migrateAuthzCodeHash(limit);
+        migrateTokenHash(chunkSize);
+        migrateAuthzCodeHash(chunkSize);
     }
 
     @Override
@@ -60,15 +60,15 @@ public class OAuthDataMigrator extends Migrator {
         log.info("Dry run capability not implemented in {} migrator.", this.getClass().getName());
     }
 
-    public void migrateTokenHash(int limit) throws MigrationClientException {
+    public void migrateTokenHash(int chunkSize) throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on OAuth2 access token table.");
 
         int offset = 0;
-        log.info("Offset is set to {} and limit is set to {}", offset, limit);
+        log.info("Offset is set to {} and limit is set to {}", offset, chunkSize);
 
         while (true) {
-            List<OauthTokenInfo> tokenInfoList = getTokenList(offset, limit);
+            List<OauthTokenInfo> tokenInfoList = getTokenList(offset, chunkSize);
             if (tokenInfoList.isEmpty()) {
                 break;
             }
@@ -80,7 +80,7 @@ public class OAuthDataMigrator extends Migrator {
                     try {
                         OAuthDAO.getInstance().updateNewTokenHash(updateTokenInfoList, connection);
                         connection.commit();
-                        log.info("Access token migration completed for tokens {} to {} ", offset, limit);
+                        log.info("Access token migration completed for tokens {} to {} ", offset, chunkSize);
                         offset += tokenInfoList.size();
                     } catch (SQLException e1) {
                         connection.rollback();
@@ -99,15 +99,15 @@ public class OAuthDataMigrator extends Migrator {
         }
     }
 
-    public void migrateAuthzCodeHash(int limit) throws MigrationClientException {
+    public void migrateAuthzCodeHash(int chunkSize) throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on Authorization code table");
 
         int offset = 0;
-        log.info("Offset is set to {} and limit is set to {}", offset, limit);
+        log.info("Offset is set to {} and limit is set to {}", offset, chunkSize);
 
         while (true) {
-            List<AuthzCodeInfo> authzCodeInfos = getAuthzCoedList(offset, limit);
+            List<AuthzCodeInfo> authzCodeInfos = getAuthzCoedList(offset, chunkSize);
             if (authzCodeInfos.isEmpty()) {
                 break;
             }
@@ -120,7 +120,7 @@ public class OAuthDataMigrator extends Migrator {
                     try {
                         OAuthDAO.getInstance().updateNewAuthzCodeHash(updatedAuthzCodeInfoList, connection);
                         connection.commit();
-                        log.info("Authorization code migration completed for tokens {} to {} ", offset, limit);
+                        log.info("Authorization code migration completed for tokens {} to {} ", offset, chunkSize);
                         offset += updatedAuthzCodeInfoList.size();
                     } catch (SQLException e1) {
                         connection.rollback();

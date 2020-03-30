@@ -33,8 +33,8 @@ import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AC
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ACCESS_TOKEN_TABLE_MYSQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ACCESS_TOKEN_TABLE_ORACLE;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS_WITH_HASHES_OTHER;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS_WITH_HASHES_MYSQL;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_OTHER;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_MYSQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_ENCRYPTED_ACCESS_TOKEN;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_PLAIN_TEXT_ACCESS_TOKEN;
 
@@ -137,9 +137,9 @@ public class TokenDAO {
         if (connection.getMetaData().getDriverName().contains("MySQL")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-            sql = RETRIEVE_ALL_TOKENS_WITH_HASHES_MYSQL;
+            sql = RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_MYSQL;
         } else {
-            sql = RETRIEVE_ALL_TOKENS_WITH_HASHES_OTHER;
+            sql = RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_OTHER;
         }
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();

@@ -52,23 +52,23 @@ public class OAuthDataMigrator extends Migrator {
     boolean isClientSecretHashColumnsAvailable = false;
 
     private static final String LIMIT = "batchSize";
-    private static final int DEFAULT_LIMIT = 10000;
+    private static final int DEFAULT_CHUNK_SIZE = 10000;
 
     @Override
     public void migrate() throws MigrationClientException {
 
         // Get the batch size from the configuration if it is provided. Or else use the default size of 10000.
         Properties migrationProperties = getMigratorConfig().getParameters();
-        int limit = DEFAULT_LIMIT;
+        int chunkSize = DEFAULT_CHUNK_SIZE;
         if (migrationProperties.containsKey(LIMIT)) {
-            limit = (int) migrationProperties.get(LIMIT);
+            chunkSize = (int) migrationProperties.get(LIMIT);
         }
 
         try {
             addHashColumns();
             deleteClientSecretHashColumn();
-            migrateTokens(limit);
-            migrateAuthorizationCodes(limit);
+            migrateTokens(chunkSize);
+            migrateAuthorizationCodes(chunkSize);
             migrateClientSecrets();
         } catch (SQLException e) {
             throw new MigrationClientException("Error while adding hash columns", e);
@@ -143,17 +143,17 @@ public class OAuthDataMigrator extends Migrator {
      * @throws MigrationClientException
      * @throws SQLException
      */
-    public void migrateTokens(int limit) throws MigrationClientException, SQLException {
+    public void migrateTokens(int chunkSize) throws MigrationClientException, SQLException {
 
         int offset = 0;
         log.info("{} Migration starting on OAuth2 access token table with offset {} and limit {}.",
-                Constant.MIGRATION_LOG, offset, limit);
+                Constant.MIGRATION_LOG, offset, chunkSize);
 
         while (true) {
             List<OauthTokenInfo> oauthTokenList;
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
-                oauthTokenList = TokenDAO.getInstance().getAllAccessTokensWithHash(connection, offset, limit);
+                oauthTokenList = TokenDAO.getInstance().getAllAccessTokensWithHash(connection, offset, chunkSize);
             }
 
             if (oauthTokenList.isEmpty()) {
@@ -170,7 +170,7 @@ public class OAuthDataMigrator extends Migrator {
                     migratePlainTextTokens(oauthTokenList);
                 }
                 offset += oauthTokenList.size();
-                log.info("Access token migration completed for offset {} and limit {}.", offset, limit);
+                log.info("Access token migration completed for offset {} and limit {}.", offset, chunkSize);
             } catch (IdentityOAuth2Exception e) {
                 throw new MigrationClientException(e.getMessage(), e);
             }
@@ -350,17 +350,17 @@ public class OAuthDataMigrator extends Migrator {
      * @throws MigrationClientException
      * @throws SQLException
      */
-    public void migrateAuthorizationCodes(int limit) throws MigrationClientException, SQLException {
+    public void migrateAuthorizationCodes(int chunkSize) throws MigrationClientException, SQLException {
 
         int offset = 0;
         log.info("{} Migration starting on OAuth2 authorization code table with offset {} and limit {}.",
-                Constant.MIGRATION_LOG, offset, limit);
+                Constant.MIGRATION_LOG, offset, chunkSize);
 
         while (true) {
             List<AuthzCodeInfo> authzCodeInfoList;
             try (Connection connection = getDataSource().getConnection()) {
                 connection.setAutoCommit(false);
-                authzCodeInfoList = AuthzCodeDAO.getInstance().getAllAuthzCodesWithHashes(connection, offset, limit);
+                authzCodeInfoList = AuthzCodeDAO.getInstance().getAllAuthzCodesWithHashes(connection, offset, chunkSize);
             }
             if (authzCodeInfoList.isEmpty()) {
                 break;
@@ -375,7 +375,7 @@ public class OAuthDataMigrator extends Migrator {
                     migratePlainTextAuthzCodes(authzCodeInfoList);
                 }
                 offset += authzCodeInfoList.size();
-                log.info("Authorization code migration completed with offset {} and limit {}", offset, limit);
+                log.info("Authorization code migration completed with offset {} and limit {}", offset, chunkSize);
             } catch (IdentityOAuth2Exception e) {
                 throw new MigrationClientException(
                         "Error while checking configurations for encryption with " + "transformation is enabled. ", e);
