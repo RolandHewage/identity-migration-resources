@@ -33,7 +33,8 @@ import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_AC
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ACCESS_TOKEN_TABLE_MYSQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ACCESS_TOKEN_TABLE_ORACLE;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS;
-import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS_WITH_HASHES;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS_WITH_HASHES_OTHER;
+import static org.wso2.carbon.is.migration.service.v550.SQLConstants.RETRIEVE_ALL_TOKENS_WITH_HASHES_MYSQL;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_ENCRYPTED_ACCESS_TOKEN;
 import static org.wso2.carbon.is.migration.service.v550.SQLConstants.UPDATE_PLAIN_TEXT_ACCESS_TOKEN;
 
@@ -129,19 +130,31 @@ public class TokenDAO {
      * @return List of access tokens.
      * @throws SQLException If an error occurs while retrieving tokens.
      */
-    public List<OauthTokenInfo> getAllAccessTokensWithHash(Connection connection) throws SQLException {
+    public List<OauthTokenInfo> getAllAccessTokensWithHash(Connection connection, int offset, int limit)
+            throws SQLException {
+
+        String sql;
+        if (connection.getMetaData().getDriverName().contains("MySQL")
+                || connection.getMetaData().getDriverName().contains("H2")
+                || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+            sql = RETRIEVE_ALL_TOKENS_WITH_HASHES_MYSQL;
+        } else {
+            sql = RETRIEVE_ALL_TOKENS_WITH_HASHES_OTHER;
+        }
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(RETRIEVE_ALL_TOKENS_WITH_HASHES);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            while (resultSet.next()) {
-                OauthTokenInfo tokenInfo = new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
-                        resultSet.getString("REFRESH_TOKEN"),
-                        resultSet.getString("TOKEN_ID"));
-                tokenInfo.setAccessTokenHash(resultSet.getString("ACCESS_TOKEN_HASH"));
-                tokenInfo.setRefreshTokenHash(resultSet.getString("REFRESH_TOKEN_HASH"));
-                oauthTokenInfoList.add(tokenInfo);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                preparedStatement.setInt(1, offset);
+                preparedStatement.setInt(2, limit);
+                while (resultSet.next()) {
+                    OauthTokenInfo tokenInfo = new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
+                            resultSet.getString("REFRESH_TOKEN"),
+                            resultSet.getString("TOKEN_ID"));
+                    tokenInfo.setAccessTokenHash(resultSet.getString("ACCESS_TOKEN_HASH"));
+                    tokenInfo.setRefreshTokenHash(resultSet.getString("REFRESH_TOKEN_HASH"));
+                    oauthTokenInfoList.add(tokenInfo);
+                }
             }
         }
         return oauthTokenInfoList;
