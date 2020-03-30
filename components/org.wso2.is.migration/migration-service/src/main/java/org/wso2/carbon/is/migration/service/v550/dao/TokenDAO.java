@@ -144,9 +144,9 @@ public class TokenDAO {
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, offset);
+            preparedStatement.setInt(2, limit);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                preparedStatement.setInt(1, offset);
-                preparedStatement.setInt(2, limit);
                 while (resultSet.next()) {
                     OauthTokenInfo tokenInfo = new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
                             resultSet.getString("REFRESH_TOKEN"),

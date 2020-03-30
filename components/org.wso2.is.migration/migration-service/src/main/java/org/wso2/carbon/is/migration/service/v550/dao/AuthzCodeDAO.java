@@ -138,8 +138,7 @@ public class AuthzCodeDAO {
         }
 
         List<AuthzCodeInfo> authzCodeInfoList = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection
-                .prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, offset);
             preparedStatement.setInt(2, limit);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
