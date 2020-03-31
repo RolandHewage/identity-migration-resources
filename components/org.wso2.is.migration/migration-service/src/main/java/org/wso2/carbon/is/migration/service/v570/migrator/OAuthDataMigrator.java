@@ -121,7 +121,7 @@ public class OAuthDataMigrator extends Migrator {
                         OAuthDAO.getInstance().updateNewAuthzCodeHash(updatedAuthzCodeInfoList, connection);
                         connection.commit();
                         log.info("Authorization code migration completed for tokens {} to {} ", offset, chunkSize);
-                        offset += updatedAuthzCodeInfoList.size();
+                        offset += authzCodeInfos.size();
                     } catch (SQLException e1) {
                         connection.rollback();
                         String error = "SQL error while updating authorization code hash";
