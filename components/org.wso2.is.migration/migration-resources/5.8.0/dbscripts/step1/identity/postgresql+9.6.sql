@@ -62,6 +62,6 @@ SELECT skip_index_if_exists('IDX_AUTH_USER_UN_TID_DN', 'IDN_AUTH_USER', '(USER_N
 
 SELECT skip_index_if_exists('IDX_AUTH_USER_DN_TOD', 'IDN_AUTH_USER', '(DOMAIN_NAME, TENANT_ID)');
 
-DROP FUNCTION skip_index_if_exists;
+DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
 
-DROP FUNCTION add_idp_id_to_con_app_key_if_token_id_present;
+DROP FUNCTION add_idp_id_to_con_app_key_if_token_id_present();

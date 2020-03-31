@@ -38,4 +38,4 @@ CREATE OR REPLACE FUNCTION skip_index_if_exists(indexName varchar(64),tableName 
 
 SELECT skip_index_if_exists('idx_fido2_str','fido2_device_store','(user_name, tenant_id, domain_name, credential_id, user_handle)');
 
-DROP FUNCTION skip_index_if_exists;
+DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
