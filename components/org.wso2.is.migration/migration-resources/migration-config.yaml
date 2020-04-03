@@ -331,20 +331,26 @@ versions:
        location: "step1"
        schema: "um"
    -
-     name: "ClaimDataMigrator"
+     name: "SchemaMigrator"
      order: 4
+     parameters:
+       location: "step2"
+       schema: "identity"
    -
-     name: "EmailTemplateDataMigrator"
+     name: "ClaimDataMigrator"
      order: 5
    -
-     name: "SchemaMigrator"
+     name: "EmailTemplateDataMigrator"
      order: 6
+   -
+     name: "SchemaMigrator"
+     order: 7
      parameters:
        location: "step2"
        schema: "um"
    -
      name: "UserIDMigrator"
-     order: 7
+     order: 8
      parameters:
        # Migrate all the tenants and all the user store domains in it.
        migrateAll: true
