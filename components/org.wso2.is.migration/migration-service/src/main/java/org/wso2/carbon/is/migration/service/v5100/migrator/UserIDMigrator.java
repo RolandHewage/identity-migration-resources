@@ -210,7 +210,15 @@ public class UserIDMigrator extends Migrator {
                                         !isCustomUserStore(abstractUserStoreManager)) {
                                     // If this is not a custom user store, we can update the user id column as well.
                                     String userId = getSCIMIDClaimValue(username, abstractUserStoreManager);
-                                    updateUserIdColumn(userId, username, tenantId);
+
+                                    if (userId != null && !userId.isEmpty()) {
+                                        updateUserIdColumn(userId, username, tenantId);
+                                    } else {
+                                        // If the user did not have a SCIM ID, get the SQL generated UUID
+                                        // and update user id claim
+                                        userId = getUserIDClaimFromDB(username, tenantId);
+                                        updateUserIDClaim(username, userId, abstractUserStoreManager, forceUpdateUserId);
+                                    }
                                 } else {
                                     // In this scenario, we have generated the UUID using SQL. So we have to get it
                                     // and add it as the user id claim.
