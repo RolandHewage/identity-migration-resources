@@ -134,18 +134,26 @@ public class TokenDAO {
             throws SQLException {
 
         String sql;
+        boolean mysqlQueryUsed = false;
         if (connection.getMetaData().getDriverName().contains("MySQL")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             sql = RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_MYSQL;
+            mysqlQueryUsed = true;
         } else {
             sql = RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_OTHER;
         }
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, offset);
-            preparedStatement.setInt(2, limit);
+            // In mysql type queries, limit and offset values are changed.
+            if (mysqlQueryUsed) {
+                preparedStatement.setInt(1, limit);
+                preparedStatement.setInt(2, offset);
+            } else {
+                preparedStatement.setInt(1, offset);
+                preparedStatement.setInt(2, limit);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     OauthTokenInfo tokenInfo = new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),

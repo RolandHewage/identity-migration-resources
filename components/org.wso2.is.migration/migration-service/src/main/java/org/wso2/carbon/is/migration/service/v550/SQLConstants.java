@@ -85,7 +85,7 @@ public class SQLConstants {
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, " +
             "ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH FROM IDN_OAUTH2_ACCESS_TOKEN " +
             "ORDER BY TOKEN_ID " +
-            "OFFSET ? LIMIT ?";
+            "LIMIT ? OFFSET ?";
 
     public static final String RETRIEVE_PAGINATED_TOKENS_WITH_HASHES_OTHER =
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH " +
@@ -107,7 +107,7 @@ public class SQLConstants {
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
                     "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
                     "ORDER BY CODE_ID " +
-                    "OFFSET ? LIMIT ?";
+                    "LIMIT ? OFFSET ?";
 
     public static final String RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER =
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
