@@ -130,6 +130,9 @@ public class AuthzCodeDAO {
 
         String sql;
         if (connection.getMetaData().getDriverName().contains("MySQL")
+                // We can't use the similar thing like above with DB2. Check
+                // https://www.ibm.com/support/knowledgecenter/en/SSEPEK_10.0.0/java/src/tpc/imjcc_rjvjdapi.html#imjcc_rjvjdapi__d70364e1426
+                || connection.getMetaData().getDatabaseProductName().contains("DB2")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
