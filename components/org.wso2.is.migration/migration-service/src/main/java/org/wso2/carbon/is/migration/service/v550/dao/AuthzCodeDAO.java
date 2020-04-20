@@ -129,18 +129,26 @@ public class AuthzCodeDAO {
             throws SQLException {
 
         String sql;
+        boolean mysqlQueriesUsed = false;
         if (connection.getMetaData().getDriverName().contains("MySQL")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_MYSQL;
+            mysqlQueriesUsed = true;
         } else {
             sql = RETRIEVE_PAGINATED_AUTHORIZATION_CODES_WITH_HASHES_OTHER;
         }
 
         List<AuthzCodeInfo> authzCodeInfoList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, offset);
-            preparedStatement.setInt(2, limit);
+            // In mysql type queries, limit and offset values are changed.
+            if (mysqlQueriesUsed) {
+                preparedStatement.setInt(1, limit);
+                preparedStatement.setInt(2, offset);
+            } else {
+                preparedStatement.setInt(1, offset);
+                preparedStatement.setInt(2, limit);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     AuthzCodeInfo authzCodeInfo = new AuthzCodeInfo(resultSet.getString("AUTHORIZATION_CODE"),
