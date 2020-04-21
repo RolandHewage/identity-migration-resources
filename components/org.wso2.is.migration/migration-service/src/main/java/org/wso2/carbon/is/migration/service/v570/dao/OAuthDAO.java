@@ -19,7 +19,7 @@ public class OAuthDAO {
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH " +
             "FROM IDN_OAUTH2_ACCESS_TOKEN " +
             "ORDER BY TOKEN_ID " +
-            "OFFSET ? LIMIT ?";
+            "LIMIT ? OFFSET ?";
     private static final String RETRIEVE_PAGINATED_TOKENS_OTHER =
             "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, ACCESS_TOKEN_HASH, REFRESH_TOKEN_HASH " +
             "FROM IDN_OAUTH2_ACCESS_TOKEN " +
@@ -30,7 +30,7 @@ public class OAuthDAO {
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
             "ORDER BY CODE_ID " +
-            "OFFSET ? LIMIT ?";
+            "LIMIT ? OFFSET ?";
     public static final String RETRIEVE_ALL_AUTHORIZATION_CODES_OTHER =
             "SELECT AUTHORIZATION_CODE, CODE_ID, AUTHORIZATION_CODE_HASH " +
             "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
@@ -63,18 +63,28 @@ public class OAuthDAO {
     public List<OauthTokenInfo> getAllAccessTokens(Connection connection, int offset, int limit) throws SQLException {
 
         String sql;
+        boolean mysqlQueriesUsed = false;
         if (connection.getMetaData().getDriverName().contains("MySQL")
+                // We can't use the similar thing like above with DB2. Check
+                // https://www.ibm.com/support/knowledgecenter/en/SSEPEK_10.0.0/java/src/tpc/imjcc_rjvjdapi.html#imjcc_rjvjdapi__d70364e1426
+                || connection.getMetaData().getDatabaseProductName().contains("DB2")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             sql = RETRIEVE_PAGINATED_TOKENS_MYSQL;
+            mysqlQueriesUsed = true;
         } else {
             sql = RETRIEVE_PAGINATED_TOKENS_OTHER;
         }
 
         List<OauthTokenInfo> oauthTokenInfoList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, offset);
-            preparedStatement.setInt(2, limit);
+            if (mysqlQueriesUsed) {
+                preparedStatement.setInt(1, limit);
+                preparedStatement.setInt(2, offset);
+            } else {
+                preparedStatement.setInt(1, offset);
+                preparedStatement.setInt(2, limit);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     OauthTokenInfo tokenInfo = new OauthTokenInfo(resultSet.getString("ACCESS_TOKEN"),
@@ -122,18 +132,28 @@ public class OAuthDAO {
     public List<AuthzCodeInfo> getAllAuthzCodes(Connection connection, int offset, int limit) throws SQLException {
 
         String sql;
+        boolean mysqlQueriesUsed = false;
         if (connection.getMetaData().getDriverName().contains("MySQL")
+                // We can't use the similar thing like above with DB2. Check
+                // https://www.ibm.com/support/knowledgecenter/en/SSEPEK_10.0.0/java/src/tpc/imjcc_rjvjdapi.html#imjcc_rjvjdapi__d70364e1426
+                || connection.getMetaData().getDatabaseProductName().contains("DB2")
                 || connection.getMetaData().getDriverName().contains("H2")
                 || connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             sql = RETRIEVE_ALL_AUTHORIZATION_CODES_MYSQL;
+            mysqlQueriesUsed = true;
         } else {
             sql = RETRIEVE_ALL_AUTHORIZATION_CODES_OTHER;
         }
 
         List<AuthzCodeInfo> authzCodeInfoList = new ArrayList<>();
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, offset);
-            preparedStatement.setInt(2, limit);
+            if (mysqlQueriesUsed) {
+                preparedStatement.setInt(1, limit);
+                preparedStatement.setInt(2, offset);
+            } else {
+                preparedStatement.setInt(1, offset);
+                preparedStatement.setInt(2, limit);
+            }
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 AuthzCodeInfo authzCodeInfo;
                 while (resultSet.next()) {
