@@ -362,7 +362,11 @@ public class UserIDMigrator extends Migrator {
         if (value != null && !value.isEmpty()) {
             return;
         }
-        abstractUserStoreManager.setUserClaimValue(username, USERNAME_CLAIM, username, DEFAULT_PROFILE);
+
+        Map<String, String> claimValues = new HashMap<String, String>(){{
+            put(USERNAME_CLAIM, username);
+        }};
+        abstractUserStoreManager.doSetUserClaimValues(username, claimValues, DEFAULT_PROFILE);
     }
 
     private String[] getAllDomainNames(AbstractUserStoreManager abstractUserStoreManager) {
