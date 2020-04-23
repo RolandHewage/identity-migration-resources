@@ -37,8 +37,15 @@ public class OAuthDataMigrator extends Migrator {
     @Override
     public void migrate() throws MigrationClientException {
 
-        migrateTokensOfLocalUsers();
-        migrateAuthCodesOfLocalUsers();
+        try {
+            migrateTokensOfLocalUsers();
+            migrateAuthCodesOfLocalUsers();
+        } catch (MigrationClientException ex) {
+            log.error("Error occurred while executing the migration step.", ex);
+            if (!isContinueOnError()) {
+                throw ex;
+            }
+        }
     }
 
     @Override
