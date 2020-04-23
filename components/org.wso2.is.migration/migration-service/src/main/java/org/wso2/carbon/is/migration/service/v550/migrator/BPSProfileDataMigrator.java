@@ -78,8 +78,8 @@ public class BPSProfileDataMigrator extends Migrator {
             throw new MigrationClientException(
                     "Error while retrieving datasource or database connection for BPS " + "profiles table", e);
         } catch (CryptoException e) {
-            throw new MigrationClientException(
-                    "Error while checking whether the passwords are encrypted with new " + "encryption algorithm.");
+            throw new MigrationClientException("Error while checking whether the passwords are encrypted with new " +
+                    "encryption algorithm.", e);
         }
     }
 
