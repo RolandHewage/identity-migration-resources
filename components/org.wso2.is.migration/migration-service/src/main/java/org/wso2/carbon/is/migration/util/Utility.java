@@ -273,4 +273,37 @@ public class Utility {
         File dbScript = new File(dbScriptFile);
         return dbScript.exists();
     }
+
+    /**
+     * Compares two {@code version} values numerically.
+     * The value returned is identical to what would be returned by:
+     * <pre>
+     *    Integer.valueOf(x).compareTo(Integer.valueOf(y))
+     * </pre>
+     *
+     * @param version1 the first {@code version1} to compare
+     * @param version2 the second {@code version1} to compare
+     * @return the value {@code 0} if {@code version1 == version2};
+     *         a value less than {@code 0} if {@code version1 < version2}; and
+     *         a value greater than {@code 0} if {@code version1 > version2}
+     * @since 1.0.92
+     */
+    public static int compareMigrationVersions(String version1, String version2) {
+
+        int version1MajorVersion = Integer.parseInt(version1.split("\\.")[0]);
+        int version1MinorVersion = Integer.parseInt(version1.split("\\.")[1]);
+
+        int version2MajorVersion = Integer.parseInt(version2.split("\\.")[0]);
+        int version2MinorVersion = Integer.parseInt(version2.split("\\.")[1]);
+
+        // Compare major versions.
+        if (version1MajorVersion > version2MajorVersion) {
+            return 1;
+        } else if (version1MajorVersion < version2MajorVersion) {
+            return -1;
+        } else {
+            // Major versions are equal. Compare minor versions.
+            return Integer.compare(version1MinorVersion, version2MinorVersion);
+        }
+    }
 }

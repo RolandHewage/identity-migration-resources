@@ -20,18 +20,23 @@ package org.wso2.carbon.is.migration.service.v570.migrator;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
+import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 import org.wso2.carbon.identity.oauth.dto.ScopeDTO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.dao.OAuthTokenPersistenceFactory;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.util.Constant;
+import org.wso2.carbon.is.migration.util.Schema;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.Tenant;
@@ -41,7 +46,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +74,16 @@ public class OIDCScopeDataMigrator extends Migrator {
     private static final String SCOPE_CLAIM_SEPERATOR = ",";
     private static final String ID = "id";
     private static final String CLAIM = "Claim";
+
+    public static final String SQL_INSERT_SCOPES = "INSERT INTO IDN_OIDC_SCOPE (NAME,TENANT_ID) VALUES (?, ?)";
+    public static final String SQL_INSERT_CLAIMS =
+            "INSERT INTO IDN_OIDC_SCOPE_CLAIM_MAPPING (SCOPE_ID, EXTERNAL_CLAIM_ID) " +
+            "SELECT ?,IDN_CLAIM.ID FROM IDN_CLAIM LEFT JOIN IDN_CLAIM_DIALECT " +
+            "ON IDN_CLAIM_DIALECT.ID = IDN_CLAIM.DIALECT_ID WHERE CLAIM_URI=? " +
+            "AND IDN_CLAIM_DIALECT.DIALECT_URI='http://wso2.org/oidc/claim' " +
+            "AND IDN_CLAIM_DIALECT.TENANT_ID=?";
+    public static final String SQL_IS_EXISTS_SCOPE = "SELECT ID FROM IDN_OIDC_SCOPE WHERE NAME=? AND TENANT_ID=?";
+
     private Map<String, String> scopeConfigFile = null;
 
     private static String loadClaimConfig(OMElement configElement) {
@@ -133,7 +150,7 @@ public class OIDCScopeDataMigrator extends Migrator {
         try {
             appendAdditionalProperties(properties);
             List<ScopeDTO> scopeDTOs = getScopeDTOs(properties);
-            OAuthTokenPersistenceFactory.getInstance().getScopeClaimMappingDAO().addScopes(tenantId, scopeDTOs);
+            addScopes(tenantId, scopeDTOs);
         } catch (IdentityOAuth2Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Duplicate scopes can not be added")) {
                 log.warn("OIDC scopes are already added to the tenant: " + tenantId);
@@ -262,5 +279,95 @@ public class OIDCScopeDataMigrator extends Migrator {
             }
         }
         return scopes;
+    }
+
+    private void addScopes(int tenantId, List<ScopeDTO> scopeClaimsList) throws MigrationClientException,
+            IdentityOAuth2Exception {
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource(Schema.IDENTITY.getName()));
+        scopeClaimsList.forEach(LambdaExceptionUtils.rethrowConsumer((scopeDTO) -> {
+            String scope = scopeDTO.getName();
+            String[] claims = scopeDTO.getClaim();
+            try {
+                if (!this.isScopeExist(scope, tenantId)) {
+                    int scopeClaimMappingId = jdbcTemplate.withTransaction(
+                            (template) -> template.executeInsert(SQL_INSERT_SCOPES,
+                                    (preparedStatement) -> {
+                                        preparedStatement.setString(1, scope);
+                                        preparedStatement.setInt(2, tenantId);
+                                    }, null, true));
+                    if (scopeClaimMappingId > 0 && ArrayUtils.isNotEmpty(claims)) {
+                        Set<String> claimsSet = new HashSet<>(Arrays.asList(claims));
+                        this.insertClaims(tenantId, scopeClaimMappingId, claimsSet);
+                    }
+                    if (log.isDebugEnabled() && ArrayUtils.isNotEmpty(claims)) {
+                        log.debug("The scope: " + scope + " and the claims: " + Arrays.asList(claims) +
+                                "are successfully" + " inserted for the tenant: " + tenantId);
+                    }
+                } else {
+                    String errorMessage =
+                            "Error while adding scopes. Duplicate scopes can not be added for the tenant: " + tenantId;
+                    throw new IdentityOAuth2Exception(errorMessage);
+                }
+            } catch (TransactionException var8) {
+                String errorMessagex = "Error while persisting new claims for the scope for the tenant: " + tenantId;
+                throw new IdentityOAuth2Exception(errorMessagex, var8);
+            }
+        }));
+    }
+
+    private void insertClaims(int tenantId, int scopeId, Set<String> claimsList)
+            throws MigrationClientException, IdentityOAuth2Exception {
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource(Schema.IDENTITY.getName()));
+        byte scopeClaimMappingId = -1;
+
+        try {
+            jdbcTemplate.withTransaction((template) -> {
+                template.executeBatchInsert(SQL_INSERT_CLAIMS, (preparedStatement) -> {
+                    if (CollectionUtils.isNotEmpty(claimsList)) {
+                        for (String claim : claimsList) {
+                            preparedStatement.setInt(1, scopeId);
+                            preparedStatement.setString(2, claim);
+                            preparedStatement.setInt(3, tenantId);
+                            preparedStatement.addBatch();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Claim value :" + claim + " is added to the batch.");
+                            }
+                        }
+                    }
+
+                }, scopeClaimMappingId);
+                return null;
+            });
+        } catch (TransactionException var8) {
+            String errorMessage = "Error when storing oidc claims for tenant: " + tenantId;
+            throw new IdentityOAuth2Exception(errorMessage, var8);
+        }
+    }
+
+    public boolean isScopeExist(String scope, int tenantId) throws IdentityOAuth2Exception, MigrationClientException {
+
+        try {
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource(Schema.IDENTITY.getName()));
+            Integer scopeId = jdbcTemplate.withTransaction((template) -> template
+                    .fetchSingleRecord(SQL_IS_EXISTS_SCOPE, (resultSet, rowNumber) -> resultSet.getInt(1),
+                            (preparedStatement) -> {
+                                preparedStatement.setString(1, scope);
+                                preparedStatement.setInt(2, tenantId);
+                            }));
+            if (scopeId == null) {
+                return false;
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope id: " + scopeId + "is returned for the tenant: " + tenantId + "and scope: "
+                            + scope);
+                }
+                return true;
+            }
+        } catch (TransactionException ex) {
+            String errorMessage = "Error fetching data for oidc scope: " + scope;
+            throw new IdentityOAuth2Exception(errorMessage, ex);
+        }
     }
 }
