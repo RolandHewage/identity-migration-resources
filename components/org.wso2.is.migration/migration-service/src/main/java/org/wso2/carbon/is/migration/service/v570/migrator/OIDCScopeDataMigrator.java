@@ -20,18 +20,24 @@ package org.wso2.carbon.is.migration.service.v570.migrator;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
+import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityIOStreamUtils;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 import org.wso2.carbon.identity.oauth.dto.ScopeDTO;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.dao.OAuthTokenPersistenceFactory;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.is.migration.service.v570.dao.OIDCScopeDAO;
 import org.wso2.carbon.is.migration.util.Constant;
+import org.wso2.carbon.is.migration.util.Schema;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.Tenant;
@@ -41,7 +47,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +75,7 @@ public class OIDCScopeDataMigrator extends Migrator {
     private static final String SCOPE_CLAIM_SEPERATOR = ",";
     private static final String ID = "id";
     private static final String CLAIM = "Claim";
+
     private Map<String, String> scopeConfigFile = null;
 
     private static String loadClaimConfig(OMElement configElement) {
@@ -131,9 +140,10 @@ public class OIDCScopeDataMigrator extends Migrator {
     protected void addScopes(Properties properties, int tenantId) throws MigrationClientException {
 
         try {
+            OIDCScopeDAO oidcScopeDAO = new OIDCScopeDAO(getDataSource(Schema.IDENTITY.getName()));
             appendAdditionalProperties(properties);
             List<ScopeDTO> scopeDTOs = getScopeDTOs(properties);
-            OAuthTokenPersistenceFactory.getInstance().getScopeClaimMappingDAO().addScopes(tenantId, scopeDTOs);
+            oidcScopeDAO.addScopes(tenantId, scopeDTOs);
         } catch (IdentityOAuth2Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Duplicate scopes can not be added")) {
                 log.warn("OIDC scopes are already added to the tenant: " + tenantId);
