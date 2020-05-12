@@ -31,8 +31,17 @@ public class ScopeDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(ScopeDataMigrator.class);
 
-    private static final String ADD_SCOPE_TYPE_COLUMN = "ALTER TABLE IDN_OAUTH2_SCOPE ADD COLUMN " +
+    private static final String ADD_SCOPE_TYPE_COLUMN_MYSQL_MSSQL = "ALTER TABLE IDN_OAUTH2_SCOPE ADD " +
             "SCOPE_TYPE VARCHAR(255) NOT NULL DEFAULT 'OAUTH2'";
+
+    private static final String ADD_SCOPE_TYPE_COLUMN_H2_DB2_POSTGRESQL = "ALTER TABLE IDN_OAUTH2_SCOPE ADD COLUMN " +
+            "SCOPE_TYPE VARCHAR(255) NOT NULL DEFAULT 'OAUTH2';";
+
+    private static final String ADD_SCOPE_TYPE_COLUMN_INFORMIX = "ALTER TABLE IDN_OAUTH2_SCOPE ADD COLUMN " +
+            "SCOPE_TYPE VARCHAR(255) NOT NULL DEFAULT 'OAUTH2'";
+
+    private static final String ADD_SCOPE_TYPE_COLUMN_ORACLE = "ALTER TABLE IDN_OAUTH2_SCOPE ADD SCOPE_TYPE " +
+            "VARCHAR(255) DEFAULT 'OAUTH2' NOT NULL";
 
     public static final String RETRIEVE_IDN_OAUTH2_SCOPE_TABLE_MYSQL = "SELECT SCOPE_TYPE " +
             "FROM IDN_OAUTH2_SCOPE LIMIT 1";
@@ -82,8 +91,22 @@ public class ScopeDataMigrator extends Migrator {
     }
 
     private void createScopeTypeColumn(Connection connection) throws SQLException {
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_SCOPE_TYPE_COLUMN)) {
+        String sql;
+        if (connection.getMetaData().getDriverName().contains("MySQL") ||
+                connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData()
+                .getDriverName().contains("Microsoft")) {
+            sql = ADD_SCOPE_TYPE_COLUMN_MYSQL_MSSQL;
+        } else if (connection.getMetaData().getDriverName().contains("H2") ||
+                connection.getMetaData().getDatabaseProductName().contains("DB2") ||
+                connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+            sql = ADD_SCOPE_TYPE_COLUMN_H2_DB2_POSTGRESQL;
+        } else if (connection.getMetaData().getDriverName().contains("Informix")) {
+            // Driver name = "IBM Informix JDBC Driver for IBM Informix Dynamic Server"
+            sql = ADD_SCOPE_TYPE_COLUMN_H2_DB2_POSTGRESQL;
+        } else {
+            sql = ADD_SCOPE_TYPE_COLUMN_ORACLE;
+        }
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         }
     }
