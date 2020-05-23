@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.is.migration.util;
+package org.wso2.is.data.sync.system.util;
 
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -24,9 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.crypto.api.CipherMetaDataHolder;
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
-import org.wso2.carbon.is.migration.config.Config;
-import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,8 +37,8 @@ public class EncryptionUtil {
     private static final Logger log = LoggerFactory.getLogger(EncryptionUtil.class);
 
     private static String oldEncryptionAlgorithmConfigured = null;
-    private static String migratingEncryptionAlgorithmConfigured = null;
     static Map<String, String> algorithmAndProviderMap = new HashMap<>();
+    private static final String DEFAULT_OLD_ENCRYPTION_ALGORITHM = "RSA/ECB/OAEPwithSHA1andMGF1Padding";
 
     static {
 
@@ -51,7 +49,6 @@ public class EncryptionUtil {
         algorithmAndProviderMap.put("AES/GCM/NoPadding", "org.wso2.carbon.crypto.provider" +
                 ".SymmetricKeyInternalCryptoProvider");
     }
-
 
     public static String getNewEncryptedValue(String encryptedValue) throws CryptoException {
 
@@ -67,22 +64,7 @@ public class EncryptionUtil {
         return CryptoUtil.getDefaultCryptoUtil().base64DecodeAndIsSelfContainedCipherText(encryptedValue);
     }
 
-    public static String getNewEncryptedUserstorePassword(String encryptedValue) throws CryptoException {
-
-        if (StringUtils.isNotEmpty(encryptedValue) && !isNewlyEncryptedUserstorePassword(encryptedValue)) {
-            byte[] decryptedPassword = SecondaryUserstoreCryptoUtil.getInstance()
-                    .base64DecodeAndDecrypt(encryptedValue, "RSA");
-            return SecondaryUserstoreCryptoUtil.getInstance().encryptAndBase64Encode(decryptedPassword);
-        }
-        return null;
-    }
-
-    public static boolean isNewlyEncryptedUserstorePassword(String encryptedValue) throws CryptoException {
-
-        return SecondaryUserstoreCryptoUtil.getInstance().base64DecodeAndIsSelfContainedCipherText(encryptedValue);
-    }
-
-    public static String transformToSymmetric(String currentEncryptedvalue) throws MigrationClientException {
+    public static String transformToSymmetric(String currentEncryptedvalue) throws SyncClientException {
 
         try {
             String cryptoProvider = getInternalCryptoProviderFromAlgorithm(oldEncryptionAlgorithmConfigured);
@@ -103,8 +85,7 @@ public class EncryptionUtil {
         return currentEncryptedvalue;
     }
 
-    public static String retryDecryptionWithSuitableAlgorithm(String currentEncryptedvalue)
-            throws MigrationClientException {
+    public static String retryDecryptionWithSuitableAlgorithm(String currentEncryptedvalue) throws SyncClientException {
 
         CipherMetaDataHolder cipherMetaDataHolder =
                 CryptoUtil.getDefaultCryptoUtil()
@@ -129,7 +110,7 @@ public class EncryptionUtil {
                             oldAlgorithm);
 
             // TODO: 5/19/20 check  
-            throw new MigrationClientException(errorMsg,e);
+            throw new SyncClientException(errorMsg, e);
         }
 
     }
@@ -144,22 +125,12 @@ public class EncryptionUtil {
         return null;
     }
 
-    public static void setCurrentEncryptionAlgorithm(Migrator migrator) {
+    public static void setCurrentEncryptionAlgorithm(String algorithm) {
 
-        oldEncryptionAlgorithmConfigured = migrator.getMigratorConfig().getParameterValue(
-                "currentEncryptionAlgorithm");
+        oldEncryptionAlgorithmConfigured = algorithm;
         if (StringUtils.isBlank(oldEncryptionAlgorithmConfigured)) {
-            oldEncryptionAlgorithmConfigured = Config.getInstance().getCurrentEncryptionAlgorithm();
+            oldEncryptionAlgorithmConfigured = DEFAULT_OLD_ENCRYPTION_ALGORITHM;
         }
     }
 
-    public static String getMigratedEncryptionAlgorithm(Migrator migrator) {
-
-        migratingEncryptionAlgorithmConfigured = migrator.getMigratorConfig().getParameterValue(
-                "migratedEncryptionAlgorithm");
-        if (StringUtils.isBlank(migratingEncryptionAlgorithmConfigured)) {
-            return Config.getInstance().getMigratedEncryptionAlgorithm();
-        }
-        return migratingEncryptionAlgorithmConfigured;
-    }
 }

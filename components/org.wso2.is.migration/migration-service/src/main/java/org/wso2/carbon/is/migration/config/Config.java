@@ -42,6 +42,8 @@ public class Config {
     private int migrationStartingTenantID;
     private int migrationEndingTenantID;
     private List<Version> versions = new ArrayList<>();
+    private String currentEncryptionAlgorithm;
+    private String migratedEncryptionAlgorithm;
 
     private Config() {
 
@@ -187,5 +189,25 @@ public class Config {
     public void setMigrationEndingTenantID(int migrationEndingTenantID) {
 
         this.migrationEndingTenantID = migrationEndingTenantID;
+    }
+
+    public String getCurrentEncryptionAlgorithm() {
+
+        return currentEncryptionAlgorithm;
+    }
+
+    public void setCurrentEncryptionAlgorithm(String currentEncryptionAlgorithm) {
+
+        this.currentEncryptionAlgorithm = currentEncryptionAlgorithm;
+    }
+
+    public String getMigratedEncryptionAlgorithm() {
+
+        return migratedEncryptionAlgorithm;
+    }
+
+    public void setMigratedEncryptionAlgorithm(String migratedEncryptionAlgorithm) {
+
+        this.migratedEncryptionAlgorithm = migratedEncryptionAlgorithm;
     }
 }

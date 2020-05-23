@@ -59,6 +59,8 @@ public class Configuration {
     private List<String> syncTables = new ArrayList<>();
     private List<SchemaInfo> schemaInfoList = new ArrayList<>();
 
+    private String oldEncryptionAlgorithm;
+
     private Configuration() {
 
     }
@@ -299,5 +301,15 @@ public class Configuration {
             }
             return property;
         }
+
+    }
+    public String getOldEncryptionAlgorithm() {
+
+        return oldEncryptionAlgorithm;
+    }
+
+    public void setOldEncryptionAlgorithm(String oldEncryptionAlgorithm) {
+
+        this.oldEncryptionAlgorithm = oldEncryptionAlgorithm;
     }
 }

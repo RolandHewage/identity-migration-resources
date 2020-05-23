@@ -126,4 +126,12 @@ public class Constant {
     public static final String POSTGRESQL_PRODUCT_NAME = "PostgreSQL";
     public static final String FOREIGN_KEY_VIOLATION_ERROR_CODE_POSTGRESQL = "23503";
     public static final String FEDERATED = "FEDERATED";
+
+    public static final String COLUMN_DATA_VALUE = "DATA_VALUE";
+    public static final String COLUMN_TENANT_ID = "TENANT_ID";
+    public static final String COLUMN_USER_NAME = "USER_NAME";
+    public static final String COLUMN_DATA_KEY = "DATA_KEY";
+
+    public static final String COLUMN_REQUEST = "REQUEST";
+    public static final String COLUMN_UUID = "UUID";
 }

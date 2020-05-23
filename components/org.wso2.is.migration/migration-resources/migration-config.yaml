@@ -373,3 +373,14 @@ versions:
          # migratingDomains: "PRIMARY"
          # Mark whether user IDs should be updated even though there is already an ID there. (Optional)
          # forceUpdateUserId: true
+
+
+ -
+   version: "5.11.0"
+   migratorConfigs:
+   -
+     name: "EncryptionAdminFlowMigrator"
+     order: 1
+   -
+     name: "EncryptionUserFlowMigrator"
+     order: 2

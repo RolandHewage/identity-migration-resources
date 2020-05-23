@@ -26,6 +26,9 @@ import org.wso2.is.data.sync.system.pipeline.DataSyncPipeline;
 import org.wso2.is.data.sync.system.pipeline.PipelineConfiguration;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformer;
 import org.wso2.is.data.sync.system.pipeline.transform.DataTransformerFactory;
+import org.wso2.is.data.sync.system.pipeline.transform.v5110.AuthorizationCodeDataTransformerV5110;
+import org.wso2.is.data.sync.system.pipeline.transform.v5110.OAuthTokenDataTransformerV5110;
+import org.wso2.is.data.sync.system.pipeline.transform.v5110.TotpSecretJdbcDataStoreClaimDataTransformerV5110;
 import org.wso2.is.data.sync.system.pipeline.transform.v550.AuthorizationCodeDataTransformerV550;
 import org.wso2.is.data.sync.system.pipeline.transform.v550.OAuthTokenDataTransformerV550;
 import org.wso2.is.data.sync.system.pipeline.transform.v570.AuthorizationCodeDataTransformerV570;
@@ -98,6 +101,9 @@ public class SyncService {
         dataTransformers.add(new AuthorizationCodeDataTransformerV550());
         dataTransformers.add(new AuthorizationCodeDataTransformerV570());
         dataTransformers.add(new AuthorizationCodeDataTransformerV580());
+        dataTransformers.add(new OAuthTokenDataTransformerV5110(configuration.getOldEncryptionAlgorithm()));
+        dataTransformers.add(new AuthorizationCodeDataTransformerV5110(configuration.getOldEncryptionAlgorithm()));
+        dataTransformers.add(new TotpSecretJdbcDataStoreClaimDataTransformerV5110(configuration.getOldEncryptionAlgorithm()));
     }
 
     public void generateScripts(boolean ddlOnly) throws SyncClientException {
