@@ -15,9 +15,12 @@
  */
 package org.wso2.carbon.is.migration.service.v5110.migrator;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.base.api.ServerConfigurationService;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
+import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.EncryptionUtil;
@@ -26,6 +29,10 @@ import org.wso2.carbon.is.migration.util.TotpSecretUtil;
 import org.wso2.carbon.is.migration.util.WorkFlowUtil;
 
 import java.util.Properties;
+
+import static org.wso2.carbon.is.migration.util.Constant.SERVER_INTERNAL_CRYPTO_PROVIDER;
+import static org.wso2.carbon.is.migration.util.Constant.SERVER_SYMMETRIC_KEY;
+import static org.wso2.carbon.is.migration.util.Constant.SYMMETRIC_KEY_CRYPTO_PROVIDER;
 
 public class EncryptionUserFlowMigrator extends Migrator {
 
@@ -42,10 +49,17 @@ public class EncryptionUserFlowMigrator extends Migrator {
     @Override
     public void migrate() throws MigrationClientException {
 
-        EncryptionUtil.setCurrentEncryptionAlgorithm(this);
-        migrateTotpSecretKey();
-        migrateOauthData();
-        migrateUserPasswordInWorkFlow();
+        ServerConfigurationService serverConfigService = ISMigrationServiceDataHolder.getServerConfigurationService();
+        String internalCryptoProvider = serverConfigService.getFirstProperty(SERVER_INTERNAL_CRYPTO_PROVIDER);
+        String symmetricKey = serverConfigService.getFirstProperty(SERVER_SYMMETRIC_KEY);
+        if (SYMMETRIC_KEY_CRYPTO_PROVIDER.equals(internalCryptoProvider) && StringUtils.isNotBlank(symmetricKey)) {
+            EncryptionUtil.setCurrentEncryptionAlgorithm(this);
+            migrateTotpSecretKey();
+            migrateOauthData();
+            migrateUserPasswordInWorkFlow();
+        } else {
+            log.warn("Symmetric key encryption is not enabled. Therefore this migration is not needed.");
+        }
     }
 
     public void migrateTotpSecretKey() throws MigrationClientException {
