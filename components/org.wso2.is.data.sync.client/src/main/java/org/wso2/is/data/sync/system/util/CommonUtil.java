@@ -189,7 +189,8 @@ public class CommonUtil {
                 tableName = tableName.toLowerCase();
             }
 
-            try (ResultSet resultSet = metaData.getColumns(null, null, tableName, null)) {
+            try (ResultSet resultSet = metaData.getColumns(connection.getCatalog(), null, tableName,
+                    null)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
                     String type = resultSet.getString(JDBC_META_DATA_TYPE_NAME);
