@@ -85,7 +85,7 @@ public class SyncClientComponent {
             if (prepareSync != null) {
                 syncService = new SyncService(properties);
                 String generateDDL = System.getProperty(JVM_PROPERTY_GENERATE_DDL);
-                syncService.generateScripts(generateDDL != null);
+                syncService.generateScripts(generateDDL != null, properties);;
             } else if (dataSync != null) {
                 syncService = new SyncService(properties);
                 syncService.run();

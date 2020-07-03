@@ -34,6 +34,12 @@ public class DB2DatabaseDialect extends ANSIDatabaseDialect {
     }
 
     @Override
+    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+
+        return null;
+    }
+
+    @Override
     public List<String> generateCreateTable(Table table) throws SyncClientException {
 
         return null;

@@ -38,6 +38,15 @@ public interface DatabaseDialect {
     List<String> generateCreateTrigger(Trigger trigger) throws SyncClientException;
 
     /**
+     * Generate SQL statements for creating a trigger.
+     *
+     * @param trigger Trigger model containing trigger information.
+     * @return List of SQL statements related to trigger creation.
+     * @throws SyncClientException If error occurs while generating SQL statements.
+     */
+    List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException;
+
+    /**
      * Generate SQL statements for creating a table.
      *
      * @param table Table model containing table information.

@@ -30,6 +30,7 @@ public class Trigger {
     private String triggerEvent; //INSERT | UPDATE | DELETE
     private TableMetaData tableMetaData;
     private String selectionPolicy; //FOR EACH ROW
+    private String foreignKey;
 
     public Trigger(String name, String sourceTableName, String targetTableName, String triggerEvent,
                    TableMetaData tableMetaData,
@@ -43,6 +44,21 @@ public class Trigger {
         this.tableMetaData = tableMetaData;
         this.selectionPolicy = selectionPolicy;
     }
+
+    public Trigger(String name, String sourceTableName, String targetTableName, String triggerEvent,
+                   TableMetaData tableMetaData,
+                   String selectionPolicy, String triggerTiming,String foreignKey) {
+
+        this.name = name;
+        this.sourceTableName = sourceTableName;
+        this.targetTableName = targetTableName;
+        this.triggerTiming = triggerTiming;
+        this.triggerEvent = triggerEvent;
+        this.tableMetaData = tableMetaData;
+        this.selectionPolicy = selectionPolicy;
+        this.foreignKey = foreignKey;
+    }
+
 
     public String getName() {
 
@@ -77,5 +93,10 @@ public class Trigger {
     public String getSelectionPolicy() {
 
         return selectionPolicy;
+    }
+
+    public String getForeignKey() {
+
+        return foreignKey;
     }
 }

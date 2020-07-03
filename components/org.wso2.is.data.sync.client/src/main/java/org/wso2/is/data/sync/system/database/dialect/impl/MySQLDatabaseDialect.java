@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_CREATE_TRIGGER_MYSQL;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DELETE_TRIGGER_MYSQL;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TABLE_MYSQL;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TRIGGER_MYSQL;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ATTRIBUTE_AUTO_INCREMENT;
@@ -124,7 +125,6 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
 
         for (ColumnData columnEntry : columnDataList) {
             columnJoiner.add(columnEntry.getName());
-
             if (SYNC_OPERATION_DELETE.equals(triggerEvent)) {
                 columnValueJoiner.add("OLD." + columnEntry.getName());
             } else {
@@ -144,6 +144,35 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         sqlStatements.add(triggerStatement);
         return sqlStatements;
     }
+
+    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+
+        List<String> sqlStatements = new ArrayList<>();
+        String triggerName = trigger.getName();
+        String sourceTableName = trigger.getSourceTableName();
+        String targetTableName = trigger.getTargetTableName();
+        String triggerType = trigger.getTriggerTiming();
+        String triggerEvent = trigger.getTriggerEvent();
+        String selectionPolicy = trigger.getSelectionPolicy();
+        String foreignKey = trigger.getForeignKey();
+        TableMetaData tableMetaData = trigger.getTableMetaData();
+        List<ColumnData> columnDataList = tableMetaData.getColumnDataList();
+        String columnValue = "";
+
+        for (ColumnData columnEntry : columnDataList) {
+            if (SYNC_OPERATION_DELETE.equals(triggerEvent) && foreignKey.equals(columnEntry.getName())) {
+                columnValue = "OLD." + columnEntry.getName();
+            }
+        }
+
+        String triggerStatement = String.format(SQL_TEMPLATE_DELETE_TRIGGER_MYSQL, triggerName, triggerType,
+                triggerEvent, sourceTableName, selectionPolicy, targetTableName, foreignKey, columnValue);
+
+        sqlStatements.add(triggerStatement);
+        return sqlStatements;
+    }
+
+    //SQL_TEMPLATE_DELETE_TRIGGER_MYSQL
 
     @Override
     public List<String> generateDropTrigger(String name) throws SyncClientException {

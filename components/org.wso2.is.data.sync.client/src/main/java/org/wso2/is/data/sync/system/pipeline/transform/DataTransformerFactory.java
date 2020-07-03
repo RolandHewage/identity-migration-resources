@@ -114,6 +114,8 @@ public class DataTransformerFactory {
             return 8;
         } else if ("5.9.0".equals(version)) {
             return 9;
+        } else if ("5.10.0".equals(version)) {
+            return 10;
         }
         return -1;
     }

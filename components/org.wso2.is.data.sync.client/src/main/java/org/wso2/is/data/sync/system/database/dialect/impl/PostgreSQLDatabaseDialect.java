@@ -111,6 +111,12 @@ public class PostgreSQLDatabaseDialect extends ANSIDatabaseDialect {
     }
 
     @Override
+    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+
+        return null;
+    }
+
+    @Override
     public List<String> generateDropTrigger(String triggerName, String targetTableName) throws SyncClientException {
 
         // DROP TRIGGER IF EXISTS %s ON %s
