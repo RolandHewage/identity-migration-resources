@@ -259,18 +259,14 @@ public class DDLGenerator {
                         SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
 
                 Trigger onDeleteTrigger;
-                List<String> onDeleteTriggerSQL;
                 if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
                         syncTables.contains(parentTableName)) {
                     onDeleteTrigger = new Trigger(deleteTriggerName, parentTableName, targetTableName,
-                            SYNC_OPERATION_DELETE, tableMetaData,
-                            SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER, fkColumnName);
-                    onDeleteTriggerSQL = databaseDialect.generateDeleteTrigger(onDeleteTrigger);
+                            SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER,
+                            fkColumnName);
                 } else {
                     onDeleteTrigger = new Trigger(deleteTriggerName, tableName, targetTableName,
-                            SYNC_OPERATION_DELETE, tableMetaData,
-                            SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
-                    onDeleteTriggerSQL = databaseDialect.generateCreateTrigger(onDeleteTrigger);
+                            SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
                 }
 
                 List<String> dropInsertTriggerSQL = databaseDialect.generateDropTrigger(insertTriggerName, targetTableName);
@@ -278,6 +274,7 @@ public class DDLGenerator {
                 List<String> dropDeleteTriggerSQL = databaseDialect.generateDropTrigger(deleteTriggerName, targetTableName);
                 List<String> onInsertTriggerSQL = databaseDialect.generateCreateTrigger(onInsertTrigger);
                 List<String> onUpdateTriggerSQL = databaseDialect.generateCreateTrigger(onUpdateTrigger);
+                List<String> onDeleteTriggerSQL = databaseDialect.generateDeleteTrigger(onDeleteTrigger);
 
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropInsertTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropUpdateTriggerSQL);
