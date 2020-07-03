@@ -95,6 +95,9 @@ public class Constant {
     public static final String TABLE_IDN_OAUTH2_AUTHORIZATION_CODE = "IDN_OAUTH2_AUTHORIZATION_CODE";
     public static final String TABLE_IDN_OAUTH2_ACCESS_TOKEN = "IDN_OAUTH2_ACCESS_TOKEN";
 
+    public static final String PK_TABLE_NAME = "PKTABLE_NAME";
+    public static final String PK_COLUMN_NAME = "PKCOLUMN_NAME";
+
     public static final String COLUMN_UM_USER_ID = "UM_USER_ID";
 
     public static final String PROPERTY_NAME_HASH = "hash";

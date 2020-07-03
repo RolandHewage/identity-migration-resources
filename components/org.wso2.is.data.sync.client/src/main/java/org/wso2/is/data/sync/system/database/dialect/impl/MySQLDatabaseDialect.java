@@ -154,19 +154,21 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         String triggerType = trigger.getTriggerTiming();
         String triggerEvent = trigger.getTriggerEvent();
         String selectionPolicy = trigger.getSelectionPolicy();
-        String foreignKey = trigger.getForeignKey();
+        String foreignKeyColumnName = trigger.getForeignKey();
         TableMetaData tableMetaData = trigger.getTableMetaData();
         List<ColumnData> columnDataList = tableMetaData.getColumnDataList();
         String columnValue = "";
 
         for (ColumnData columnEntry : columnDataList) {
-            if (SYNC_OPERATION_DELETE.equals(triggerEvent) && foreignKey.equals(columnEntry.getName())) {
+            if (SYNC_OPERATION_DELETE.equals(triggerEvent) && foreignKeyColumnName.equals(columnEntry.getName())) {
                 columnValue = "OLD." + columnEntry.getName();
             }
         }
 
+        // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
+        // DELETE FROM {targetTableName} WHERE {foreignKeyColumnName}=columnValue; END;
         String triggerStatement = String.format(SQL_TEMPLATE_DELETE_TRIGGER_MYSQL, triggerName, triggerType,
-                triggerEvent, sourceTableName, selectionPolicy, targetTableName, foreignKey, columnValue);
+                triggerEvent, sourceTableName, selectionPolicy, targetTableName, foreignKeyColumnName, columnValue);
 
         sqlStatements.add(triggerStatement);
         return sqlStatements;
