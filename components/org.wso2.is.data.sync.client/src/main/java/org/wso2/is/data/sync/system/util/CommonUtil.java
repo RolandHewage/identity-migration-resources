@@ -51,6 +51,7 @@ import static org.wso2.is.data.sync.system.util.Constant.POSTGRESQL_PRODUCT_NAME
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC;
 import static org.wso2.is.data.sync.system.util.Constant.TABLE_NAME_SUFFIX_SYNC_VERSION;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_DELETE;
+import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_FOREIGN_KEY;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_INSERT;
 import static org.wso2.is.data.sync.system.util.Constant.TRIGGER_NAME_SUFFIX_UPDATE;
 
@@ -88,6 +89,12 @@ public class CommonUtil {
     public static String getDeleteTriggerName(String tableName) {
 
         return getFormattedName(tableName, TRIGGER_NAME_SUFFIX_DELETE);
+    }
+
+    public static String getDeleteTriggerNameForChildTable(String tableName, int triggerNo) {
+
+        String suffix = TRIGGER_NAME_SUFFIX_FOREIGN_KEY + Integer.toString(triggerNo);
+        return getFormattedName(tableName, suffix);
     }
 
     public static String getScripId(String scheme, String type) {

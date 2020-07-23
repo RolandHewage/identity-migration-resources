@@ -31,7 +31,6 @@ import org.wso2.is.data.sync.system.database.dialect.impl.OracleDatabaseDialect;
 import org.wso2.is.data.sync.system.database.dialect.impl.PostgreSQLDatabaseDialect;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 import org.wso2.is.data.sync.system.util.Constant;
-import org.wso2.is.data.sync.system.config.Configuration;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +53,7 @@ import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getDeleteTriggerName;
+import static org.wso2.is.data.sync.system.util.CommonUtil.getDeleteTriggerNameForChildTable;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getInsertTriggerName;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getPrimaryKeys;
 import static org.wso2.is.data.sync.system.util.CommonUtil.getSyncTableName;
@@ -233,13 +233,6 @@ public class DDLGenerator {
             String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
             try (Connection sourceConnection = dataSourceManager.getSourceConnection(schema)) {
-                DatabaseMetaData metaData = sourceConnection.getMetaData();
-                ResultSet rs = metaData.getImportedKeys(sourceConnection.getCatalog(), null, tableName);
-                while (rs.next()) {
-                    parentTableName = rs.getString(PK_TABLE_NAME);
-                    fkColumnName = rs.getString(PK_COLUMN_NAME);
-                }
-
                 String syncTables = getProperty(JVM_PROPERTY_SYNC_TABLES, true, properties);
                 TableMetaData tableMetaData = new TableMetaData.Builder().setColumnData(
                         getColumnData(tableName, sourceConnection)).setPrimaryKeys(
@@ -257,24 +250,15 @@ public class DDLGenerator {
                 Trigger onUpdateTrigger = new Trigger(updateTriggerName, tableName, targetTableName,
                         SYNC_OPERATION_UPDATE, tableMetaData,
                         SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
-
-                Trigger onDeleteTrigger;
-                if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
-                        syncTables.contains(parentTableName)) {
-                    onDeleteTrigger = new Trigger(deleteTriggerName, parentTableName, targetTableName,
-                            SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER,
-                            fkColumnName);
-                } else {
-                    onDeleteTrigger = new Trigger(deleteTriggerName, tableName, targetTableName,
+                Trigger onDeleteTrigger = new Trigger(deleteTriggerName, tableName, targetTableName,
                             SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
-                }
 
                 List<String> dropInsertTriggerSQL = databaseDialect.generateDropTrigger(insertTriggerName, targetTableName);
                 List<String> dropUpdateTriggerSQL = databaseDialect.generateDropTrigger(updateTriggerName, targetTableName);
                 List<String> dropDeleteTriggerSQL = databaseDialect.generateDropTrigger(deleteTriggerName, targetTableName);
                 List<String> onInsertTriggerSQL = databaseDialect.generateCreateTrigger(onInsertTrigger);
                 List<String> onUpdateTriggerSQL = databaseDialect.generateCreateTrigger(onUpdateTrigger);
-                List<String> onDeleteTriggerSQL = databaseDialect.generateDeleteTrigger(onDeleteTrigger);
+                List<String> onDeleteTriggerSQL = databaseDialect.generateCreateTrigger(onDeleteTrigger);
 
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropInsertTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropUpdateTriggerSQL);
@@ -283,6 +267,27 @@ public class DDLGenerator {
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onUpdateTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onDeleteTriggerSQL);
 
+                Trigger onDeleteTriggersForChildTables;
+                DatabaseMetaData metaData = sourceConnection.getMetaData();
+                ResultSet rs = metaData.getImportedKeys(sourceConnection.getCatalog(), null, tableName);
+                int triggerCount = 0;
+                while (rs.next()) {
+                    parentTableName = rs.getString(PK_TABLE_NAME);
+                    fkColumnName = rs.getString(PK_COLUMN_NAME);
+                    String triggerName = getDeleteTriggerNameForChildTable(tableName, triggerCount);
+
+                    if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
+                            syncTables.contains(parentTableName)) {
+                        onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
+                                SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER,
+                                fkColumnName);
+                        List<String> onDeleteTriggerForChildTable =
+                                databaseDialect.generateDeleteTrigger(onDeleteTriggersForChildTables);
+                        addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList,
+                                onDeleteTriggerForChildTable);
+                    }
+                    triggerCount++;
+                }
             } catch (SQLException e) {
                 throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
             }

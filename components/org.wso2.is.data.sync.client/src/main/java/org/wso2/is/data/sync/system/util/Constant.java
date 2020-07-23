@@ -43,6 +43,7 @@ public class Constant {
     public static final String TRIGGER_NAME_SUFFIX_INSERT = "_IT";
     public static final String TRIGGER_NAME_SUFFIX_UPDATE = "_UT";
     public static final String TRIGGER_NAME_SUFFIX_DELETE = "_DT";
+    public static final String TRIGGER_NAME_SUFFIX_FOREIGN_KEY = "_FK";
     public static final String TRIGGER_TIMING_AFTER = "AFTER";
     public static final String TRIGGER_TIMING_BEFORE = "BEFORE";
     public static final String SELECTION_POLICY_FOR_EACH_ROW = "FOR EACH ROW";
