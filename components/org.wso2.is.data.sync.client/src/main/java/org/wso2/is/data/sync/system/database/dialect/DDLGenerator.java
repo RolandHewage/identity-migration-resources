@@ -276,6 +276,11 @@ public class DDLGenerator {
                     fkColumnName = rs.getString(PK_COLUMN_NAME);
                     String triggerName = getDeleteTriggerNameForChildTable(tableName, triggerCount);
 
+                    List<String> dropDeleteTriggerSQLForChildTable =
+                            databaseDialect.generateDropTrigger(triggerName, targetTableName);
+                    addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList,
+                            dropDeleteTriggerSQLForChildTable);
+
                     if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
                             syncTables.contains(parentTableName)) {
                         onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
