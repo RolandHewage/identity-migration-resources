@@ -28,10 +28,12 @@ import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_ALL_TOTP_S
 import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_ALL_TOTP_SECRET_KEY_CLAIM_DATA_WITH_OTHER;
 import static org.wso2.carbon.is.migration.util.SQLConstants.UPDATE_TOTP_SECRET;
 
+/**
+ * DAO class for handling identity claim for TOTP secret.
+ */
 public class IdentityClaimDAO {
 
-    private static IdentityClaimDAO
-            instance = new IdentityClaimDAO();
+    private static IdentityClaimDAO instance = new IdentityClaimDAO();
 
     private IdentityClaimDAO() {
 
@@ -42,10 +44,17 @@ public class IdentityClaimDAO {
         return instance;
     }
 
+    /**
+     * Method to retrieve all TOTP secret claim values as a list.
+     *
+     * @param limit      limit of the data chunk to be retrieved from DB
+     * @param offset     offset of the dat achunk
+     * @param connection datasource connection to IDN_IDENTITY_USER_DATA table.
+     * @return list of encrypted TOTP secrets.
+     * @throws SQLException
+     */
     public List<TotpSecretData> getAllTotpSecretData(int limit, int offset, Connection connection) throws SQLException {
 
-        String secretKeyIdentityClaim = "http://wso2.org/claims/identity/secretkey";
-        String verifiedSecretKeyIdentityClaim = "http://wso2.org/claims/identity/verifySecretkey";
         List<TotpSecretData> totpSecretDataList = new ArrayList<>();
         boolean mysqlQueryUsed = false;
         String sql;
@@ -63,8 +72,8 @@ public class IdentityClaimDAO {
         }
         try (PreparedStatement preparedStatement = connection
                 .prepareStatement(sql)) {
-            preparedStatement.setString(1, secretKeyIdentityClaim);
-            preparedStatement.setString(2, verifiedSecretKeyIdentityClaim);
+            preparedStatement.setString(1, Constant.TOTP_SECRET_KEY_CLAIM);
+            preparedStatement.setString(2, Constant.TOTP_VERIFIED_SECRET_KEY_CLAIM);
             // In mysql type queries, limit and offset values are changed.
             if (mysqlQueryUsed) {
                 preparedStatement.setInt(3, limit);
@@ -85,6 +94,15 @@ public class IdentityClaimDAO {
         return totpSecretDataList;
     }
 
+    /**
+     * Method to update TOTP secret claims with newly encrypted value.
+     *
+     * @param updatedTotpSecretDataList list of TotpSecretData objects, which contain newly encrypted values of TOTP
+     *                                  secrets.
+     * @param connection                datasource connection to IDN_IDENTITY_USER_DATA table.
+     * @throws SQLException
+     * @throws MigrationClientException
+     */
     public void updateNewTotpSecrets(List<TotpSecretData> updatedTotpSecretDataList, Connection connection)
             throws SQLException, MigrationClientException {
 

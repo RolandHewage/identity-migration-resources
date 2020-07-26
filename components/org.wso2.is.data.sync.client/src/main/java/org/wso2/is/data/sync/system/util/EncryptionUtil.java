@@ -37,7 +37,7 @@ public class EncryptionUtil {
     private static final Logger log = LoggerFactory.getLogger(EncryptionUtil.class);
 
     private static String oldEncryptionAlgorithmConfigured = null;
-    static Map<String, String> algorithmAndProviderMap = new HashMap<>();
+    private static Map<String, String> algorithmAndProviderMap = new HashMap<>();
     private static final String DEFAULT_OLD_ENCRYPTION_ALGORITHM = "RSA/ECB/OAEPwithSHA1andMGF1Padding";
 
     static {
@@ -48,15 +48,6 @@ public class EncryptionUtil {
         algorithmAndProviderMap.put("AES", "org.wso2.carbon.crypto.provider.SymmetricKeyInternalCryptoProvider");
         algorithmAndProviderMap.put("AES/GCM/NoPadding", "org.wso2.carbon.crypto.provider" +
                 ".SymmetricKeyInternalCryptoProvider");
-    }
-
-    public static String getNewEncryptedValue(String encryptedValue) throws CryptoException {
-
-        if (StringUtils.isNotEmpty(encryptedValue) && !isNewlyEncrypted(encryptedValue)) {
-            byte[] decryptedPassword = CryptoUtil.getDefaultCryptoUtil().base64DecodeAndDecrypt(encryptedValue, "RSA");
-            return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedPassword);
-        }
-        return null;
     }
 
     public static boolean isNewlyEncrypted(String encryptedValue) throws CryptoException {
@@ -76,8 +67,7 @@ public class EncryptionUtil {
             log.warn(String.format("Error while decrypting using '%s'. The provided algorithm may be incorrect" +
                             ".Please check if your system have data encrypted with different algorithm.",
                     oldEncryptionAlgorithmConfigured));
-            // TODO: 5/19/20  
-            log.warn("Retrying decryption with self contained ciphe");
+            log.warn("Retrying decryption with self contained cipher.");
             retryDecryptionWithSuitableAlgorithm(currentEncryptedvalue);
 
         }
@@ -109,10 +99,8 @@ public class EncryptionUtil {
                                     ".Please check if your system have data encrypted with different algorithm.",
                             oldAlgorithm);
 
-            // TODO: 5/19/20 check  
             throw new SyncClientException(errorMsg, e);
         }
-
     }
 
     private static String getInternalCryptoProviderFromAlgorithm(String algorithm) {

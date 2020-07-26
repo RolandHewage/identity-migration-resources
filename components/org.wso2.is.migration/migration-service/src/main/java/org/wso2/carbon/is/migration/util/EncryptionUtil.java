@@ -52,7 +52,6 @@ public class EncryptionUtil {
                 ".SymmetricKeyInternalCryptoProvider");
     }
 
-
     public static String getNewEncryptedValue(String encryptedValue) throws CryptoException {
 
         if (StringUtils.isNotEmpty(encryptedValue) && !isNewlyEncrypted(encryptedValue)) {
@@ -94,12 +93,9 @@ public class EncryptionUtil {
             log.warn(String.format("Error while decrypting using '%s'. The provided algorithm may be incorrect" +
                             ".Please check if your system have data encrypted with different algorithm.",
                     oldEncryptionAlgorithmConfigured));
-            // TODO: 5/19/20  
             log.warn("Retrying decryption with self contained ciphe");
             retryDecryptionWithSuitableAlgorithm(currentEncryptedvalue);
-
         }
-
         return currentEncryptedvalue;
     }
 
@@ -128,10 +124,8 @@ public class EncryptionUtil {
                                     ".Please check if your system have data encrypted with different algorithm.",
                             oldAlgorithm);
 
-            // TODO: 5/19/20 check  
             throw new MigrationClientException(errorMsg,e);
         }
-
     }
 
     private static String getInternalCryptoProviderFromAlgorithm(String algorithm) {

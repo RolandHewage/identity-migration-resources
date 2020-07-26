@@ -47,7 +47,6 @@ public class WorkFlowUtil {
                 throw new MigrationClientException(errorMessage, e);
             }
         }
-
     }
 
     public static List<WorkflowRequest> transformWorkFlowCredentialsFromOldToNewEncryption(

@@ -81,7 +81,7 @@ public class BPSProfileDAO {
         } catch (SQLException e) {
             connection.rollback();
             throw new MigrationClientException(
-                    "SQL error while retrieving datasource or database connection for BPS " + "profiles table", e);
+                    "SQL error while retrieving datasource or database connection for BPS profiles table", e);
         }
     }
 }

@@ -29,6 +29,9 @@ import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_PAGINATED_
 import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_PAGINATED_AUTHORIZATION_CODES_OTHER;
 import static org.wso2.carbon.is.migration.util.SQLConstants.UPDATE_ENCRYPTED_AUTHORIZATION_CODE;
 
+/**
+ * Class to handle database operations on authorization codes.
+ */
 public class AuthzCodeDAO {
 
     private static AuthzCodeDAO instance = new AuthzCodeDAO();

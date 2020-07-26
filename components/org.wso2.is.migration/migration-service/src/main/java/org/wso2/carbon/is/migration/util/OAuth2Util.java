@@ -27,6 +27,9 @@ import org.wso2.carbon.is.migration.service.Migrator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Util class for handling oauth2 tokens, authorization codes and client secret encryption and decryption.
+ */
 public class OAuth2Util {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2Util.class);
@@ -84,9 +87,8 @@ public class OAuth2Util {
         try {
             while (true) {
                 List<AuthzCodeInfo> authzCodeInfoList;
-                authzCodeInfoList = AuthzCodeDAO.getInstance().getAllEncryptedAuthzCodesFromDB(migrator,
-                        offset,
-                        chunkSize);
+                authzCodeInfoList =
+                        AuthzCodeDAO.getInstance().getAllEncryptedAuthzCodesFromDB(migrator, offset, chunkSize);
 
                 if (authzCodeInfoList.isEmpty()) {
                     break;

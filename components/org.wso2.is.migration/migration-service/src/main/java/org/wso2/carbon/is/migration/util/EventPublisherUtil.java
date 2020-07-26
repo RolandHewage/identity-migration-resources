@@ -43,6 +43,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+/**
+ * Util class handling event publisher file sensitive data encryption migration.
+ */
 public class EventPublisherUtil {
 
     private static final Logger log = LoggerFactory.getLogger(EventPublisherUtil.class);
@@ -51,7 +54,6 @@ public class EventPublisherUtil {
 
         File publisherPath = readFiles(System.getProperty(Constant.CARBON_HOME) + Constant.EVENT_PUBLISHER_PATH);
         migrateData(publisherPath, migrator);
-
     }
 
     private static File readFiles(String path) {
@@ -92,7 +94,6 @@ public class EventPublisherUtil {
                 log.error("Error occurred while migrating even publisher data in folder : " + folder.getAbsolutePath() +
                         " . ", e);
             } else {
-
                 throw new MigrationClientException(
                         "Error occurred while migrating even publisher data in folder : " + folder.getAbsolutePath() +
                                 " . ", e);
@@ -104,12 +105,9 @@ public class EventPublisherUtil {
     private static NodeList getEncryptedPayload(Document doc, XPath xpath)
             throws  XPathExpressionException {
 
-
             XPathExpression expr = xpath
                     .compile("//*[local-name()='property'][@*[local-name()='encrypted']='true']/text()");
             return (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-
     }
 
 }

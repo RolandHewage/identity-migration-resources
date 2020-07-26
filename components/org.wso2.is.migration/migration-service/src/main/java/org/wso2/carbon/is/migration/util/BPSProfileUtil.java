@@ -64,15 +64,14 @@ public class BPSProfileUtil {
         return bpsProfileList;
     }
 
-    public static void updateBPSProfileList(Migrator migrator, List<BPSProfile> updatedBpsProfileList) {
+    public static void updateBPSProfileList(Migrator migrator, List<BPSProfile> updatedBpsProfileList)
+            throws MigrationClientException {
 
         try (Connection connection = migrator.getDataSource().getConnection()) {
             connection.setAutoCommit(false);
             BPSProfileDAO.getInstance().updateNewPasswords(updatedBpsProfileList, connection);
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (MigrationClientException e) {
-            e.printStackTrace();
+            throw new MigrationClientException("Error while updating newly encrypted BPS profile passwords.", e);
         }
     }
 
@@ -88,7 +87,6 @@ public class BPSProfileUtil {
                     newEncryptedPassword);
             updatedBpsProfileList.add(updatedBpsProfile);
         }
-
         return updatedBpsProfileList;
     }
 

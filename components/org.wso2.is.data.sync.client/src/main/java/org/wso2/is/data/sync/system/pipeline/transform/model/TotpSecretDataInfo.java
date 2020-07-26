@@ -15,6 +15,9 @@
  */
 package org.wso2.is.data.sync.system.pipeline.transform.model;
 
+/**
+ * POJO class for TOTP secret related data.
+ */
 public class TotpSecretDataInfo {
     private String tenantId;
 

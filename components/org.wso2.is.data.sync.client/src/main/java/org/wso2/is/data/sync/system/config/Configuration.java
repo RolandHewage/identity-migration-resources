@@ -303,6 +303,7 @@ public class Configuration {
         }
 
     }
+
     public String getOldEncryptionAlgorithm() {
 
         return oldEncryptionAlgorithm;

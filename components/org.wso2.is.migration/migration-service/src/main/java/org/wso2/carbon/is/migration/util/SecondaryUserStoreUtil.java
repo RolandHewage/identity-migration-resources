@@ -168,7 +168,6 @@ public class SecondaryUserStoreUtil {
             } catch (XMLStreamException ex) {
                 log.error("Error while closing XML stream", ex);
             }
-
         }
     }
 

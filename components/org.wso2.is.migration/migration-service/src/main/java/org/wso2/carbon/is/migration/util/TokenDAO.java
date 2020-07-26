@@ -29,6 +29,9 @@ import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_PAGINATED_
 import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_PAGINATED_TOKENS_WITH_OTHER;
 import static org.wso2.carbon.is.migration.util.SQLConstants.UPDATE_ENCRYPTED_ACCESS_TOKEN;
 
+/**
+ * DAO class for retrieving and updating Oauth2 tokens from DB.
+ */
 public class TokenDAO {
 
     private static TokenDAO instance = new TokenDAO();
@@ -116,8 +119,6 @@ public class TokenDAO {
             throw new MigrationClientException("Error while getting connection to IDN_OAUTH2_ACCESS_TOKEN to update " +
                     "the tokens.", e);
         }
-
     }
-
 
 }

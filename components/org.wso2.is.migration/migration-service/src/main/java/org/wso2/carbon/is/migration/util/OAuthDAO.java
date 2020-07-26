@@ -28,6 +28,9 @@ import java.util.List;
 import static org.wso2.carbon.is.migration.util.SQLConstants.RETRIEVE_ALL_CONSUMER_SECRETS;
 import static org.wso2.carbon.is.migration.util.SQLConstants.UPDATE_CONSUMER_SECRET;
 
+/**
+ * DAO class for retrieve and update client secrets.
+ */
 public class OAuthDAO {
 
     private static OAuthDAO instance = new OAuthDAO();

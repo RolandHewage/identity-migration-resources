@@ -15,30 +15,32 @@
  */
 package org.wso2.is.data.sync.system.util;
 
-import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.workflow.mgt.bean.RequestParameter;
 import org.wso2.carbon.identity.workflow.mgt.dto.WorkflowRequest;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.wso2.carbon.identity.workflow.mgt.dto.WorkflowRequest.CREDENTIAL;
 
+/**
+ * Util class to transform encryption of workflow credentials.
+ */
 public class WorkFlowUtil {
 
     public static WorkflowRequest transformWorkFlowCredentialsFromOldToNewEncryption(
             WorkflowRequest workflowRequest) throws SyncClientException {
 
         Map<String, Object> requestParams = new HashMap<String, Object>();
-        for (RequestParameter parameter : workflowRequest.getRequestParameters()) {
-            if (CREDENTIAL.equals(parameter.getName())) {
-                Object encryptedCredential = parameter.getValue();
-                String newEncryptedWorkFlowCredential =
-                        EncryptionUtil.transformToSymmetric(encryptedCredential.toString());
-                parameter.setValue(newEncryptedWorkFlowCredential);
+        if(workflowRequest != null) {
+            for (RequestParameter parameter : workflowRequest.getRequestParameters()) {
+                if (CREDENTIAL.equals(parameter.getName())) {
+                    Object encryptedCredential = parameter.getValue();
+                    String newEncryptedWorkFlowCredential =
+                            EncryptionUtil.transformToSymmetric(encryptedCredential.toString());
+                    parameter.setValue(newEncryptedWorkFlowCredential);
+                }
             }
         }
 

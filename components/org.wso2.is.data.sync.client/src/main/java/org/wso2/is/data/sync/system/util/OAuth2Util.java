@@ -238,7 +238,6 @@ public class OAuth2Util {
         return totpSecretDataInfo;
     }
 
-
     /**
      * Update a value of a token journal entry.
      *

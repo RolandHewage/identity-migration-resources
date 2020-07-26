@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.is.migration.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.user.api.Tenant;
@@ -189,7 +190,6 @@ public class UserStoreOperationsUtil {
                             resultSet.getString("UM_ATTR_VALUE"), resultSet.getString("UM_ATTR_NAME")));
                 }
             }
-
         }
         return totpSecretDataList;
     }
@@ -220,7 +220,7 @@ public class UserStoreOperationsUtil {
             throws org.wso2.carbon.user.core.UserStoreException {
 
         String value = abstractUserStoreManager.getUserClaimValue(username, TOTP_SECRET_KEY_CLAIM, DEFAULT_PROFILE);
-        if (value != null && !value.isEmpty()) {
+        if (StringUtils.isNotEmpty(value)) {
             return;
         }
 

@@ -104,7 +104,6 @@ public class EncryptionAdminFlowMigrator extends Migrator {
         log.info(Constant.MIGRATION_LOG + "Migration starting on secondary userstore passwords. ");
         SecondaryUserStoreUtil.migrateSecondaryUserstorePasswords(this);
         log.info(Constant.MIGRATION_LOG + "Migrating secondary userstore passwords was successful. ");
-
     }
 
 }

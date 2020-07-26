@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
 
+/**
+ * Util class for migrating tenant keystores credentials,
+ */
 public class TenantKeyStoreUtil {
 
     private static final Logger log = LoggerFactory.getLogger(TenantKeyStoreUtil.class);

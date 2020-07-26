@@ -74,7 +74,6 @@ public class TotpSecretJdbcDataStoreClaimDataTransformerV5110 implements DataTra
                 updateJournalEntryForTotp(entry, totpSecretDataInfo, isColumnNameInsLowerCase);
             }
 
-
         }
         return journalEntryList;
     }
