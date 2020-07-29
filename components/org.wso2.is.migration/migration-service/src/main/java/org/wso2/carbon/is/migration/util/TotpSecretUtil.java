@@ -254,7 +254,8 @@ public class TotpSecretUtil {
             connection.setAutoCommit(false);
             totpSecretDataList = IdentityClaimDAO.getInstance().getAllTotpSecretData(chunkSize, offSet, connection);
         } catch (SQLException e) {
-            throw new MigrationClientException("", e);
+            throw new MigrationClientException("Error while retrieving database connection for identity claims " +
+                    "database. ", e);
         }
         return totpSecretDataList;
     }
@@ -271,7 +272,8 @@ public class TotpSecretUtil {
             totpSecretDataList = getAllTotpSecretDataFromDb(limit, offset, connection, secretKeyMappedAttr,
                     verifiedSecretKeyMappedAttribute);
         } catch (SQLException e) {
-            throw new MigrationClientException("", e);
+            throw new MigrationClientException("Error while retrieving database connection for identity claims from " +
+                    "user management database. ", e);
         }
         return totpSecretDataList;
     }
