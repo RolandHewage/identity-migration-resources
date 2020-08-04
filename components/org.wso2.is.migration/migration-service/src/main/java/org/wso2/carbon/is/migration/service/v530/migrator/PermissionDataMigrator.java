@@ -157,10 +157,11 @@ public class PermissionDataMigrator extends Migrator {
                 addPermission.execute();
             }
             insertUmConnection.commit();
-            insertUmConnection.close();
         } catch (SQLException | MigrationClientException e) {
             rollbackTransaction(insertUmConnection);
             log.error("Error while adding new permission data", e);
+        } finally {
+            IdentityDatabaseUtil.closeConnection(insertUmConnection);
         }
         return selectAddedPermissions(newPermValue, umConnection, tenantId);
     }
