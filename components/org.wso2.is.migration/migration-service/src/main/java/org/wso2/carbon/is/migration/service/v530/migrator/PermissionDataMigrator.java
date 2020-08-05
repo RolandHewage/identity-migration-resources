@@ -145,13 +145,23 @@ public class PermissionDataMigrator extends Migrator {
     private ResultSet addNewPermission(Connection umConnection, String action,
                                        int tenantId, int moduleId, String newPermValue) throws SQLException {
 
-        if (!isPermissionExists(umConnection, newPermValue, action, tenantId, moduleId)) {
-            PreparedStatement addPermission = umConnection.prepareStatement(SQLConstants.INSERT_PERMISSION);
-            addPermission.setString(1, newPermValue);
-            addPermission.setString(2, action);
-            addPermission.setInt(3, tenantId);
-            addPermission.setInt(4, moduleId);
-            addPermission.execute();
+        Connection insertUmConnection = null;
+        try {
+            insertUmConnection = getDataSource().getConnection();
+            if (!isPermissionExists(umConnection, newPermValue, action, tenantId, moduleId)) {
+                PreparedStatement addPermission = insertUmConnection.prepareStatement(SQLConstants.INSERT_PERMISSION);
+                addPermission.setString(1, newPermValue);
+                addPermission.setString(2, action);
+                addPermission.setInt(3, tenantId);
+                addPermission.setInt(4, moduleId);
+                addPermission.execute();
+            }
+            insertUmConnection.commit();
+        } catch (SQLException | MigrationClientException e) {
+            rollbackTransaction(insertUmConnection);
+            log.error("Error while adding new permission data", e);
+        } finally {
+            IdentityDatabaseUtil.closeConnection(insertUmConnection);
         }
         return selectAddedPermissions(newPermValue, umConnection, tenantId);
     }
