@@ -71,4 +71,13 @@ public class Constant {
 
     public static final String USER_ID_CLAIM = "http://wso2.org/claims/userid";
     public static final String USERNAME_CLAIM = "http://wso2.org/claims/username";
+    public static final String TOTP_SECRET_KEY_CLAIM = "http://wso2.org/claims/identity/secretkey";
+    public static final String TOTP_VERIFIED_SECRET_KEY_CLAIM = "http://wso2.org/claims/identity/verifySecretkey";
+
+    public static final String WORKFLOW_REQUEST_COLUMN = "REQUEST";
+
+    public static final String SERVER_INTERNAL_CRYPTO_PROVIDER = "CryptoService.InternalCryptoProviderClassName";
+    public static final String SERVER_SYMMETRIC_KEY = "CryptoService.Secret";
+    public static final String SYMMETRIC_KEY_CRYPTO_PROVIDER = "org.wso2.carbon.crypto.provider" +
+            ".SymmetricKeyInternalCryptoProvider";
 }

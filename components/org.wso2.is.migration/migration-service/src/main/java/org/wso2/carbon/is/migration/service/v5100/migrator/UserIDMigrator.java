@@ -104,8 +104,6 @@ public class UserIDMigrator extends Migrator {
             // If migrate all property is there, we have to migrate all the tenants.
             if (migrationProperties.containsKey(MIGRATE_ALL) && ((Boolean) migrationProperties.get(MIGRATE_ALL))) {
                 Tenant[] tenants = getAllTenants();
-                // Clear all other properties before we add our ones since we don't need other properties.
-                migrationProperties.clear();
                 for (Tenant tenant : tenants) {
                     // Ignore inactive tenants.
                     if (!tenant.isActive()) {

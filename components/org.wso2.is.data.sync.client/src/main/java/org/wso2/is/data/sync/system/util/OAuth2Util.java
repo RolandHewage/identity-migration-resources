@@ -28,6 +28,7 @@ import org.wso2.is.data.sync.system.pipeline.JournalEntry;
 import org.wso2.is.data.sync.system.pipeline.PipelineContext;
 import org.wso2.is.data.sync.system.pipeline.transform.model.AuthorizationCodeInfo;
 import org.wso2.is.data.sync.system.pipeline.transform.model.TokenInfo;
+import org.wso2.is.data.sync.system.pipeline.transform.model.TotpSecretDataInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,9 +43,13 @@ import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE_HASH;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_DATA_KEY;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_DATA_VALUE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_IDP_ID;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_REFRESH_TOKEN_HASH;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TENANT_ID;
+import static org.wso2.is.data.sync.system.util.Constant.COLUMN_USER_NAME;
 
 /**
  * OAuth2Util.
@@ -201,6 +206,38 @@ public class OAuth2Util {
         return authorizationCodeInfo;
     }
 
+    public static TokenInfo transformTokensFromOldToNewEncryption(TokenInfo tokenInfo) throws SyncClientException {
+
+        String newEncryptedAccessToken =
+                EncryptionUtil.transformToSymmetric(tokenInfo.getAccessToken());
+        String newEncryptedRefreshToken =
+                EncryptionUtil.transformToSymmetric(tokenInfo.getRefreshToken());
+        tokenInfo.setAccessToken(newEncryptedAccessToken);
+        tokenInfo.setRefreshToken(newEncryptedRefreshToken);
+
+        return tokenInfo;
+    }
+
+    public static AuthorizationCodeInfo transformAuthzCodesFromOldToNewEncryption(
+            AuthorizationCodeInfo authorizationCodeInfo) throws SyncClientException {
+
+        String newEncryptedAuthzCode =
+                EncryptionUtil.transformToSymmetric(authorizationCodeInfo.getAuthorizationCode());
+        authorizationCodeInfo.setAuthorizationCode(newEncryptedAuthzCode);
+
+        return authorizationCodeInfo;
+    }
+
+    public static TotpSecretDataInfo transformTotpSecretsFromOldToNewEncryption(
+            TotpSecretDataInfo totpSecretDataInfo) throws SyncClientException {
+
+        String newEncryptedTotpSecret =
+                EncryptionUtil.transformToSymmetric(totpSecretDataInfo.getEncryptedSeceretkeyValue());
+        totpSecretDataInfo.setEncryptedSeceretkeyValue(newEncryptedTotpSecret);
+
+        return totpSecretDataInfo;
+    }
+
     /**
      * Update a value of a token journal entry.
      *
@@ -272,6 +309,20 @@ public class OAuth2Util {
                 .getAuthorizationCodeHash()));
         entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_IDP_ID.toLowerCase() : COLUMN_IDP_ID,
                 new EntryField<>(authorizationCodeInfo.getIdpId()));
+    }
+
+    public static void updateJournalEntryForTotp(JournalEntry entry, TotpSecretDataInfo totpSecretDataInfo,
+                                                 boolean isLowerCaseIdentifiers) {
+
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_DATA_VALUE.toLowerCase() : COLUMN_DATA_VALUE
+                , new EntryField<>(totpSecretDataInfo.getEncryptedSeceretkeyValue()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_TENANT_ID.toLowerCase()
+                : COLUMN_TENANT_ID, new EntryField<>(totpSecretDataInfo
+                .getTenantId()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_USER_NAME.toLowerCase() : COLUMN_USER_NAME,
+                new EntryField<>(totpSecretDataInfo.getUserName()));
+        entry.addEntryField(isLowerCaseIdentifiers ? COLUMN_DATA_KEY.toLowerCase() : COLUMN_DATA_KEY,
+                new EntryField<>(totpSecretDataInfo.getDataKey()));
     }
 
     /**
