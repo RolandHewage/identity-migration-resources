@@ -174,8 +174,6 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         return sqlStatements;
     }
 
-    //SQL_TEMPLATE_DELETE_TRIGGER_MYSQL
-
     @Override
     public List<String> generateDropTrigger(String name) throws SyncClientException {
 

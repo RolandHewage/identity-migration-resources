@@ -59,7 +59,6 @@ public class Trigger {
         this.foreignKey = foreignKey;
     }
 
-
     public String getName() {
 
         return name;
