@@ -410,22 +410,4 @@ public class DDLGenerator {
 
         return databaseDialect.generateCreateTable(table);
     }
-
-    private String getProperty(String propertyName, boolean mandatory, Properties properties)
-            throws SyncClientException {
-
-        String property = properties.getProperty(propertyName);
-        if (StringUtils.isBlank(property)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Property " + propertyName + " is not available in file. Hence loading from system " +
-                        "properties.");
-            }
-            property = System.getProperty(propertyName);
-        }
-        if (mandatory && StringUtils.isBlank(property)) {
-            throw new SyncClientException("Mandatory system property: " + property + "is required for data " +
-                    "synchronization operations.");
-        }
-        return property;
-    }
 }
