@@ -46,8 +46,7 @@ public class Trigger {
     }
 
     public Trigger(String name, String sourceTableName, String targetTableName, String triggerEvent,
-                   TableMetaData tableMetaData,
-                   String selectionPolicy, String triggerTiming,String foreignKey) {
+                   TableMetaData tableMetaData, String selectionPolicy, String triggerTiming, String foreignKey) {
 
         this.name = name;
         this.sourceTableName = sourceTableName;

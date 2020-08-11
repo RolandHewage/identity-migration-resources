@@ -100,8 +100,8 @@ public class SyncService {
         dataTransformers.add(new AuthorizationCodeDataTransformerV580());
     }
 
-    public void generateScripts(boolean ddlOnly, Properties properties) throws SyncClientException {
+    public void generateScripts(boolean ddlOnly) throws SyncClientException {
 
-        ddlGenerator.generateScripts(ddlOnly, properties);
+        ddlGenerator.generateScripts(ddlOnly);
     }
 }

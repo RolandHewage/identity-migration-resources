@@ -69,7 +69,6 @@ import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MSSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MYSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSTGRESQL;
-import static org.wso2.is.data.sync.system.util.Constant.JVM_PROPERTY_SYNC_TABLES;
 import static org.wso2.is.data.sync.system.util.Constant.PK_COLUMN_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.PK_TABLE_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.SELECTION_POLICY_FOR_EACH_ROW;
@@ -103,8 +102,8 @@ public class DDLGenerator {
         databaseDialectMap.put(DATA_SOURCE_TYPE_POSTGRESQL, new PostgreSQLDatabaseDialect());
     }
 
-    public void generateScripts(boolean ddlOnly, Properties properties) throws SyncClientException {
-        List<SQLStatement> sqlStatementList = generateSyncScripts(properties);
+    public void generateScripts(boolean ddlOnly) throws SyncClientException {
+        List<SQLStatement> sqlStatementList = generateSyncScripts();
 
         Map<String, List<SQLStatement>> sourceStatements = new LinkedHashMap<>();
         Map<String, List<SQLStatement>> targetStatements = new LinkedHashMap<>();
@@ -212,28 +211,25 @@ public class DDLGenerator {
         }
     }
 
-    public List<SQLStatement> generateSyncScripts(Properties properties) throws SyncClientException {
+    public List<SQLStatement> generateSyncScripts() throws SyncClientException {
 
         List<SQLStatement> scripts = new ArrayList<>();
 
-        scripts.addAll(generateTriggers(properties));
+        scripts.addAll(generateTriggers());
         scripts.addAll(generateTables());
 
         return scripts;
     }
 
-    public List<SQLStatement> generateTriggers(Properties properties) throws SyncClientException {
+    public List<SQLStatement> generateTriggers() throws SyncClientException {
 
         List<SQLStatement> sqlStatementList = new ArrayList<>();
-        String parentTableName = "";
-        String fkColumnName = "";
 
         for (String tableName : syncTableList) {
             String schema = dataSourceManager.getSchema(tableName);
             String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
             DatabaseDialect databaseDialect = databaseDialectMap.get(dataSourceType);
             try (Connection sourceConnection = dataSourceManager.getSourceConnection(schema)) {
-                String syncTables = getProperty(JVM_PROPERTY_SYNC_TABLES, true, properties);
                 TableMetaData tableMetaData = new TableMetaData.Builder().setColumnData(
                         getColumnData(tableName, sourceConnection)).setPrimaryKeys(
                         getPrimaryKeys(tableName, sourceConnection)).build();
@@ -251,7 +247,7 @@ public class DDLGenerator {
                         SYNC_OPERATION_UPDATE, tableMetaData,
                         SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
                 Trigger onDeleteTrigger = new Trigger(deleteTriggerName, tableName, targetTableName,
-                            SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
+                        SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
 
                 List<String> dropInsertTriggerSQL = databaseDialect.generateDropTrigger(insertTriggerName, targetTableName);
                 List<String> dropUpdateTriggerSQL = databaseDialect.generateDropTrigger(updateTriggerName, targetTableName);
@@ -267,13 +263,12 @@ public class DDLGenerator {
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onUpdateTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onDeleteTriggerSQL);
 
-                Trigger onDeleteTriggersForChildTables;
                 DatabaseMetaData metaData = sourceConnection.getMetaData();
                 ResultSet rs = metaData.getImportedKeys(sourceConnection.getCatalog(), null, tableName);
                 int triggerCount = 0;
                 while (rs.next()) {
-                    parentTableName = rs.getString(PK_TABLE_NAME);
-                    fkColumnName = rs.getString(PK_COLUMN_NAME);
+                    String parentTableName = rs.getString(PK_TABLE_NAME);
+                    String fkColumnName = rs.getString(PK_COLUMN_NAME);
                     String triggerName = getDeleteTriggerNameForChildTable(tableName, triggerCount);
 
                     List<String> dropDeleteTriggerSQLForChildTable =
@@ -282,8 +277,8 @@ public class DDLGenerator {
                             dropDeleteTriggerSQLForChildTable);
 
                     if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
-                            syncTables.contains(parentTableName)) {
-                        onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
+                            syncTableList.contains(parentTableName)) {
+                        Trigger onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
                                 SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER,
                                 fkColumnName);
                         List<String> onDeleteTriggerForChildTable =
@@ -293,6 +288,7 @@ public class DDLGenerator {
                     }
                     triggerCount++;
                 }
+                rs.close();
             } catch (SQLException e) {
                 throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
             }
