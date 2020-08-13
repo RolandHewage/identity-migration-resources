@@ -21,6 +21,7 @@ import org.wso2.is.data.sync.system.database.dialect.Trigger;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Produces MSSQL specific database dialects.
@@ -29,6 +30,12 @@ public class MSSQLDatabaseDialect extends ANSIDatabaseDialect {
 
     @Override
     public List<String> generateCreateTrigger(Trigger trigger) throws SyncClientException {
+
+        return null;
+    }
+
+    @Override
+    public List<String> generateDeleteTrigger(Trigger trigger, Map<String, String> columnIds) throws SyncClientException {
 
         return null;
     }

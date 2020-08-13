@@ -30,6 +30,7 @@ public class Trigger {
     private String triggerEvent; //INSERT | UPDATE | DELETE
     private TableMetaData tableMetaData;
     private String selectionPolicy; //FOR EACH ROW
+    private String foreignKey;
 
     public Trigger(String name, String sourceTableName, String targetTableName, String triggerEvent,
                    TableMetaData tableMetaData,
@@ -77,5 +78,10 @@ public class Trigger {
     public String getSelectionPolicy() {
 
         return selectionPolicy;
+    }
+
+    public String getForeignKey() {
+
+        return foreignKey;
     }
 }

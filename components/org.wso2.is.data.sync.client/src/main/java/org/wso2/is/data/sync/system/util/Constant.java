@@ -43,6 +43,7 @@ public class Constant {
     public static final String TRIGGER_NAME_SUFFIX_INSERT = "_IT";
     public static final String TRIGGER_NAME_SUFFIX_UPDATE = "_UT";
     public static final String TRIGGER_NAME_SUFFIX_DELETE = "_DT";
+    public static final String TRIGGER_NAME_SUFFIX_FOREIGN_KEY = "_FK";
     public static final String TRIGGER_TIMING_AFTER = "AFTER";
     public static final String TRIGGER_TIMING_BEFORE = "BEFORE";
     public static final String SELECTION_POLICY_FOR_EACH_ROW = "FOR EACH ROW";
@@ -94,6 +95,10 @@ public class Constant {
 
     public static final String TABLE_IDN_OAUTH2_AUTHORIZATION_CODE = "IDN_OAUTH2_AUTHORIZATION_CODE";
     public static final String TABLE_IDN_OAUTH2_ACCESS_TOKEN = "IDN_OAUTH2_ACCESS_TOKEN";
+
+    public static final String PK_TABLE_NAME = "PKTABLE_NAME";
+    public static final String PK_COLUMN_NAME = "PKCOLUMN_NAME";
+    public static final String FK_COLUMN_NAME = "FKCOLUMN_NAME";
 
     public static final String COLUMN_UM_USER_ID = "UM_USER_ID";
 

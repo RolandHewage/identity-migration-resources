@@ -25,9 +25,11 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_CREATE_TRIGGER_MYSQL;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DELETE_TRIGGER_MYSQL;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TABLE_MYSQL;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TRIGGER_MYSQL;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ATTRIBUTE_AUTO_INCREMENT;
@@ -124,7 +126,6 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
 
         for (ColumnData columnEntry : columnDataList) {
             columnJoiner.add(columnEntry.getName());
-
             if (SYNC_OPERATION_DELETE.equals(triggerEvent)) {
                 columnValueJoiner.add("OLD." + columnEntry.getName());
             } else {
@@ -141,6 +142,35 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         String triggerStatement = String.format(SQL_TEMPLATE_CREATE_TRIGGER_MYSQL, triggerName, triggerType,
                 triggerEvent, sourceTableName, selectionPolicy, targetTableName,
                 columnJoiner, columnValueJoiner);
+        sqlStatements.add(triggerStatement);
+        return sqlStatements;
+    }
+
+    public List<String> generateDeleteTrigger(Trigger trigger, Map<String,String> columnIds) throws SyncClientException {
+
+        List<String> sqlStatements = new ArrayList<>();
+        String triggerName = trigger.getName();
+        String sourceTableName = trigger.getSourceTableName();
+        String targetTableName = trigger.getTargetTableName();
+        String triggerType = trigger.getTriggerTiming();
+        String triggerEvent = trigger.getTriggerEvent();
+        String selectionPolicy = trigger.getSelectionPolicy();
+
+        StringJoiner columnJoiner = new StringJoiner(" AND ");
+
+        if (SYNC_OPERATION_DELETE.equals(triggerEvent)) {
+            for (String parentTableColumn : columnIds.keySet()) {
+                String childTableColumnVal = columnIds.get(parentTableColumn);
+                columnJoiner.add(childTableColumnVal + "=OLD." + parentTableColumn);
+            }
+        }
+
+        // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
+        // DELETE FROM {targetTableName} WHERE {childColumnName1}=parentTableColumn1 AND
+        // {childColumnName2}=parentTableColumn2; END;
+        String triggerStatement = String.format(SQL_TEMPLATE_DELETE_TRIGGER_MYSQL, triggerName, triggerType,
+                triggerEvent, sourceTableName, selectionPolicy, targetTableName, columnJoiner.toString());
+
         sqlStatements.add(triggerStatement);
         return sqlStatements;
     }
