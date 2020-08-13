@@ -25,6 +25,7 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TRIGGER_ORACLE;
@@ -80,7 +81,7 @@ public class OracleDatabaseDialect extends ANSIDatabaseDialect {
     }
 
     @Override
-    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+    public List<String> generateDeleteTrigger(Trigger trigger, Map<String, String> columnIds) throws SyncClientException {
 
         return null;
     }

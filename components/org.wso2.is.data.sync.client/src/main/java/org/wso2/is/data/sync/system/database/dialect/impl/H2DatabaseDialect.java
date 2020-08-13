@@ -21,6 +21,7 @@ import org.wso2.is.data.sync.system.database.dialect.Trigger;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Produces H2 specific database dialects.
@@ -34,7 +35,7 @@ public class H2DatabaseDialect extends ANSIDatabaseDialect {
     }
 
     @Override
-    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+    public List<String> generateDeleteTrigger(Trigger trigger, Map<String, String> columnIds) throws SyncClientException {
 
         return null;
     }

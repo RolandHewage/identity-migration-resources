@@ -166,8 +166,8 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         }
 
         // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
-        // DELETE FROM {targetTableName} WHERE {foreignKeyColumnName1}=parentTableColumn1 AND
-        // {foreignKeyColumnName2}=parentTableColumn2; END;
+        // DELETE FROM {targetTableName} WHERE {childColumnName1}=parentTableColumn1 AND
+        // {childColumnName2}=parentTableColumn2; END;
         String triggerStatement = String.format(SQL_TEMPLATE_DELETE_TRIGGER_MYSQL, triggerName, triggerType,
                 triggerEvent, sourceTableName, selectionPolicy, targetTableName, columnJoiner.toString());
 

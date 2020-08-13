@@ -42,6 +42,7 @@ public interface DatabaseDialect {
      * Generate SQL statements for creating a trigger for delete operation.
      *
      * @param trigger Trigger model containing trigger information.
+     * @param columnIds columnIds which are used to construct delete triggers
      * @return List of SQL statements related to trigger creation.
      * @throws SyncClientException If error occurs while generating SQL statements.
      */
