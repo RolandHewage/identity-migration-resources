@@ -19,6 +19,7 @@ package org.wso2.is.data.sync.system.database.dialect;
 import org.wso2.is.data.sync.system.exception.SyncClientException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for database dialects. SQL statements relate to database operations are exposed through this.
@@ -38,13 +39,13 @@ public interface DatabaseDialect {
     List<String> generateCreateTrigger(Trigger trigger) throws SyncClientException;
 
     /**
-     * Generate SQL statements for creating a trigger.
+     * Generate SQL statements for creating a trigger for delete operation.
      *
      * @param trigger Trigger model containing trigger information.
      * @return List of SQL statements related to trigger creation.
      * @throws SyncClientException If error occurs while generating SQL statements.
      */
-    List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException;
+    List<String> generateDeleteTrigger(Trigger trigger, Map<String, String> columnIds) throws SyncClientException;
 
     /**
      * Generate SQL statements for creating a table.

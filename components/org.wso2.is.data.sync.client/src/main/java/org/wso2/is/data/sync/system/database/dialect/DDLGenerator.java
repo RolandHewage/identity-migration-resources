@@ -16,7 +16,6 @@
 
 package org.wso2.is.data.sync.system.database.dialect;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.is.data.sync.system.database.ColumnData;
@@ -48,7 +47,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.util.CommonUtil.getColumnData;
@@ -69,6 +67,7 @@ import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MSSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_MYSQL;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSTGRESQL;
+import static org.wso2.is.data.sync.system.util.Constant.FK_COLUMN_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.PK_COLUMN_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.PK_TABLE_NAME;
 import static org.wso2.is.data.sync.system.util.Constant.SELECTION_POLICY_FOR_EACH_ROW;
@@ -224,7 +223,7 @@ public class DDLGenerator {
     public List<SQLStatement> generateTriggers() throws SyncClientException {
 
         List<SQLStatement> sqlStatementList = new ArrayList<>();
-
+//oauthScope, oauthScopeToken
         for (String tableName : syncTableList) {
             String schema = dataSourceManager.getSchema(tableName);
             String dataSourceType = dataSourceManager.getSourceDataSourceType(schema);
@@ -263,32 +262,50 @@ public class DDLGenerator {
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onUpdateTriggerSQL);
                 addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, onDeleteTriggerSQL);
 
-                DatabaseMetaData metaData = sourceConnection.getMetaData();
-                ResultSet rs = metaData.getImportedKeys(sourceConnection.getCatalog(), null, tableName);
                 int triggerCount = 0;
-                while (rs.next()) {
-                    String parentTableName = rs.getString(PK_TABLE_NAME);
-                    String fkColumnName = rs.getString(PK_COLUMN_NAME);
-                    String triggerName = getDeleteTriggerNameForChildTable(tableName, triggerCount);
+                ResultSet rs = null;
+                HashMap<String, String> columnIds = new HashMap<>();
+                List<List<String>> dropDeleteTriggerListSQLForChildTables = new ArrayList<>();
+                List<List<String>> onDeleteTriggerListForChildTables = new ArrayList<>();
 
-                    List<String> dropDeleteTriggerSQLForChildTable =
-                            databaseDialect.generateDropTrigger(triggerName, targetTableName);
-                    addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList,
-                            dropDeleteTriggerSQLForChildTable);
+                try {
+                    DatabaseMetaData metaData = sourceConnection.getMetaData();
+                    rs = metaData.getImportedKeys(sourceConnection.getCatalog(), null, tableName);
+                    while (rs.next()) {
+                        String parentTableName = rs.getString(PK_TABLE_NAME);
+                        String pkColumnName = rs.getString(PK_COLUMN_NAME);
+                        String fkColumnName = rs.getString(FK_COLUMN_NAME);
+                        String triggerName = getDeleteTriggerNameForChildTable(tableName, triggerCount);
 
-                    if (parentTableName != null && tableMetaData.getPrimaryKeys().contains(fkColumnName) &&
-                            syncTableList.contains(parentTableName)) {
-                        Trigger onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
-                                SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER,
-                                fkColumnName);
-                        List<String> onDeleteTriggerForChildTable =
-                                databaseDialect.generateDeleteTrigger(onDeleteTriggersForChildTables);
+                        columnIds.put(pkColumnName, fkColumnName);
+
+                        if (parentTableName != null && syncTableList.contains(parentTableName)) {
+
+                            dropDeleteTriggerListSQLForChildTables.add(databaseDialect.generateDropTrigger(triggerName, targetTableName));
+
+                            Trigger onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName, targetTableName,
+                                    SYNC_OPERATION_DELETE, tableMetaData, SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
+                            onDeleteTriggerListForChildTables.add(databaseDialect.generateDeleteTrigger
+                                    (onDeleteTriggersForChildTables, columnIds));
+                        }
+                        triggerCount++;
+
+                    }
+
+                    for (List<String> dropDeleteTriggerSQLForChildTable : dropDeleteTriggerListSQLForChildTables) {
+                        addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList,
+                                dropDeleteTriggerSQLForChildTable);
+                    }
+
+                    for (List<String> onDeleteTriggerForChildTable : onDeleteTriggerListForChildTables) {
                         addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList,
                                 onDeleteTriggerForChildTable);
                     }
-                    triggerCount++;
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
                 }
-                rs.close();
             } catch (SQLException e) {
                 throw new SyncClientException("Error occurred while creating connection for source schema: " + schema);
             }

@@ -98,6 +98,7 @@ public class Constant {
 
     public static final String PK_TABLE_NAME = "PKTABLE_NAME";
     public static final String PK_COLUMN_NAME = "PKCOLUMN_NAME";
+    public static final String FK_COLUMN_NAME = "FKCOLUMN_NAME";
 
     public static final String COLUMN_UM_USER_ID = "UM_USER_ID";
 

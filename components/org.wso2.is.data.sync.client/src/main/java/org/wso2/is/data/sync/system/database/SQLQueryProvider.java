@@ -72,7 +72,7 @@ public class SQLQueryProvider {
             "BEGIN INSERT INTO %s (%s) VALUES (%s); END";
 
     public static final String SQL_TEMPLATE_DELETE_TRIGGER_MYSQL = "CREATE TRIGGER %s %s %s ON %s %s " +
-            "BEGIN DELETE FROM %s WHERE %s=%s; END";
+            "BEGIN DELETE FROM %s WHERE %s END";
 
     public static final String SQL_TEMPLATE_CREATE_TRIGGER_POSTGRES = "CREATE TRIGGER %s %s %s ON %s %s " +
             "EXECUTE PROCEDURE %s()";

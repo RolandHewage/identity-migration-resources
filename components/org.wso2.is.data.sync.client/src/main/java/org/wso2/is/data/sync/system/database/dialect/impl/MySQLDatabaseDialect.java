@@ -25,6 +25,7 @@ import org.wso2.is.data.sync.system.exception.SyncClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_CREATE_TRIGGER_MYSQL;
@@ -145,7 +146,7 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         return sqlStatements;
     }
 
-    public List<String> generateDeleteTrigger(Trigger trigger) throws SyncClientException {
+    public List<String> generateDeleteTrigger(Trigger trigger, Map<String,String> columnIds) throws SyncClientException {
 
         List<String> sqlStatements = new ArrayList<>();
         String triggerName = trigger.getName();
@@ -154,21 +155,21 @@ public class MySQLDatabaseDialect extends ANSIDatabaseDialect {
         String triggerType = trigger.getTriggerTiming();
         String triggerEvent = trigger.getTriggerEvent();
         String selectionPolicy = trigger.getSelectionPolicy();
-        String foreignKeyColumnName = trigger.getForeignKey();
-        TableMetaData tableMetaData = trigger.getTableMetaData();
-        List<ColumnData> columnDataList = tableMetaData.getColumnDataList();
-        String columnValue = "";
 
-        for (ColumnData columnEntry : columnDataList) {
-            if (SYNC_OPERATION_DELETE.equals(triggerEvent) && foreignKeyColumnName.equals(columnEntry.getName())) {
-                columnValue = "OLD." + columnEntry.getName();
+        StringJoiner columnJoiner = new StringJoiner(" AND ");
+
+        if (SYNC_OPERATION_DELETE.equals(triggerEvent)) {
+            for (String parentTableColumn : columnIds.keySet()) {
+                String childTableColumnVal = columnIds.get(parentTableColumn);
+                columnJoiner.add(childTableColumnVal + "=OLD." + parentTableColumn);
             }
         }
 
         // CREATE TRIGGER {triggerName} {triggerType} {triggerEvent} ON {sourceTableName} {selectionPolicy} BEGIN
-        // DELETE FROM {targetTableName} WHERE {foreignKeyColumnName}=columnValue; END;
+        // DELETE FROM {targetTableName} WHERE {foreignKeyColumnName1}=parentTableColumn1 AND
+        // {foreignKeyColumnName2}=parentTableColumn2; END;
         String triggerStatement = String.format(SQL_TEMPLATE_DELETE_TRIGGER_MYSQL, triggerName, triggerType,
-                triggerEvent, sourceTableName, selectionPolicy, targetTableName, foreignKeyColumnName, columnValue);
+                triggerEvent, sourceTableName, selectionPolicy, targetTableName, columnJoiner.toString());
 
         sqlStatements.add(triggerStatement);
         return sqlStatements;
