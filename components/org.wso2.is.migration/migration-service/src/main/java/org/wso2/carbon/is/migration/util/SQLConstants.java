@@ -47,13 +47,13 @@ public class SQLConstants {
                     "UM_TENANT_ID=? AND UM_USER_ID=? AND UM_ATTR_NAME=?";
 
     public static final String RETRIEVE_PAGINATED_TOKENS_WITH_MYSQL =
-            "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, " +
+            "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID " +
                     "FROM IDN_OAUTH2_ACCESS_TOKEN " +
                     "ORDER BY TOKEN_ID " +
                     "LIMIT ? OFFSET ?";
 
     public static final String RETRIEVE_PAGINATED_TOKENS_WITH_OTHER =
-            "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID, " +
+            "SELECT ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_ID " +
                     "FROM IDN_OAUTH2_ACCESS_TOKEN " +
                     "ORDER BY TOKEN_ID " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -62,13 +62,13 @@ public class SQLConstants {
             "ACCESS_TOKEN=?, REFRESH_TOKEN=?, WHERE TOKEN_ID=?";
 
     public static final String RETRIEVE_PAGINATED_AUTHORIZATION_CODES_MYSQL =
-            "SELECT AUTHORIZATION_CODE, CODE_ID, " +
+            "SELECT AUTHORIZATION_CODE, CODE_ID " +
                     "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
                     "ORDER BY CODE_ID " +
                     "LIMIT ? OFFSET ?";
 
     public static final String RETRIEVE_PAGINATED_AUTHORIZATION_CODES_OTHER =
-            "SELECT AUTHORIZATION_CODE, CODE_ID, " +
+            "SELECT AUTHORIZATION_CODE, CODE_ID " +
                     "FROM IDN_OAUTH2_AUTHORIZATION_CODE " +
                     "ORDER BY CODE_ID " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
