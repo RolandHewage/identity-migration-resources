@@ -84,11 +84,13 @@ public class EncryptionUtil {
     public static String transformToSymmetric(String currentEncryptedvalue) throws MigrationClientException {
 
         try {
-            String cryptoProvider = getInternalCryptoProviderFromAlgorithm(oldEncryptionAlgorithmConfigured);
-            byte[] decryptedtext = CryptoUtil.getDefaultCryptoUtil()
-                    .base64DecodeAndDecrypt(currentEncryptedvalue, oldEncryptionAlgorithmConfigured,
-                            cryptoProvider);
-            return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedtext);
+            if (StringUtils.isNotEmpty(currentEncryptedvalue)) {
+                String cryptoProvider = getInternalCryptoProviderFromAlgorithm(oldEncryptionAlgorithmConfigured);
+                byte[] decryptedtext = CryptoUtil.getDefaultCryptoUtil()
+                        .base64DecodeAndDecrypt(currentEncryptedvalue, oldEncryptionAlgorithmConfigured,
+                                cryptoProvider);
+                return CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(decryptedtext);
+            }
         } catch (CryptoException c) {
             log.warn(String.format("Error while decrypting using '%s'. The provided algorithm may be incorrect" +
                             ".Please check if your system have data encrypted with different algorithm.",
