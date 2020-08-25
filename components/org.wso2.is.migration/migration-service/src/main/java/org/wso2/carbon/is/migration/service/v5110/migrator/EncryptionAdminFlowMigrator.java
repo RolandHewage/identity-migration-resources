@@ -53,6 +53,7 @@ public class EncryptionAdminFlowMigrator extends Migrator {
         String symmetricKey = serverConfigService.getFirstProperty(SERVER_SYMMETRIC_KEY);
         if (SYMMETRIC_KEY_CRYPTO_PROVIDER.equals(internalCryptoProvider) && StringUtils.isNotBlank(symmetricKey)) {
             EncryptionUtil.setCurrentEncryptionAlgorithm(this);
+            EncryptionUtil.setMigratedEncryptionAlgorithm(this);
             migrateEventPublisherPassword();
             migrateTenantKeyStorePassword();
             migratepolicySubscriberPassword();

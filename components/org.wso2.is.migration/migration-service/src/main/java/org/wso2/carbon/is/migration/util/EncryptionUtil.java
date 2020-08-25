@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.is.migration.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.axiom.om.util.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.config.Config;
 import org.wso2.carbon.is.migration.service.Migrator;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,7 +87,8 @@ public class EncryptionUtil {
     public static String transformToSymmetric(String currentEncryptedvalue) throws MigrationClientException {
 
         try {
-            if (StringUtils.isNotEmpty(currentEncryptedvalue)) {
+            if (StringUtils.isNotEmpty(currentEncryptedvalue) && isMigrationNeeded(Base64.decode
+                    (currentEncryptedvalue))) {
                 String cryptoProvider = getInternalCryptoProviderFromAlgorithm(oldEncryptionAlgorithmConfigured);
                 byte[] decryptedtext = CryptoUtil.getDefaultCryptoUtil()
                         .base64DecodeAndDecrypt(currentEncryptedvalue, oldEncryptionAlgorithmConfigured,
@@ -149,7 +153,7 @@ public class EncryptionUtil {
         }
     }
 
-    public static String getMigratedEncryptionAlgorithm(Migrator migrator) {
+    public static String setMigratedEncryptionAlgorithm(Migrator migrator) {
 
         migratingEncryptionAlgorithmConfigured = migrator.getMigratorConfig().getParameterValue(
                 "migratedEncryptionAlgorithm");
@@ -157,5 +161,31 @@ public class EncryptionUtil {
             return Config.getInstance().getMigratedEncryptionAlgorithm();
         }
         return migratingEncryptionAlgorithmConfigured;
+    }
+
+
+    public static boolean isMigrationNeeded(byte[] cipherText) {
+
+        String cipherStr = new String(cipherText, Charset.defaultCharset());
+        try {
+            CipherMetaDataHolder
+                    cipherMetaDataHolder = new Gson().fromJson(cipherStr, CipherMetaDataHolder.class);
+            if (cipherMetaDataHolder != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            String.format("Cipher text is in self contained format. Retrieving the actual cipher from" +
+                                    " the self contained cipher text."));
+                }
+                String algorithm = cipherMetaDataHolder.getTransformation();
+                if (migratingEncryptionAlgorithmConfigured.equals(algorithm)) {
+                    return false;
+                }
+            }
+        } catch (JsonSyntaxException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Deserialization failed since cipher string is not representing cipher with metadata");
+            }
+        }
+        return true;
     }
 }
