@@ -104,7 +104,7 @@ public class TokenDAO {
                     for (OauthTokenInfo oauthTokenInfo : updatedOauthTokenList) {
                         preparedStatement.setString(1, oauthTokenInfo.getAccessToken());
                         preparedStatement.setString(2, oauthTokenInfo.getRefreshToken());
-                        preparedStatement.setString(5, oauthTokenInfo.getTokenId());
+                        preparedStatement.setString(3, oauthTokenInfo.getTokenId());
                         preparedStatement.addBatch();
                     }
                     preparedStatement.executeBatch();

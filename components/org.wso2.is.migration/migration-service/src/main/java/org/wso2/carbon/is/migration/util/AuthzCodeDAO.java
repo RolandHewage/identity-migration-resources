@@ -101,7 +101,7 @@ public class AuthzCodeDAO {
                         .prepareStatement(UPDATE_ENCRYPTED_AUTHORIZATION_CODE)) {
                     for (AuthzCodeInfo authzCodeInfo : updatedAuthzCodeList) {
                         preparedStatement.setString(1, authzCodeInfo.getAuthorizationCode());
-                        preparedStatement.setString(3, authzCodeInfo.getCodeId());
+                        preparedStatement.setString(2, authzCodeInfo.getCodeId());
                         preparedStatement.addBatch();
                     }
                     preparedStatement.executeBatch();
