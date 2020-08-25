@@ -59,7 +59,7 @@ public class SQLConstants {
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String UPDATE_ENCRYPTED_ACCESS_TOKEN = "UPDATE IDN_OAUTH2_ACCESS_TOKEN SET " +
-            "ACCESS_TOKEN=?, REFRESH_TOKEN=?, WHERE TOKEN_ID=?";
+            "ACCESS_TOKEN=?, REFRESH_TOKEN=? WHERE TOKEN_ID=?";
 
     public static final String RETRIEVE_PAGINATED_AUTHORIZATION_CODES_MYSQL =
             "SELECT AUTHORIZATION_CODE, CODE_ID " +
