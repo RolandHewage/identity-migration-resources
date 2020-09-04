@@ -149,6 +149,11 @@
                 <artifactId>org.wso2.carbon.identity.workflow.mgt</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.utils</groupId>
+                <artifactId>org.wso2.carbon.database.utils</artifactId>
+                <version>${org.wso2.carbon.database.utils.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -266,11 +271,11 @@
     <properties>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.12.402</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.18.97</carbon.identity.framework.version>
         <carbon.identity.framework.version.range>[5.11.0, 6.0.0]</carbon.identity.framework.version.range>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
         <identity.inbound.auth.oauth.version>6.0.83</identity.inbound.auth.oauth.version>
-        <carbon.kernel.version>4.6.1-m6</carbon.kernel.version>
+        <carbon.kernel.version>4.6.1-alpha3</carbon.kernel.version>
         <version.commons.logging>1.1.1</version.commons.logging>
         <axiom.impl.version>1.2.12</axiom.impl.version>
         <axiom.version>1.2.11-wso2v6</axiom.version>
@@ -278,6 +283,9 @@
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
         <json.version>3.0.0.wso2v1</json.version>
+
+        <org.wso2.carbon.database.utils.version>2.0.12</org.wso2.carbon.database.utils.version>
+        <org.wso2.carbon.database.utils.version.range>[2.0.0,2.1.0)</org.wso2.carbon.database.utils.version.range>
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>

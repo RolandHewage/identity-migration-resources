@@ -96,6 +96,10 @@
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.workflow.mgt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.utils</groupId>
+            <artifactId>org.wso2.carbon.database.utils</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -128,6 +132,8 @@
                             org.osgi.service.component; version="${osgi.service.component.imp.pkg.version.range}",
                             org.apache.commons.logging; version="${version.commons.logging}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.identity.role.mgt.core.*; version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.database.utils.*; version="${org.wso2.carbon.database.utils.version.range}",
                             org.apache.commons.lang; version="${commons-lang.wso2.osgi.version.range}",
                             org.wso2.carbon.base.api,
                         </Import-Package>
