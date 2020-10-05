@@ -384,3 +384,13 @@ versions:
    -
      name: "EncryptionUserFlowMigrator"
      order: 2
+   - name: "ConfigurationManagementSchemaMigrator"
+     order: 3
+     parameters:
+       location: "step1"
+       schema: "identity"
+   - name: "SchemaMigrator"
+     order: 4
+     parameters:
+       location: "step2"
+       schema: "identity"
