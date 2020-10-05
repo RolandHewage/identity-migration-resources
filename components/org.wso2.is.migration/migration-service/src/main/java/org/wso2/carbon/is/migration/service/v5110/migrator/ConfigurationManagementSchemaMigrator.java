@@ -39,7 +39,7 @@ public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
     /**
      * Checks whether Configuration Management database tables are created.
      *
-     * @return <code>true</core> if checkSQL is success, else <code>false</code>.
+     * @return <code>true</code> if Configuration Management database tables exist, else <code>false</code>.
      */
     private boolean isConfigurationManagementDatabaseStructureCreated() throws MigrationClientException {
 
