@@ -384,3 +384,15 @@ versions:
    -
      name: "EncryptionUserFlowMigrator"
      order: 2
+   -
+     name: "SchemaMigrator"
+     order: 3
+     parameters:
+       location: "step1"
+       schema: "um"
+   -
+     name: "GroupsAndRolesMigrator"
+     order: 4
+     parameters:
+       # Absolute path for the dry report. This is required in the dry run mode.
+       # reportPath:
