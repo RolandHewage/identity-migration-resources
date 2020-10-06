@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.is.migration.service.v530.SQLConstants;
+import org.wso2.carbon.is.migration.service.v530.util.JDBCPersistenceUtil;
 import org.wso2.carbon.utils.DBUtils;
 
 import java.sql.Connection;
@@ -126,9 +127,9 @@ public class IdpMetaDataDAO {
                 prepStmt.setInt(5, idpMetaData.getTenantId());
                 prepStmt.executeUpdate();
             }
-            IdentityDatabaseUtil.commitTransaction(connection);
+            JDBCPersistenceUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollbackTransaction(connection);
+            JDBCPersistenceUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while inserting default resident idp property values.", e);
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
