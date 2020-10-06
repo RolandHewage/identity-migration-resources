@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.is.migration.service.v5110.migrator;
 
 import org.slf4j.Logger;
@@ -6,7 +21,6 @@ import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -43,13 +57,13 @@ public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
      */
     private boolean isConfigurationManagementDatabaseStructureCreated() throws MigrationClientException {
 
-        try (Connection conn = getDataSource().getConnection();
-             Statement statement = conn.createStatement()) {
+        try {
+            Connection conn = getDataSource().getConnection();
+            conn.setAutoCommit(false);
             log.info("Running a query to test the database configuration management tables existence. ");
-            // check whether the tables are already created with a query.
-            try (ResultSet ignored = statement.executeQuery(DB_CHECK_SQL)) {
-                log.info("Configuration Management tables already exists.");
-            }
+            Statement statement = conn.createStatement();
+            statement.executeQuery(DB_CHECK_SQL);
+            conn.commit();
         } catch (SQLException e) {
             return false;
         }
