@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * ConfigurationManagementSchemaMigrator.
+ * Executes Configuration Management DB scripts if they do not exist.
  */
 public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
 
