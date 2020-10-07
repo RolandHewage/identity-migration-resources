@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.SchemaMigrator;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,7 +29,7 @@ import java.sql.Statement;
 public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
 
     private static Logger log = LoggerFactory.getLogger(ConfigurationManagementSchemaMigrator.class);
-    private static final String DB_CHECK_SQL = "SELECT 1 FROM IDN_CONFIG_TYPE";
+    private static final String IDN_CONFIG_DB_CHECK_SQL = "SELECT 1 FROM IDN_CONFIG_TYPE";
 
     @Override
     public void dryRun() throws MigrationClientException {
@@ -42,12 +41,11 @@ public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
     public void migrate() throws MigrationClientException {
 
         if (!isConfigurationManagementDatabaseStructureCreated()) {
-            log.info("Configuration Management tables does not exist in the database. Hence creating. ");
+            log.info("Configuration Management tables does not exist in the database. Hence creating.");
             super.migrate();
         } else {
             log.info("Configuration Management tables already exist in the database. Hence skipping.");
         }
-
     }
 
     /**
@@ -57,15 +55,22 @@ public class ConfigurationManagementSchemaMigrator extends SchemaMigrator {
      */
     private boolean isConfigurationManagementDatabaseStructureCreated() throws MigrationClientException {
 
-        try {
-            Connection conn = getDataSource().getConnection();
-            conn.setAutoCommit(false);
-            log.info("Running a query to test the database configuration management tables existence. ");
-            Statement statement = conn.createStatement();
-            statement.executeQuery(DB_CHECK_SQL);
-            conn.commit();
+        try (Connection con = getDataSource().getConnection()) {
+            con.setAutoCommit(false);
+            log.info("Running a query to test the database configuration management tables existence.");
+            try (Statement stm = con.createStatement()) {
+                stm.executeQuery(IDN_CONFIG_DB_CHECK_SQL);
+                con.commit();
+            } catch (SQLException ex) {
+                try {
+                    con.rollback();
+                } catch (SQLException e) {
+                    log.error("An error occurred while rolling back transactions.", e);
+                }
+                return false;
+            }
         } catch (SQLException e) {
-            return false;
+            log.error("An error occurred while retrieving the connection.", e);
         }
         return true;
     }
