@@ -411,3 +411,8 @@ versions:
      parameters:
        location: "step3"
        schema: "um"
+   - name: "SchemaMigrator"
+     order: 8
+     parameters:
+       location: "step3"
+       schema: "identity"
