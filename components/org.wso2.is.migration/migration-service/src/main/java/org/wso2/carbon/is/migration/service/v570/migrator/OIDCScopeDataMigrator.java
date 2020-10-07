@@ -75,6 +75,7 @@ public class OIDCScopeDataMigrator extends Migrator {
     private static final String SCOPE_CLAIM_SEPERATOR = ",";
     private static final String ID = "id";
     private static final String CLAIM = "Claim";
+    private static final String REGISTRY_METADATA_PROPERTY_PREFIX = "registry.";
 
     private Map<String, String> scopeConfigFile = null;
 
@@ -192,7 +193,13 @@ public class OIDCScopeDataMigrator extends Migrator {
         if (oidcScopesResource != null) {
             for (Object scopeProperty : oidcScopesResource.getProperties().keySet()) {
                 String propertyKey = (String) scopeProperty;
-                propertiesToReturn.setProperty(propertyKey, oidcScopesResource.getProperty(propertyKey));
+                if (!StringUtils.startsWith(propertyKey, REGISTRY_METADATA_PROPERTY_PREFIX)) {
+                    propertiesToReturn.setProperty(propertyKey, oidcScopesResource.getProperty(propertyKey));
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Skipping registry resource metadata property: " + propertyKey + " from migration.");
+                    }
+                }
             }
         } else {
             log.error(Constant.MIGRATION_LOG + "OIDC scope resource cannot be found at " + SCOPE_RESOURCE_PATH
