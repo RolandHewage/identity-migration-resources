@@ -396,3 +396,18 @@ versions:
      parameters:
        # Absolute path for the dry report. This is required in the dry run mode.
        # reportPath:
+   - name: "ConfigurationManagementSchemaMigrator"
+     order: 5
+     parameters:
+       location: "step1"
+       schema: "identity"
+   - name: "SchemaMigrator"
+     order: 6
+     parameters:
+       location: "step2"
+       schema: "identity"
+   - name: "SchemaMigrator"
+     order: 7
+     parameters:
+       location: "step3"
+       schema: "um"
