@@ -23,6 +23,9 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * This class handles the common database util operations needed for v530 migration.
+ */
 public class JDBCPersistenceUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JDBCPersistenceUtil.class);
