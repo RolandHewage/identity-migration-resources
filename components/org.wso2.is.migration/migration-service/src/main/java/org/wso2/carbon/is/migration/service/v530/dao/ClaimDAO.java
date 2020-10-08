@@ -28,6 +28,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.is.migration.service.v530.SQLConstants;
 import org.wso2.carbon.is.migration.service.v530.bean.Claim;
 import org.wso2.carbon.is.migration.service.v530.bean.MappedAttribute;
+import org.wso2.carbon.is.migration.service.v530.util.JDBCPersistenceUtil;
 import org.wso2.carbon.utils.DBUtils;
 
 import java.sql.Connection;
@@ -78,10 +79,9 @@ public class ClaimDAO {
             prepStmt.setString(1, claimDialectURI);
             prepStmt.setInt(2, tenantId);
             prepStmt.executeUpdate();
-            IdentityDatabaseUtil.commitTransaction(connection);
-
+            JDBCPersistenceUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollbackTransaction(connection);
+            JDBCPersistenceUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding claim dialect " + claimDialectURI, e);
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
@@ -194,9 +194,9 @@ public class ClaimDAO {
             }
 
             // End transaction
-            IdentityDatabaseUtil.commitTransaction(connection);
+            JDBCPersistenceUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollbackTransaction(connection);
+            JDBCPersistenceUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding local claim " + localClaimURI, e);
         } finally {
             IdentityDatabaseUtil.closeConnection(connection);
@@ -537,9 +537,9 @@ public class ClaimDAO {
                 }
             }
             // End transaction
-            IdentityDatabaseUtil.commitTransaction(connection);
+            JDBCPersistenceUtil.commitTransaction(connection);
         } catch (SQLException e) {
-            IdentityDatabaseUtil.rollbackTransaction(connection);
+            JDBCPersistenceUtil.rollbackTransaction(connection);
             throw new MigrationClientException("Error while adding external claim " + externalClaimURI + " to " +
                     "dialect " + externalClaimDialectURI, e);
         } finally {
@@ -598,3 +598,4 @@ public class ClaimDAO {
     }
 
 }
+
