@@ -1,0 +1,7 @@
+UPDATE UM_HYBRID_ROLE 
+SET 
+	UM_ROLE_NAME = 'Application/My Account' 
+WHERE 
+	UM_ROLE_NAME = 'Application/User Portal' AND UM_TENANT_ID= -1234;
+    
+DELETE FROM UM_HYBRID_ROLE WHERE UM_ROLE_NAME = 'Application/User Portal' AND UM_TENANT_ID <> -1234;

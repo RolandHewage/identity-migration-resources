@@ -416,3 +416,13 @@ versions:
      parameters:
        location: "step3"
        schema: "identity"
+   - name: "UserPortalDataMigrator"
+     order: 9
+     parameters:
+       location: "step4"
+       schema: "identity"
+   - name: "UserPortalDataMigrator"
+     order: 10
+     parameters:
+       location: "step4"
+       schema: "um"
