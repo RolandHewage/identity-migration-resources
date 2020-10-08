@@ -38,8 +38,8 @@ public class JDBCPersistenceUtil {
             if (dbConnection != null) {
                 dbConnection.rollback();
             }
-        } catch (SQLException e1) {
-            log.error("An error occurred while rolling back transactions. ", e1);
+        } catch (SQLException e) {
+            log.error("An error occurred while rolling back transactions.", e);
         }
     }
 
@@ -59,4 +59,3 @@ public class JDBCPersistenceUtil {
         }
     }
 }
-
