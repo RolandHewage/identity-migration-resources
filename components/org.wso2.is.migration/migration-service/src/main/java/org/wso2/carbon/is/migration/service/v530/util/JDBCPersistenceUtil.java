@@ -54,8 +54,8 @@ public class JDBCPersistenceUtil {
             if (dbConnection != null) {
                 dbConnection.commit();
             }
-        } catch (SQLException e1) {
-            log.error("An error occurred while commit transactions. ", e1);
+        } catch (SQLException e) {
+            log.error("An error occurred while commit transactions.", e);
         }
     }
 }
