@@ -393,7 +393,7 @@ versions:
    -
      name: "GroupsAndRolesMigrator"
      order: 4
-     parameters:
+     # parameters:
        # Absolute path for the dry report. This is required in the dry run mode.
        # reportPath:
    - name: "ConfigurationManagementSchemaMigrator"
