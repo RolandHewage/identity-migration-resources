@@ -18,6 +18,7 @@ package org.wso2.carbon.is.migration.service.v5100.migrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
@@ -199,6 +200,7 @@ public class UserIDMigrator extends Migrator {
 
                         // Iterate for each user.
                         for (String username : userList) {
+                            username = UserCoreUtil.removeDomainFromName(username);
                             if (log.isDebugEnabled()) {
                                 log.debug("Migrating user {}, counter index {}", username, userCounter);
                             }
@@ -226,7 +228,8 @@ public class UserIDMigrator extends Migrator {
                                     // In this scenario, we have generated the UUID using SQL. So we have to get it
                                     // and add it as the user id claim.
                                     String userId = getUserIDClaimFromDB(username, tenantId);
-                                    updateUserIDClaim(username, userId, abstractUserStoreManager, forceUpdateUserId);
+                                    updateUserIDClaim(username, userId, abstractUserStoreManager,
+                                            forceUpdateUserId);
                                 }
                             }
 
