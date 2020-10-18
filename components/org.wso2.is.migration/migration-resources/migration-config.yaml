@@ -434,3 +434,8 @@ versions:
      parameters:
        location: "step4"
        schema: "um"
+   - name: "TokenBindingValidationMigrator"
+     order: 11
+     # parameters:
+      # Absolute path for the dry report. This is required in the dry run mode.
+      # reportPath:
