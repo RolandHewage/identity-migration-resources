@@ -47,16 +47,6 @@ public class TokenBindingDAO {
     public static final String COOKIE = "cookie";
     public static final String TOKEN_BINDING_VALIDATION = "tokenBindingValidation";
 
-    private static TokenBindingDAO instance = new TokenBindingDAO();
-
-    private TokenBindingDAO() {
-    }
-
-    public static TokenBindingDAO getInstance() {
-
-        return instance;
-    }
-
     /**
      * Method to retrieve OIDC service providers tenant id and consumer key.
      *
@@ -70,9 +60,8 @@ public class TokenBindingDAO {
             preparedStatement.setString(2, COOKIE);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    OIDCSPInfo oidcspInfo = new OIDCSPInfo();
-                    oidcspInfo.setTenantID(resultSet.getInt(TENANT_ID));
-                    oidcspInfo.setConsumerKey(resultSet.getString(CONSUMER_KEY));
+                    OIDCSPInfo oidcspInfo = new OIDCSPInfo(resultSet.getString(CONSUMER_KEY),
+                            resultSet.getInt(TENANT_ID));
                     oidcSpInfoList.add(oidcspInfo);
                 }
             }

@@ -44,6 +44,8 @@ public class TokenBindingValidationMigrator extends Migrator {
 
     private ReportUtil reportUtil;
 
+    TokenBindingDAO tokenBindingDAO = new TokenBindingDAO();
+
     @Override
     public void dryRun() throws MigrationClientException {
 
@@ -53,7 +55,8 @@ public class TokenBindingValidationMigrator extends Migrator {
         try {
             reportUtil = new ReportUtil(reportPath);
             reportUtil.writeMessage("\n--- Summery of the report ---\n");
-            reportUtil.writeMessage("Token Binding Validation parameter to be migrated..\n");
+            reportUtil.writeMessage("Token Binding Validation parameter to be migrated for the following" +
+                    " OIDC Service Providers..\n");
             reportUtil.writeMessage(
                     String.format("%20s | %20s ", "Tenant ID", "Consumer Key"));
 
@@ -61,9 +64,9 @@ public class TokenBindingValidationMigrator extends Migrator {
             List<OIDCSPInfo> oidcSpInfoList;
             try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
                 try {
-                    oidcSpInfoList = TokenBindingDAO.getInstance().getOIDCServiceProvidersData(connection);
+                    oidcSpInfoList = tokenBindingDAO.getOIDCServiceProvidersData(connection);
                     for (OIDCSPInfo oidcspInfo : oidcSpInfoList) {
-                        if (!TokenBindingDAO.getInstance().isTokenBindingValidationPropertyExists(connection,
+                        if (!tokenBindingDAO.isTokenBindingValidationPropertyExists(connection,
                                 oidcspInfo.getConsumerKey(), oidcspInfo.getTenantID())) {
                             reportUtil.writeMessage(
                                     String.format("%20s | %20s ", oidcspInfo.getTenantID(),
@@ -99,11 +102,11 @@ public class TokenBindingValidationMigrator extends Migrator {
         List<OIDCSPInfo> oidcSpInfoList;
         try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
             try {
-                oidcSpInfoList = TokenBindingDAO.getInstance().getOIDCServiceProvidersData(connection);
+                oidcSpInfoList = tokenBindingDAO.getOIDCServiceProvidersData(connection);
                 for (OIDCSPInfo oidcspInfo : oidcSpInfoList) {
-                    if (!TokenBindingDAO.getInstance().isTokenBindingValidationPropertyExists(connection,
+                    if (!tokenBindingDAO.isTokenBindingValidationPropertyExists(connection,
                             oidcspInfo.getConsumerKey(), oidcspInfo.getTenantID())) {
-                        TokenBindingDAO.getInstance().addTokenBindingValidationParameter(connection,
+                        tokenBindingDAO.addTokenBindingValidationParameter(connection,
                                 oidcspInfo.getConsumerKey(), oidcspInfo.getTenantID());
                     }
                 }

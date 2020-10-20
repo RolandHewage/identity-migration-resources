@@ -23,19 +23,19 @@ public class OIDCSPInfo {
     private String consumerKey;
     private int tenantID;
 
+    public OIDCSPInfo(String consumerKey, int tenantID) {
+
+        this.consumerKey = consumerKey;
+        this.tenantID = tenantID;
+    }
+
     public String getConsumerKey() {
+
         return consumerKey;
     }
 
-    public void setConsumerKey(String consumerKey) {
-        this.consumerKey = consumerKey;
-    }
-
     public int getTenantID() {
-        return tenantID;
-    }
 
-    public void setTenantID(int tenantID) {
-        this.tenantID = tenantID;
+        return tenantID;
     }
 }
