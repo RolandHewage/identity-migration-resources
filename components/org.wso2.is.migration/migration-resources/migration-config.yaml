@@ -439,3 +439,5 @@ versions:
      # parameters:
       # Absolute path for the dry report. This is required in the dry run mode.
       # reportPath:
+   - name: "ClaimDataMigrator"
+     order: 12
