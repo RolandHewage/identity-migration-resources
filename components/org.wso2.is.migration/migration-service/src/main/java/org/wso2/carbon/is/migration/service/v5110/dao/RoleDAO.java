@@ -15,19 +15,16 @@
  */
 package org.wso2.carbon.is.migration.service.v5110.dao;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-import org.wso2.carbon.database.utils.jdbc.NamedPreparedStatement;
 import org.wso2.carbon.is.migration.service.v5110.bean.RoleInfo;
 import org.wso2.carbon.user.core.UserCoreConstants;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * RoleDAO implementation.
@@ -37,33 +34,30 @@ public class RoleDAO {
     public static final String RETRIEVE_EXTERNAL_ROLE_DATA =
             "SELECT DISTINCT(UM_ROLE_PERMISSION.UM_ROLE_NAME), UM_ROLE_PERMISSION.UM_DOMAIN_ID, UM_DOMAIN"
                     + ".UM_DOMAIN_NAME, UM_ROLE_PERMISSION.UM_TENANT_ID FROM UM_ROLE_PERMISSION, UM_DOMAIN WHERE "
-                    + "UM_ROLE_PERMISSION.UM_DOMAIN_ID = UM_DOMAIN.UM_DOMAIN_ID AND UM_ROLE_PERMISSION.UM_TENANT_ID ="
-                    + " UM_DOMAIN.UM_TENANT_ID AND UM_ROLE_PERMISSION.UM_TENANT_ID=:UM_TENANT_ID; AND UM_DOMAIN"
-                    + ".UM_DOMAIN_NAME NOT IN (:HYBRID_DOMAINS;)";
+                    + " UM_ROLE_PERMISSION.UM_DOMAIN_ID = UM_DOMAIN.UM_DOMAIN_ID AND UM_ROLE_PERMISSION.UM_TENANT_ID ="
+                    + " UM_DOMAIN.UM_TENANT_ID AND UM_ROLE_PERMISSION.UM_TENANT_ID = ?  AND UM_DOMAIN"
+                    + ".UM_DOMAIN_NAME NOT IN (?, ?, ?, ?)";
 
-    public static final String UPDATE_ROLE_NAME_SQL = "UPDATE UM_ROLE_PERMISSION SET UM_ROLE_NAME=:NEW_UM_ROLE_NAME;, "
-            + "UM_DOMAIN_ID=(SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME=:INTERNAL_DOMAIN; AND "
-            + "UM_TENANT_ID=:UM_TENANT_ID;) WHERE UM_ROLE_NAME=:UM_ROLE_NAME; AND UM_TENANT_ID=:UM_TENANT_ID; AND "
-            + "UM_DOMAIN_ID=:UM_DOMAIN_ID;";
+    public static final String UPDATE_ROLE_NAME_SQL = "UPDATE UM_ROLE_PERMISSION SET UM_ROLE_NAME = ? "
+            + "UM_DOMAIN_ID = (SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME = ? AND "
+            + "UM_TENANT_ID = ?) WHERE UM_ROLE_NAME = ? AND UM_TENANT_ID = ? AND "
+            + "UM_DOMAIN_ID = ?";
 
     public static final String DELETE_ADMIN_GROUP_DATA =
-            "DELETE FROM UM_ROLE_PERMISSION WHERE UM_ROLE_NAME=:UM_ROLE_NAME; AND UM_TENANT_ID=:UM_TENANT_ID; AND "
+            "DELETE FROM UM_ROLE_PERMISSION WHERE UM_ROLE_NAME= ? AND UM_TENANT_ID = ? AND "
                     + "UM_DOMAIN_ID NOT IN (SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME = "
-                    + ":UM_DOMAIN_NAME; AND UM_TENANT_ID=:UM_TENANT_ID;)";
+                    + "? AND UM_TENANT_ID = ?)";
 
     public static final String DELETE_TENANT_ADMIN_ROLE_DATA =
-            "DELETE FROM UM_ROLE_PERMISSION WHERE UM_ROLE_NAME=:UM_ROLE_NAME; AND UM_TENANT_ID=:UM_TENANT_ID; AND "
+            "DELETE FROM UM_ROLE_PERMISSION WHERE UM_ROLE_NAME = ? AND UM_TENANT_ID = ? AND "
                     + "UM_DOMAIN_ID IN (SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME = "
-                    + ":UM_DOMAIN_NAME; AND UM_TENANT_ID=:UM_TENANT_ID;)";
+                    + "? AND UM_TENANT_ID = ?)";
 
-    public static final String HYBRID_DOMAINS = "HYBRID_DOMAINS";
-    public static final String NEW_UM_ROLE_NAME = "NEW_UM_ROLE_NAME";
     public static final String UM_ROLE_NAME = "UM_ROLE_NAME";
     public static final String UM_TENANT_ID = "UM_TENANT_ID";
     public static final String UM_DOMAIN_ID = "UM_DOMAIN_ID";
     public static final String UM_DOMAIN_NAME = "UM_DOMAIN_NAME";
     public static final String TENANT_ID = "TENANT_ID";
-    public static final String INTERNAL_DOMAIN = "INTERNAL_DOMAIN";
 
     private static RoleDAO instance = new RoleDAO();
 
@@ -85,18 +79,12 @@ public class RoleDAO {
     public List<RoleInfo> getExternalRoleData(Connection connection, int tenantID) throws SQLException {
 
         List<RoleInfo> externalRoles = new ArrayList<>();
-        Map<String, Integer> repetition = new HashMap<>();
-        repetition.put(HYBRID_DOMAINS, 4);
-        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection,
-                RETRIEVE_EXTERNAL_ROLE_DATA, repetition)) {
-            List<String> hybridDomains = new ArrayList<>(Arrays.asList(new String[] {
-                    UserCoreConstants.APPLICATION_DOMAIN.toUpperCase(Locale.ENGLISH),
-                    UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH),
-                    UserCoreConstants.SYSTEM_DOMAIN_NAME.toUpperCase(Locale.ENGLISH),
-                    UserCoreConstants.WORKFLOW_DOMAIN.toUpperCase(Locale.ENGLISH)
-            }));
-            preparedStatement.setInt(UM_TENANT_ID, tenantID);
-            preparedStatement.setString(HYBRID_DOMAINS, hybridDomains);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(RETRIEVE_EXTERNAL_ROLE_DATA)) {
+            preparedStatement.setInt(1, tenantID);
+            preparedStatement.setString(2, UserCoreConstants.APPLICATION_DOMAIN.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setString(3, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setString(4, UserCoreConstants.SYSTEM_DOMAIN_NAME.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setString(5, UserCoreConstants.WORKFLOW_DOMAIN.toUpperCase(Locale.ENGLISH));
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     RoleInfo roleInfo = new RoleInfo();
@@ -121,15 +109,16 @@ public class RoleDAO {
     public void transferPermissionsOfRole(Connection connection, RoleInfo roleInfo, boolean isAdminRole)
             throws SQLException {
 
-        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection, UPDATE_ROLE_NAME_SQL)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ROLE_NAME_SQL)) {
 
             boolean autoCommitStatus = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            preparedStatement.setString(NEW_UM_ROLE_NAME, roleInfo.getInternalRoleName(isAdminRole));
-            preparedStatement.setString(UM_ROLE_NAME, roleInfo.getRoleName());
-            preparedStatement.setString(INTERNAL_DOMAIN, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
-            preparedStatement.setInt(UM_TENANT_ID, roleInfo.getTenantID());
-            preparedStatement.setInt(UM_DOMAIN_ID, roleInfo.getDomainID());
+            preparedStatement.setString(1, roleInfo.getInternalRoleName(isAdminRole));
+            preparedStatement.setString(2, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setInt(3, roleInfo.getTenantID());
+            preparedStatement.setString(4, roleInfo.getRoleName());
+            preparedStatement.setInt(5, roleInfo.getTenantID());
+            preparedStatement.setInt(6, roleInfo.getDomainID());
             preparedStatement.executeUpdate();
             connection.commit();
             connection.setAutoCommit(autoCommitStatus);
@@ -148,14 +137,15 @@ public class RoleDAO {
     public int deleteAdminGroupPermissions(Connection connection, String adminGroupName, int tenantID)
             throws SQLException {
 
-        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection,
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
                 DELETE_ADMIN_GROUP_DATA)) {
 
             boolean autoCommitStatus = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            preparedStatement.setString(UM_ROLE_NAME, adminGroupName);
-            preparedStatement.setString(UM_DOMAIN_NAME, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
-            preparedStatement.setInt(UM_TENANT_ID, tenantID);
+            preparedStatement.setString(1, adminGroupName);
+            preparedStatement.setInt(2, tenantID);
+            preparedStatement.setString(3, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setInt(4, tenantID);
             int rows = preparedStatement.executeUpdate();
             connection.commit();
             connection.setAutoCommit(autoCommitStatus);
@@ -169,24 +159,23 @@ public class RoleDAO {
      * @param connection     Database connection.
      * @param adminGroupName Admin group name.
      * @param tenantID       Tenant ID.
-     * @return No of affected rows.
      * @throws SQLException SQLException.
      */
     public void deleteTenantAdminRolePermissions(Connection connection, String adminGroupName, int tenantID)
             throws SQLException {
 
-        try (NamedPreparedStatement preparedStatement = new NamedPreparedStatement(connection,
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
                 DELETE_TENANT_ADMIN_ROLE_DATA)) {
 
             boolean autoCommitStatus = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            preparedStatement.setString(UM_ROLE_NAME, adminGroupName);
-            preparedStatement.setString(UM_DOMAIN_NAME, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
-            preparedStatement.setInt(UM_TENANT_ID, tenantID);
+            preparedStatement.setString(1, adminGroupName);
+            preparedStatement.setInt(2, tenantID);
+            preparedStatement.setString(3, UserCoreConstants.INTERNAL_DOMAIN.toUpperCase(Locale.ENGLISH));
+            preparedStatement.setInt(4, tenantID);
             preparedStatement.executeUpdate();
             connection.commit();
             connection.setAutoCommit(autoCommitStatus);
         }
     }
 }
-
