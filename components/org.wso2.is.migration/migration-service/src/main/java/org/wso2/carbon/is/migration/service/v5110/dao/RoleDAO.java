@@ -38,7 +38,7 @@ public class RoleDAO {
                     + " UM_DOMAIN.UM_TENANT_ID AND UM_ROLE_PERMISSION.UM_TENANT_ID = ?  AND UM_DOMAIN"
                     + ".UM_DOMAIN_NAME NOT IN (?, ?, ?, ?)";
 
-    public static final String UPDATE_ROLE_NAME_SQL = "UPDATE UM_ROLE_PERMISSION SET UM_ROLE_NAME = ? "
+    public static final String UPDATE_ROLE_NAME_SQL = "UPDATE UM_ROLE_PERMISSION SET UM_ROLE_NAME = ?, "
             + "UM_DOMAIN_ID = (SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME = ? AND "
             + "UM_TENANT_ID = ?) WHERE UM_ROLE_NAME = ? AND UM_TENANT_ID = ? AND "
             + "UM_DOMAIN_ID = ?";
