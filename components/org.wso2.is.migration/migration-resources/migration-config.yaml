@@ -441,3 +441,8 @@ versions:
       # reportPath:
    - name: "ClaimDataMigrator"
      order: 12
+   - name: "SchemaMigrator"
+     order: 13
+     parameters:
+       location: "step5"
+       schema: "identity"
