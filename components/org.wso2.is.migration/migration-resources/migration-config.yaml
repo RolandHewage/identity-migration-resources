@@ -446,3 +446,8 @@ versions:
      parameters:
        location: "step5"
        schema: "identity"
+   - name: "SchemaMigrator"
+     order: 14
+     parameters:
+       location: "step5"
+       schema: "um"
