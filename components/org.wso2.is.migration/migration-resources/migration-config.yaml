@@ -393,61 +393,55 @@ versions:
        migratedEncryptionAlgorithm: "AES/GCM/NoPadding"
        schema: "identity"
    -
-     name: "SchemaMigrator"
-     order: 3
-     parameters:
-       location: "step1"
-       schema: "um"
-   -
      name: "GroupsAndRolesMigrator"
-     order: 4
+     order: 3
      # parameters:
        # Absolute path for the dry report. This is required in the dry run mode.
        # reportPath:
    - name: "ConfigurationManagementSchemaMigrator"
-     order: 5
+     order: 4
      parameters:
        location: "step1"
        schema: "identity"
    - name: "SchemaMigrator"
-     order: 6
+     order: 5
      parameters:
        location: "step2"
        schema: "identity"
    - name: "SchemaMigrator"
-     order: 7
+     order: 6
      parameters:
        location: "step3"
        schema: "um"
    - name: "SchemaMigrator"
-     order: 8
+     order: 7
      parameters:
        location: "step3"
+       schema: "identity"
+   - name: "UserPortalDataMigrator"
+     order: 8
+     parameters:
+       location: "step4"
        schema: "identity"
    - name: "UserPortalDataMigrator"
      order: 9
      parameters:
        location: "step4"
-       schema: "identity"
-   - name: "UserPortalDataMigrator"
-     order: 10
-     parameters:
-       location: "step4"
        schema: "um"
    - name: "TokenBindingValidationMigrator"
-     order: 11
+     order: 10
      # parameters:
       # Absolute path for the dry report. This is required in the dry run mode.
       # reportPath:
    - name: "ClaimDataMigrator"
-     order: 12
+     order: 11
    - name: "SchemaMigrator"
-     order: 13
+     order: 12
      parameters:
        location: "step5"
        schema: "identity"
    - name: "SchemaMigrator"
-     order: 14
+     order: 13
      parameters:
        location: "step5"
        schema: "um"
