@@ -164,13 +164,8 @@ public class GroupsAndRolesMigrator extends Migrator {
         String adminRoleName = userRealm.getRealmConfiguration().getAdminRoleName();
         String adminGroupName = UserCoreUtil.removeDomainFromName(adminRoleName);
         // Delete admin group permission data since it is already assigned for the admin role during the startup.
-        int noOfDeletedRows = RoleDAO.getInstance()
+        RoleDAO.getInstance()
                 .deleteAdminGroupPermissions(connection, adminGroupName, MultitenantConstants.SUPER_TENANT_ID);
-        // Assign the admin group to the admin role if the group existed before.
-        if (noOfDeletedRows > 0) {
-            ((AbstractUserStoreManager) userStoreManager)
-                    .updateGroupListOfHybridRole(adminRoleName, null, new String[] { adminGroupName });
-        }
 
         // Retrieve external role data of super tenant which has permissions assigned.
         List<RoleInfo> externalRoles = RoleDAO.getInstance()
