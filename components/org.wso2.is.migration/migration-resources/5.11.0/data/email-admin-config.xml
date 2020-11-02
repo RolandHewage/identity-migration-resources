@@ -1,0 +1,376 @@
+<!--
+  ~ Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  ~
+  -->
+
+<configurations>
+    <configuration type="tenantRegistrationConfirmation" display="TenantRegistrationConfirmation" locale="en_US"
+                   emailContentType="text/html">
+        <subject>WSO2 - TenantAdminEmailconfirm</subject>
+        <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
+                <tr>
+                <td style="padding: 30px 30px 20px 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
+                            <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
+                            <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
+                                You're almost there
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Hi {{user.claim.givenname}},
+                            </p>
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                It's amazing to get you on-board. Please click the button below to create a password for your account.<br/>Username : {{url:user-name}}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0px 50px 0px 50px; text-align: left;">
+                            <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
+                                <tr>
+                                    <td style="border-radius: 6px;  padding: 14px 0px;">
+                                        <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/t/{{tenant-domain}}/admin-portal"
+                                           target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Set Password</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
+                                <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
+                                   href="{{carbon.product-url}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/t/{{tenant-domain}}/admin-portal">
+                                    {{carbon.product-url}}/accountrecoveryendpoint/confirmrecovery.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}&amp;callback={{carbon.product-url}}/t/{{tenant-domain}}/admin-portal</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 30px 50px 50px 50px" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                Thanks,<br/>WSO2 Identity Server Team.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
+                            <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
+                                &copy; 2020
+                                <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
+                                <br>
+                                787 Castro Street, Mountain View, CA 94041.
+                            </p>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+                </tr>
+            </table>]]></body>
+        <footer>---</footer>
+    </configuration>
+    <configuration type="liteUserEmailConfirmation" display="LiteUserEmailConfirmation" locale="en_US" emailContentType="text/html">
+    <subject>WSO2 - Lite User Email Confirmation</subject>
+    <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
+                <tr>
+                <td style="padding: 30px 30px 20px 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
+                            <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
+                            <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
+                                Account Confirmation
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Hi,
+                            </p>
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                You have created an account with the following user name. <br>
+                                User Name: <b>{{user-name}}</b><br>
+                                Please click the button below to confirm your account.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0px 50px 0px 50px; text-align: left;">
+                            <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
+                                <tr>
+                                    <td style="border-radius: 6px;  padding: 14px 0px;">
+                                        <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}"
+                                           target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Confirm Account</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
+                                <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
+                                   href="{{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}">
+                                    {{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 30px 50px 50px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                Thanks,<br/>WSO2 Team
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
+                            <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
+                                &copy;2020
+                                <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
+                                <br>
+                                787 Castro Street, Mountain View, CA 94041.
+                            </p>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+                </tr>
+            </table>]]></body>
+    <footer>---</footer>
+    </configuration>
+    <configuration type="resendLiteUserEmailConfirmation" display="ResendLiteUserEmailConfirmation" locale="en_US"
+                   emailContentType="text/html">
+    <subject>WSO2 - Resend Lite User Email Confirmation</subject>
+    <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
+                <tr>
+                <td style="padding: 30px 30px 20px 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
+                            <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
+                            <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
+                                Resend Account Confirmation
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Hi,
+                            </p>
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                You have created an account with the following user name. <br>
+                                User Name: <b>{{user-name}}</b><br>
+                                Please click the button below to confirm your account.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0px 50px 0px 50px; text-align: left;">
+                            <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
+                                <tr>
+                                    <td style="border-radius: 6px;  padding: 14px 0px;">
+                                        <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}"
+                                           target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Confirm Account</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
+                                <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
+                                   href="{{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}">
+                                    {{carbon.product-url}}/accountrecoveryendpoint/confirmliteuserregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 30px 50px 50px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                Thanks,<br/>WSO2 Team
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
+                            <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
+                                &copy;2020
+                                <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
+                                <br>
+                                787 Castro Street, Mountain View, CA 94041.
+                            </p>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+                </tr>
+            </table>]]></body>
+    <footer>---</footer>
+    </configuration>
+    <configuration type="resendVerifyEmailOnUpdate" display="ResendVerifyEmailOnUpdate" locale="en_US" emailContentType="text/html">
+    <subject>WSO2 - Resend Email Confirmation</subject>
+    <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
+                <tr>
+                <td style="padding: 30px 30px 20px 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
+                            <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
+                            <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
+                                Resend Email Confirmation
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Hi {{user.claim.givenname}},
+                            </p>
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Your email address has been updated for the account with the following user name. <br>
+                                User Name: <b>{{user-name}}</b><br>
+                                Please click the button below to verify your updated email address.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0px 50px 0px 50px; text-align: left;">
+                            <table align="left" cellpadding="0" cellspacing="0" border="0" style="border-radius: 4px; background-color: #ff5000;">
+                                <tr>
+                                    <td style="border-radius: 6px;  padding: 14px 0px;">
+                                        <a href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}"
+                                           target="_blank" style="width: 230px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif;  font-size: 18px; line-height: 21px; font-weight: 600; color: #fff; text-decoration: none; background-color: #ff5000; text-align: center; display: inline-block;cursor: pointer;">Confirm</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 40px 50px 0px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                If clicking the button doesn't seem to work, you can copy and paste the following link into your browser. <br/>
+                                <a style="word-break: break-all; color: #ff5000; font-size: 14px" target="_blank"
+                                   href="{{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}">
+                                    {{carbon.product-url}}/accountrecoveryendpoint/confirmregistration.do?confirmation={{confirmation-code}}&amp;userstoredomain={{userstore-domain}}&amp;username={{url:user-name}}&amp;tenantdomain={{tenant-domain}}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 30px 50px 50px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                Thanks,<br/>WSO2 Identity Server Team
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
+                            <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
+                                &copy; 2020
+                                <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
+                                <br>
+                                787 Castro Street, Mountain View, CA 94041.
+                            </p>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+                </tr>
+            </table>]]></body>
+    <footer>---</footer>
+    </configuration>
+    <configuration type="selfSignUpSuccess" display="SelfSignUpSuccess" locale="en_US" emailContentType="text/html">
+    <subject>WSO2 - Self Sign Up Completed</subject>
+    <body><![CDATA[<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%"bgcolor="#f0f0f0">
+                <tr>
+                <td style="padding: 30px 30px 20px 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="max-width: 650px; margin: auto;">
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #333; padding: 40px;">
+                            <a href="http://wso2.com/" target="_blank"><img src="http://cdn.wso2.com/wso2/newsletter/images/nl-2017/wso2-logo-transparent.png" border="0" /></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 50px 50px 0px 50px;">
+                            <h1 style="padding-right: 0em; margin: 0; line-height: 40px; font-weight:300; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 1em;">
+                                Self Sign Up Success
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; padding: 0px 50px 20px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Hi {{user.claim.givenname}},
+                            </p>
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #666; text-align: left; padding-bottom: 3%;">
+                                Please note that your account has been successfully activated. <br>
+                                Account activation time: {{selfsignup-confirm-time}}
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="text-align: left; padding: 30px 50px 50px 50px;" valign="top">
+                            <p style="font-size: 18px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #505050; text-align: left;">
+                                Thanks,<br/>WSO2 Identity Server Team
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="padding: 20px 40px 40px 40px;" bgcolor="#f0f0f0">
+                            <p style="font-size: 12px; margin: 0; line-height: 24px; font-family: 'Nunito Sans', Arial, Verdana, Helvetica, sans-serif; color: #777;">
+                                &copy; 2020
+                                <a href="http://wso2.com/" target="_blank" style="color: #777; text-decoration: none">WSO2</a>
+                                <br>
+                                787 Castro Street, Mountain View, CA 94041.
+                            </p>
+                        </td>
+                    </tr>
+                    </table>
+                </td>
+                </tr>
+            </table>]]></body>
+    <footer>---</footer>
+    </configuration>
+</configurations>

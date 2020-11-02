@@ -445,3 +445,5 @@ versions:
      parameters:
        location: "step5"
        schema: "um"
+   - name: "EmailTemplateDataMigrator"
+     order: 14
