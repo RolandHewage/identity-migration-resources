@@ -447,3 +447,18 @@ versions:
        schema: "um"
    - name: "EmailTemplateDataMigrator"
      order: 14
+   - name: "SchemaMigrator"
+     order: 15
+     parameters:
+       location: "step6"
+       schema: "identity"
+   - name: "SchemaMigrator"
+     order: 16
+     parameters:
+       location: "step6"
+       schema: "um"
+   - name: "SchemaMigrator"
+     order: 17
+     parameters:
+       location: "step7"
+       schema: "identity"
