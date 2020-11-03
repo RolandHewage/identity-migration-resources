@@ -294,8 +294,8 @@ public class SchemaMigrator extends Migrator {
             }
             conn.clearWarnings();
         } catch (SQLException e) {
-            if (e.getSQLState().equals("X0Y32") || e.getSQLState().equals("42710")) {
-                // eliminating the table already exception for the derby and DB2 database types
+            if (e.getSQLState().equals("X0Y32") || e.getSQLState().equals("42710") || e.getSQLState().equals("42000")) {
+                // eliminating the table already exception for the derby,oracle and DB2 database types
                 if (log.isDebugEnabled()) {
                     log.info("Table Already Exists. Hence, skipping table creation");
                 }
