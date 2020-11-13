@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
-import org.wso2.carbon.is.migration.service.v550.RegistryDataManager;
 import org.wso2.carbon.is.migration.util.Constant;
+import org.wso2.carbon.is.migration.util.EncryptionUtil;
 
 /**
  * KeyStorePasswordMigrator.
@@ -35,6 +35,8 @@ public class KeyStorePasswordMigrator extends Migrator {
     public void migrate() throws MigrationClientException {
 
         try {
+            EncryptionUtil.setCurrentEncryptionAlgorithm(this);
+            EncryptionUtil.setMigratedEncryptionAlgorithm(this);
             migrateKeystorePasswords();
         } catch (Exception e) {
             String errorMsg = "Error while migrating key store passwords";
@@ -54,7 +56,14 @@ public class KeyStorePasswordMigrator extends Migrator {
     private void migrateKeystorePasswords() throws Exception {
 
         log.info(Constant.MIGRATION_LOG + "Migration starting on Key Stores");
-        RegistryDataManager registryDataManager = RegistryDataManager.getInstance();
-        registryDataManager.migrateKeyStorePassword(isIgnoreForInactiveTenants(), isContinueOnError());
+        if (Boolean.parseBoolean(this.getMigratorConfig().getParameterValue("transformToSymmetric"))) {
+            org.wso2.carbon.is.migration.util.RegistryDataManager registryDataManager = org.wso2.carbon.is.migration.
+                    util.RegistryDataManager.getInstance();
+            registryDataManager.migrateKeyStorePassword(isIgnoreForInactiveTenants(), isContinueOnError());
+        } else {
+            org.wso2.carbon.is.migration.service.v550.RegistryDataManager registryDataManager = org.wso2.carbon.is.
+                    migration.service.v550.RegistryDataManager.getInstance();
+            registryDataManager.migrateKeyStorePassword(isIgnoreForInactiveTenants(), isContinueOnError());
+        }
     }
 }

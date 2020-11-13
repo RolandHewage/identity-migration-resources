@@ -208,6 +208,9 @@ versions:
     order: 9
     parameters:
       schema: "identity"
+      currentEncryptionAlgorithm: "RSA"
+      migratedEncryptionAlgorithm: "RSA/ECB/OAEPwithSHA1andMGF1Padding"
+      transformToSymmetric: "false"
    -
     name: "SecurityPolicyPasswordMigrator"
     order: 10
