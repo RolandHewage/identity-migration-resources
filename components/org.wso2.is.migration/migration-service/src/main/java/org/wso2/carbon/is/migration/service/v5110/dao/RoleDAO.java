@@ -53,6 +53,8 @@ public class RoleDAO {
                     + "UM_DOMAIN_ID IN (SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME = "
                     + "? AND UM_TENANT_ID = ?)";
 
+    public static final String RETRIEVE_UM_DOMAIN_ID = "SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME=?";
+
     public static final String UM_ROLE_NAME = "UM_ROLE_NAME";
     public static final String UM_TENANT_ID = "UM_TENANT_ID";
     public static final String UM_DOMAIN_ID = "UM_DOMAIN_ID";
@@ -97,6 +99,20 @@ public class RoleDAO {
             }
         }
         return externalRoles;
+    }
+
+    public int getDomainId(Connection connection, String domainName) throws SQLException {
+
+        int domainId = -1;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(RETRIEVE_UM_DOMAIN_ID)) {
+            preparedStatement.setString(1, domainName);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    domainId = resultSet.getInt(UM_DOMAIN_ID);
+                }
+            }
+        }
+        return domainId;
     }
 
     /**
