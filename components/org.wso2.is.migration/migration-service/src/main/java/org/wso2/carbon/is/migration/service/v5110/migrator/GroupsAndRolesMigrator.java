@@ -161,8 +161,16 @@ public class GroupsAndRolesMigrator extends Migrator {
         log.info(Constant.MIGRATION_LOG + "Started the groups and roles migration for super tenant.");
         UserRealm userRealm = realmService.getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID);
         UserStoreManager userStoreManager = userRealm.getUserStoreManager();
-        String adminRoleName = userRealm.getRealmConfiguration().getAdminRoleName();
-        String adminGroupName = UserCoreUtil.removeDomainFromName(adminRoleName);
+        String adminRoleNameWithDomain = userRealm.getRealmConfiguration().getAdminRoleName();
+        String adminGroupName = UserCoreUtil.removeDomainFromName(adminRoleNameWithDomain);
+        String adminUserNameWithDomain = userRealm.getRealmConfiguration().getAdminUserName();
+        String adminUserName = UserCoreUtil.removeDomainFromName(adminUserNameWithDomain);
+        userStoreManager.addRole(UserCoreConstants.INTERNAL_DOMAIN + UserCoreConstants.DOMAIN_SEPARATOR +
+                adminGroupName, new String[]{adminUserName}, null);
+        ((AbstractUserStoreManager) userStoreManager)
+                .updateGroupListOfHybridRole(adminGroupName, null, new String[]{adminGroupName});
+        RoleInfo roleInfoObj = getRoleInfo(adminGroupName, userRealm, connection);
+        RoleDAO.getInstance().transferPermissionsOfRole(connection, roleInfoObj, true);
         // Delete admin group permission data since it is already assigned for the admin role during the startup.
         RoleDAO.getInstance()
                 .deleteAdminGroupPermissions(connection, adminGroupName, MultitenantConstants.SUPER_TENANT_ID);
@@ -178,10 +186,22 @@ public class GroupsAndRolesMigrator extends Migrator {
             // Assign the external role to the newly created role.
             ((AbstractUserStoreManager) userStoreManager)
                     .updateGroupListOfHybridRole(roleInfo.getInternalRoleName(false), null,
-                            new String[] { roleInfo.getDomainQualifiedRoleName() });
+                            new String[]{roleInfo.getDomainQualifiedRoleName()});
             // Transfer permissions to the newly created role.
             RoleDAO.getInstance().transferPermissionsOfRole(connection, roleInfo, false);
         }
+    }
+
+    private RoleInfo getRoleInfo(String adminGroupName, UserRealm userRealm, Connection connection) throws
+            UserStoreException, SQLException {
+
+        RoleInfo roleInfo = new RoleInfo();
+        String domainName = UserCoreUtil.getDomainName(userRealm.getRealmConfiguration());
+        roleInfo.setTenantID(MultitenantConstants.SUPER_TENANT_ID);
+        roleInfo.setRoleName(adminGroupName);
+        roleInfo.setDomainID(RoleDAO.getInstance().getDomainId(connection, domainName));
+        roleInfo.setDomainName(domainName);
+        return roleInfo;
     }
 
     private void migrateTenantData(Connection connection)
