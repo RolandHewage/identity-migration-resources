@@ -93,33 +93,6 @@ public class ScopeDataMigrator extends Migrator {
                 throw new MigrationClientException("Error occurred while creating the SCOPE_TYPE column.", ex);
             }
         }
-        try {
-            migrateOAuth2ScopesOfTenants();
-        } catch (SQLException ex) {
-            throw new MigrationClientException("Error occurred while migrating the OAuth2 internal ,scopes to tenants.", ex);
-        }
-    }
-
-    private void migrateOAuth2ScopesOfTenants() throws MigrationClientException, SQLException {
-
-        try {
-            Set<Tenant> tenants = Utility.getTenants();
-            for (Tenant tenant : tenants) {
-                log.info(Constant.MIGRATION_LOG + "Started the dry run for tenant: " + tenant.getDomain());
-                if (tenant.isActive() || !(isIgnoreForInactiveTenants())) {
-                    log.info(Constant.MIGRATION_LOG + "Started migrating the internal OAuth2 scopes for the tenant: " +
-                            tenant.getDomain());
-                    OAuth2Util.initiateOAuthScopePermissionsBindings(tenant.getId());
-                }
-            }
-        } catch (MigrationClientException e) {
-            String message = Constant.MIGRATION_LOG + "Error occurred while migrating the OAuth2 resources.";
-            if (isContinueOnError()) {
-                log.error(message, e);
-            } else {
-                throw new MigrationClientException(message, e);
-            }
-        }
     }
 
     private void createScopeTypeColumn(Connection connection) throws SQLException {

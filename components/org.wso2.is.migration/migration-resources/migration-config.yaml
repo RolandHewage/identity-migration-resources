@@ -343,20 +343,23 @@ versions:
        location: "step2"
        schema: "identity"
    -
-     name: "ClaimDataMigrator"
+     name: "OAuth2ScopesMigrator"
      order: 6
    -
-     name: "EmailTemplateDataMigrator"
+     name: "ClaimDataMigrator"
      order: 7
    -
-     name: "SchemaMigrator"
+     name: "EmailTemplateDataMigrator"
      order: 8
+   -
+     name: "SchemaMigrator"
+     order: 9
      parameters:
        location: "step2"
        schema: "um"
    -
      name: "UserIDMigrator"
-     order: 9
+     order: 10
      parameters:
        # Migrate all the tenants and all the user store domains in it.
        migrateAll: true
@@ -376,7 +379,9 @@ versions:
          # migratingDomains: "PRIMARY"
          # Mark whether user IDs should be updated even though there is already an ID there. (Optional)
          # forceUpdateUserId: true
-
+   -
+     name: "TenantPortalMigrator"
+     order: 11
 
  -
    version: "5.11.0"

@@ -100,6 +100,10 @@
             <groupId>org.wso2.carbon.utils</groupId>
             <artifactId>org.wso2.carbon.database.utils</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.identity.apps</groupId>
+            <artifactId>org.wso2.identity.apps.common</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
