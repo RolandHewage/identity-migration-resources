@@ -24,6 +24,7 @@ import org.wso2.carbon.identity.application.common.IdentityApplicationManagement
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.TenantPortalMigratorUtil;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -48,9 +49,18 @@ public class TenantPortalMigrator extends Migrator {
     @Override
     public void migrate() throws MigrationClientException {
 
+        log.info(Constant.MIGRATION_LOG + "Starting the user portal initiation for tenants.");
         Tenant[] tenants = getAllTenants();
         for (Tenant tenant : tenants) {
             try {
+                // Skip if the ignoreForInactiveTenants enabled and the tenant is inactive.
+                if (isIgnoreForInactiveTenants() && !tenant.isActive()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Skipping tenant %s since it is a deactivated tenant.",
+                                tenant.getDomain()));
+                    }
+                    continue;
+                }
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Starting to initiate user portal for tenant %s.", tenant.getDomain()));
                 }

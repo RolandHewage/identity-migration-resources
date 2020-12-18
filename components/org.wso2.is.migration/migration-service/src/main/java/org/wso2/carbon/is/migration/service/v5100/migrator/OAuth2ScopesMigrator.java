@@ -59,7 +59,7 @@ public class OAuth2ScopesMigrator extends Migrator {
         try {
             Set<Tenant> tenants = Utility.getTenants();
             for (Tenant tenant : tenants) {
-                log.info(Constant.MIGRATION_LOG + "Started the dry run for tenant: " + tenant.getDomain());
+                log.info(Constant.MIGRATION_LOG + "Started the migration for tenant: " + tenant.getDomain());
                 if (tenant.isActive() || !(isIgnoreForInactiveTenants())) {
                     log.info(Constant.MIGRATION_LOG + "Started migrating the internal OAuth2 scopes for the tenant: " +
                             tenant.getDomain());

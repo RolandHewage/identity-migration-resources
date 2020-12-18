@@ -115,7 +115,6 @@ public class TenantPortalMigratorUtil {
                         consumerKey, consumerSecret, tenantDomain);
             }
         }
-
     }
 
     private static void createApplication(String appName, String appOwner, String appDescription, String consumerKey,
