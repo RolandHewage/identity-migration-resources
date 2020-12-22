@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
@@ -82,9 +84,10 @@ public class ApplicationRedirectURLMigrator extends Migrator {
 
     }
 
-    private void migratingRelyingPartyURL(String reportPath, String tenantDomain, boolean isDryRun) {
+    private void migratingRelyingPartyURL(String reportPath, String tenantDomain, boolean isDryRun) throws MigrationClientException {
 
         List<ServiceProvider> applications = new ArrayList();
+        Map<String, String> applicationAccessURLs = new HashMap<>();
         log.info("............................................................................................");
         if (isDryRun) {
             log.info(Constant.MIGRATION_LOG + "Started dry run of migrating redirect URLs for tenant: " + tenantDomain);
@@ -117,13 +120,30 @@ public class ApplicationRedirectURLMigrator extends Migrator {
                     // Retrieve an application of which saml2 is configured as the inbound auth config.
                     sp = getServiceProviderByRelyingParty(relyingParty, tenantDomain, SAML2);
                 }
-                if (sp != null && StringUtils.isNotEmpty(redirectUrl) && StringUtils.isEmpty(sp.getAccessUrl())) {
-                    applications.add(sp);
-                    if (isDryRun) {
-                        reportUtil.writeMessage(String.format("%40s | %40s | %40s | %40s ", sp.getApplicationName(),
-                                relyingParty, redirectUrl, tenantDomain));
-                    } else {
-                        migrateRedirectURLFromRegistryToApplication(relyingParty, tenantDomain, sp, redirectUrl);
+                if (sp != null) {
+                    String applicationName = sp.getApplicationName();
+                    if (StringUtils.isEmpty(sp.getAccessUrl())) {
+                        applications.add(sp);
+                        if (isDryRun) {
+                            reportUtil.writeMessage(String.format("%40s | %40s | %40s | %40s ", applicationName,
+                                    relyingParty, redirectUrl, tenantDomain));
+                        } else {
+                            applicationAccessURLs.put(applicationName, redirectUrl);
+                            migrateRedirectURLFromRegistryToApplication(relyingParty, tenantDomain, sp, redirectUrl);
+                        }
+                    } else if (!redirectUrl.equals(sp.getAccessUrl())) {
+                        applications.add(sp);
+                        String message = String.format("Conflicting relying-party redirect URL: %s, found for the " +
+                                "application: %s, where the access URL is already set to: %s by default or by" +
+                                " another relying-party configuration. Please resolve the conflict and re-run" +
+                                " the migration.", redirectUrl, applicationName, sp.getAccessUrl());
+                        log.error(message);
+                        if (isDryRun) {
+                            reportUtil.writeMessage(String.format("%40s | %40s | %40s | %40s ", applicationName,
+                                    relyingParty, redirectUrl, tenantDomain));
+                        } else {
+                            throw new MigrationClientException(message);
+                        }
                     }
                 }
             }
@@ -147,7 +167,7 @@ public class ApplicationRedirectURLMigrator extends Migrator {
 
         if (isDryRun) {
             String message = "There are multiple relyingParty values defined for the application: " +
-                    sp.getApplicationName() + "Refer the report at " + reportPath + " to get more details and find " +
+                    sp.getApplicationName() + " Refer the report at " + reportPath + " to get more details and find " +
                     "duplicates and resolve the issues by deleting duplicates from the config registry at path: " +
                     SP_REDIRECT_URL_RESOURCE_PATH;
             log.error(Constant.MIGRATION_LOG + message);
