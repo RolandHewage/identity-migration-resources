@@ -83,6 +83,7 @@ public class ApplicationRedirectURLMigrator extends Migrator {
     }
 
     private void migratingRelyingPartyURL(String reportPath, String tenantDomain, boolean isDryRun) {
+
         List<ServiceProvider> applications = new ArrayList();
         log.info("............................................................................................");
         if (isDryRun) {
@@ -104,6 +105,9 @@ public class ApplicationRedirectURLMigrator extends Migrator {
             ArrayList relyingPartyPropValue = ((ArrayList) relyingPartyDetails.get(relyingParty));
             if (StringUtils.isNotEmpty(relyingParty) && CollectionUtils.isNotEmpty(relyingPartyPropValue)) {
 
+                if (relyingPartyPropValue.get(0) == null) {
+                    continue;
+                }
                 String redirectUrl = relyingPartyPropValue.get(0).toString();
                 if (StringUtils.isEmpty(redirectUrl)) continue;
 
@@ -183,6 +187,7 @@ public class ApplicationRedirectURLMigrator extends Migrator {
      * @return Redirect URL.
      */
     private static Properties getRelyingPartyRedirectUrlValues(String tenantDomain) {
+
         if (log.isDebugEnabled()) {
             log.debug("Retrieving configured url against relying parties for tenant domain : " +
                     tenantDomain);
@@ -222,6 +227,7 @@ public class ApplicationRedirectURLMigrator extends Migrator {
      * @return Redirect URL.
      */
     private static void removeRelyingPartyRedirectUrlsFRomRegistry(String tenantDomain) {
+
         if (log.isDebugEnabled()) {
             log.debug("Removing configured redirect url against relying parties for tenant domain : " +
                     tenantDomain);
@@ -268,10 +274,8 @@ public class ApplicationRedirectURLMigrator extends Migrator {
                 .getInboundAuthenticationRequestConfigs();
         for (InboundAuthenticationRequestConfig inboundAuth : inboundAuthenticationRequestConfig) {
             if (relyingParty.equals(inboundAuth.getInboundAuthKey())) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Updating the application: " + sp.getApplicationName() + " access URL with " +
-                            "redirect URL: " + redirectUrl + " configured for relyingParty: " + relyingParty);
-                }
+                log.info("Updating the application: " + sp.getApplicationName() + " access URL with redirect URL: " +
+                        redirectUrl + " configured for relyingParty: " + relyingParty);
                 sp.setAccessUrl(redirectUrl);
                 try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
                     new ApplicationDAO().updateAccessURL(connection, sp.getApplicationName(),
@@ -290,6 +294,7 @@ public class ApplicationRedirectURLMigrator extends Migrator {
 
     private static ServiceProvider getServiceProviderByRelyingParty(String relyingParty, String tenantDomain, String
             type) {
+
         ServiceProvider sp = null;
         try {
             sp = ApplicationManagementService.getInstance().getServiceProviderByClientId(relyingParty,
