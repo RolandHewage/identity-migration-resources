@@ -480,3 +480,9 @@ versions:
      parameters:
        location: "step1"
        schema: "identity"
+
+   - name: "SchemaMigrator"
+     order: 2
+     parameters:
+       location: "step1"
+       schema: "identity"
