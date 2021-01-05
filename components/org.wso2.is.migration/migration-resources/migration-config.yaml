@@ -471,3 +471,12 @@ versions:
      parameters:
        location: "step6"
        schema: "um"
+ -
+   version: "5.12.0"
+   migratorConfigs:
+   -
+     name: "ApplicationRedirectURLMigrator"
+     order: 1
+     parameters:
+       location: "step1"
+       schema: "identity"
