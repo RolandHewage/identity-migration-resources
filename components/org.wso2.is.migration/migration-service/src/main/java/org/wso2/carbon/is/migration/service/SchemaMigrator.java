@@ -294,10 +294,25 @@ public class SchemaMigrator extends Migrator {
             }
             conn.clearWarnings();
         } catch (SQLException e) {
-            if (e.getSQLState().equals("X0Y32") || e.getSQLState().equals("42710") || e.getSQLState().equals("42000")) {
-                // eliminating the table already exception for the derby,oracle and DB2 database types
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains(":")) {
+                String[] errorCodes = errorMsg.split(":");
+                if (errorCodes.length > 0) {
+                    String errorCode = errorCodes[0];
+                    if ("ORA-00955".equals(errorCode)) {
+                        // Eliminating the table already exists exception for oracle and DB2 database .
+                        // errorMsg for this case will be "ORA-00955: name is already used by an existing object"
+                        if (log.isDebugEnabled()) {
+                            log.debug("Table Already Exists. Hence, skipping table creation");
+                        }
+                        return;
+                    }
+                }
+            }
+            if (e.getSQLState().equals("X0Y32") || e.getSQLState().equals("42710")) {
+                // Eliminating the table already exception for the derby and DB2 database types
                 if (log.isDebugEnabled()) {
-                    log.info("Table Already Exists. Hence, skipping table creation");
+                    log.debug("Table Already Exists. Hence, skipping table creation");
                 }
             } else {
                 throw new Exception("Error occurred while executing : " + sql, e);
