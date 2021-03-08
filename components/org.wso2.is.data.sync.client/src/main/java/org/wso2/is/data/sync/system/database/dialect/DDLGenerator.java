@@ -215,6 +215,7 @@ public class DDLGenerator {
 
         List<SQLStatement> scripts = new ArrayList<>();
 
+        scripts.addAll(dropTables());
         scripts.addAll(generateTables());
         scripts.addAll(generateTriggers());
 
@@ -378,7 +379,7 @@ public class DDLGenerator {
             List<String> dropSyncVersionTableSQL = databaseDialect.generateDropTable(syncVersionTableName);
 
             addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropSyncTableSQL);
-            addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropSyncVersionTableSQL);
+            addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_TARGET, sqlStatementList, dropSyncVersionTableSQL);
         }
         return sqlStatementList;
     }

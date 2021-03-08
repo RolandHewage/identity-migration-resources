@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DELETE_TRIGGER_ORACLE;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_DROP_TABLE_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ATTRIBUTE_AUTO_INCREMENT_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_NAME_ACTION;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_TYPE_BIGINT;
@@ -145,7 +146,7 @@ public class OracleDatabaseDialect extends ANSIDatabaseDialect {
     @Override
     public List<String> generateDropTable(String name) throws SyncClientException {
 
-        return null;
+        return Collections.singletonList(String.format(SQL_TEMPLATE_DROP_TABLE_ORACLE, name));
     }
 
     private static String generateColumnList(List<ColumnData> columnData) {
