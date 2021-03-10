@@ -39,6 +39,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.wso2.carbon.core.util.CryptoUtil.getDefaultCryptoUtil;
 import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_IDP_ID;
+import static org.wso2.is.data.sync.system.database.SQLQueryProvider.SQL_TEMPLATE_SELECT_SOURCE_IDP_ID_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_ACCESS_TOKEN_HASH;
 import static org.wso2.is.data.sync.system.util.Constant.COLUMN_AUTHORIZATION_CODE;
@@ -342,7 +343,11 @@ public class OAuth2Util {
         if (!journalEntryList.isEmpty()) {
             try {
                 Connection connection = context.getSourceConnection();
-                String sqlQuery = String.format(SQL_TEMPLATE_SELECT_SOURCE_IDP_ID, tableName, tableName);
+                String format = SQL_TEMPLATE_SELECT_SOURCE_IDP_ID;
+                if (Constant.DATA_SOURCE_TYPE_ORACLE.equals(CommonUtil.getDatabase(connection))) {
+                    format = SQL_TEMPLATE_SELECT_SOURCE_IDP_ID_ORACLE;
+                }
+                String sqlQuery = String.format(format, tableName, tableName);
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
                     try (ResultSet resultSet = preparedStatement.executeQuery()) {
                         if (resultSet.next()) {

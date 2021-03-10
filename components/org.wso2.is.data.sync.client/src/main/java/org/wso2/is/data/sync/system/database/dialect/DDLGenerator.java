@@ -215,8 +215,9 @@ public class DDLGenerator {
 
         List<SQLStatement> scripts = new ArrayList<>();
 
-        scripts.addAll(generateTriggers());
+        scripts.addAll(dropTables());
         scripts.addAll(generateTables());
+        scripts.addAll(generateTriggers());
 
         return scripts;
     }
@@ -280,14 +281,20 @@ public class DDLGenerator {
 
                         if (parentTableName != null && syncTableList.contains(parentTableName)) {
 
-                            dropDeleteTriggerListSQLForChildTables.addAll(databaseDialect.generateDropTrigger
-                                    (triggerName, targetTableName));
+                            List<String> dropTriggerList =
+                                    databaseDialect.generateDropTrigger(triggerName, targetTableName);
+                            if (dropTriggerList != null) {
+                                dropDeleteTriggerListSQLForChildTables.addAll(dropTriggerList);
+                            }
 
                             Trigger onDeleteTriggersForChildTables = new Trigger(triggerName, parentTableName,
                                     targetTableName, SYNC_OPERATION_DELETE, tableMetaData,
                                     SELECTION_POLICY_FOR_EACH_ROW, TRIGGER_TIMING_AFTER);
-                            onDeleteTriggerListForChildTables.addAll(databaseDialect.generateDeleteTrigger
-                                    (onDeleteTriggersForChildTables, columnIds));
+                            List<String> deleteTriggerList =
+                                    databaseDialect.generateDeleteTrigger(onDeleteTriggersForChildTables, columnIds);
+                            if (deleteTriggerList != null) {
+                                onDeleteTriggerListForChildTables.addAll(deleteTriggerList);
+                            }
                         }
                         triggerCount++;
                     }
@@ -372,7 +379,7 @@ public class DDLGenerator {
             List<String> dropSyncVersionTableSQL = databaseDialect.generateDropTable(syncVersionTableName);
 
             addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropSyncTableSQL);
-            addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_SOURCE, sqlStatementList, dropSyncVersionTableSQL);
+            addStatementsToStatementList(schema, SQL_STATEMENT_TYPE_TARGET, sqlStatementList, dropSyncVersionTableSQL);
         }
         return sqlStatementList;
     }

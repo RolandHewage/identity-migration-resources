@@ -196,7 +196,7 @@ public class CommonUtil {
                 tableName = tableName.toLowerCase();
             }
 
-            try (ResultSet resultSet = metaData.getColumns(connection.getCatalog(), null, tableName,
+            try (ResultSet resultSet = metaData.getColumns(connection.getCatalog(), connection.getSchema(), tableName,
                     null)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString(JDBC_META_DATA_COLUMN_NAME);
@@ -244,7 +244,7 @@ public class CommonUtil {
                 tableName = tableName.toLowerCase();
             }
 
-            try (ResultSet resultSet = metaData.getPrimaryKeys(null, null, tableName)) {
+            try (ResultSet resultSet = metaData.getPrimaryKeys(null, connection.getSchema(), tableName)) {
                 while (resultSet.next()) {
                     String name = resultSet.getString("COLUMN_NAME");
                     primaryKeys.add(name);
@@ -296,5 +296,12 @@ public class CommonUtil {
             value = (T) entryField.getValue();
         }
         return value;
+    }
+
+    public static String getDatabase(Connection connection) throws SQLException {
+        if (connection != null && connection.getMetaData() != null) {
+            return connection.getMetaData().getDatabaseProductName().toLowerCase();
+        }
+        return null;
     }
 }

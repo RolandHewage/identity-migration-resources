@@ -41,7 +41,8 @@ import static org.wso2.is.data.sync.system.util.Constant.DATA_SOURCE_TYPE_POSTGR
 import static org.wso2.is.data.sync.system.util.Constant.DELIMITER;
 import static org.wso2.is.data.sync.system.util.Constant.DELIMITER_COMMA;
 import static org.wso2.is.data.sync.system.util.Constant.DELIMITER_DOUBLE_SLASH;
-import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_DB2_ORACLE;
+import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_DB2;
+import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_ORACLE;
 import static org.wso2.is.data.sync.system.util.Constant.SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
 
 /**
@@ -167,8 +168,10 @@ public class DataSourceManager {
     public String getSourceSqlDelimiter(String schema) {
 
         String dataSourceType = getSourceDataSourceType(schema);
-        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType) || DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
-            return SQL_DELIMITER_DB2_ORACLE;
+        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType)) {
+            return SQL_DELIMITER_ORACLE;
+        } else if (DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
+            return SQL_DELIMITER_DB2;
         }
         return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
     }
@@ -176,8 +179,10 @@ public class DataSourceManager {
     public String getTargetSqlDelimiter(String schema) {
 
         String dataSourceType = getTargetDataSourceType(schema);
-        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType) || DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
-            return SQL_DELIMITER_DB2_ORACLE;
+        if (DATA_SOURCE_TYPE_ORACLE.equals(dataSourceType)) {
+            return SQL_DELIMITER_ORACLE;
+        } else if (DATA_SOURCE_TYPE_DB2.equals(dataSourceType)) {
+            return SQL_DELIMITER_DB2;
         }
         return SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES;
     }

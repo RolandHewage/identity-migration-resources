@@ -63,6 +63,8 @@ public class Constant {
     public static final String COLUMN_TYPE_BIGINT = "BIGINT";
     public static final String COLUMN_TYPE_SERIAL = "SERIAL";
     public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT = "AUTO_INCREMENT";
+    public static final String COLUMN_ATTRIBUTE_AUTO_INCREMENT_ORACLE =
+            "GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)";
     public static final String COLUMN_NAME_SYNC_ID = "SYNC_ID";
     public static final String COLUMN_NAME_ACTION = "ACTION";
 
@@ -73,7 +75,8 @@ public class Constant {
     public static final String PRODUCT_VERSION_V570 = "5.7.0";
 
     public static final String SQL_DELIMITER_H2_MYSQL_MSSQL_POSGRES = "//";
-    public static final String SQL_DELIMITER_DB2_ORACLE = "/";
+    public static final String SQL_DELIMITER_DB2 = "/";
+    public static final String SQL_DELIMITER_ORACLE = "\n/";
 
     public static final String ENTRY_FILED_ACTION_INSERT = "INSERT";
     public static final String ENTRY_FILED_ACTION_UPDATE = "UPDATE";

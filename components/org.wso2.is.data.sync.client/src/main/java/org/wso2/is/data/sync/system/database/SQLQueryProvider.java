@@ -56,6 +56,8 @@ public class SQLQueryProvider {
 
     public static final String SQL_TEMPLATE_DROP_TABLE_MYSQL_KEY = "SQL_TEMPLATE_DROP_TABLE_MYSQL";
     public static final String SQL_TEMPLATE_DROP_TABLE_MYSQL = "DROP TABLE IF EXISTS %s";
+    public static final String SQL_TEMPLATE_DROP_TABLE_ORACLE = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE %s'; " +
+            "EXCEPTION WHEN OTHERS THEN IF SQLCODE != -942 THEN RAISE; END IF; END;";
 
     public static final String SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL_KEY = "SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL";
     public static final String SQL_TEMPLATE_CREATE_SYNC_TABLE_MYSQL = "CREATE TABLE %s (SYNC_ID INT NOT NULL " +
@@ -74,6 +76,9 @@ public class SQLQueryProvider {
     public static final String SQL_TEMPLATE_DELETE_TRIGGER_MYSQL = "CREATE TRIGGER %s %s %s ON %s %s " +
             "BEGIN DELETE FROM %s WHERE %s; END";
 
+    public static final String SQL_TEMPLATE_DELETE_TRIGGER_ORACLE = "CREATE OR REPLACE TRIGGER %s %s %s ON %s %s " +
+            "BEGIN DELETE FROM %s WHERE %s; END;";
+
     public static final String SQL_TEMPLATE_CREATE_TRIGGER_POSTGRES = "CREATE TRIGGER %s %s %s ON %s %s " +
             "EXECUTE PROCEDURE %s()";
 
@@ -91,6 +96,8 @@ public class SQLQueryProvider {
     public static final String SQL_TEMPLATE_DROP_TRIGGER_ORACLE = "DROP TRIGGER %s";
     public static final String SQL_TEMPLATE_SELECT_SOURCE_IDP_ID = "SELECT ID FROM IDP INNER JOIN %s " +
             "ON %s.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = 'LOCAL' LIMIT 1";
+    public static final String SQL_TEMPLATE_SELECT_SOURCE_IDP_ID_ORACLE = "SELECT ID FROM IDP INNER JOIN %s " +
+            "ON %s.TENANT_ID =  IDP.TENANT_ID AND IDP.NAME = 'LOCAL' AND rownum = 1";
 
     private static Map<String, String> queryHolder = new HashMap<>();
 
