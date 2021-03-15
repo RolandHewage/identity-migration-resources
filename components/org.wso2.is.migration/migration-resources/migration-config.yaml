@@ -498,3 +498,10 @@ versions:
      parameters:
        location: "step3"
        schema: "consent"
+
+   - name: "ClaimDataMigrator"
+     order: 5
+     parameters:
+       name: "GroupsVsRolesSeparationImprovementsClaimDataMigrator"
+       overrideExistingClaims: "true"
+       useOwnDataFile: "true"

@@ -80,4 +80,10 @@ public class Constant {
     public static final String SERVER_SYMMETRIC_KEY = "CryptoService.Secret";
     public static final String SYMMETRIC_KEY_CRYPTO_PROVIDER = "org.wso2.carbon.crypto.provider" +
             ".SymmetricKeyInternalCryptoProvider";
+
+    public static class ClaimDataMigratorConstants {
+
+        public static final String MIGRATOR_PARAMETER_USE_OWN_DATA_FILE = "useOwnDataFile";
+        public static final String MIGRATOR_PARAMETER_OVERRIDE_EXISTING_CLAIMS = "overrideExistingClaims";
+    }
 }

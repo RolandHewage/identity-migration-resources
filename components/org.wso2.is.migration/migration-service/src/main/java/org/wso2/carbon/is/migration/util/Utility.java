@@ -68,6 +68,13 @@ public class Utility {
         return path.toString();
     }
 
+    public static String getDataFilePathWithFolderLocation(Path dataFileFolder, String dataFileName, String version) {
+
+        Path path = Paths.get(getMigrationResourceDirectoryPath(), version, Constant
+                        .MIGRATION_RESOURCE_DATA_FILES, dataFileFolder.toString(), dataFileName);
+        return path.toString();
+    }
+
     public static String getSchemaPath(String schema, String databaseType, String location, String version) {
 
         Path path = Paths.get(getMigrationResourceDirectoryPath(), version, Constant.MIGRATION_RESOURCE_DBSCRIPTS,
