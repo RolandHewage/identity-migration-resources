@@ -498,3 +498,9 @@ versions:
      parameters:
        location: "step3"
        schema: "consent"
+
+   - name: "SchemaMigrator"
+     order: 5
+     parameters:
+       location: "step4"
+       schema: "identity"
