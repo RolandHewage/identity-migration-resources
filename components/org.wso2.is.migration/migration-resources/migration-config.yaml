@@ -5,7 +5,7 @@ currentVersion: "5.x.x"
 # Migration End Version
 migrateVersion: "5.x.x"
 
-continueOnError: "true"
+continueOnError: "false"
 batchUpdate: "true"
 ignoreForInactiveTenants: "true"
 
