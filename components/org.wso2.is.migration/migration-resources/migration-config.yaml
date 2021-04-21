@@ -5,7 +5,7 @@ currentVersion: "5.x.x"
 # Migration End Version
 migrateVersion: "5.x.x"
 
-continueOnError: "true"
+continueOnError: "false"
 batchUpdate: "true"
 ignoreForInactiveTenants: "true"
 
@@ -499,8 +499,14 @@ versions:
        location: "step3"
        schema: "consent"
 
-   - name: "ClaimDataMigrator"
+   - name: "SchemaMigrator"
      order: 5
+     parameters:
+       location: "step4"
+       schema: "identity"
+
+   - name: "ClaimDataMigrator"
+     order: 6
      parameters:
        name: "GroupsVsRolesSeparationImprovementsClaimDataMigrator"
        overrideExistingClaims: "true"
