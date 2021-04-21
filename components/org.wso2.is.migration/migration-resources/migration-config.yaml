@@ -504,3 +504,9 @@ versions:
      parameters:
        location: "step4"
        schema: "identity"
+
+   - name: "ClaimDataMigrator"
+     order: 6
+     parameters:
+       overrideExistingClaims: "true"
+       useOwnClaimDataFile: "true"
