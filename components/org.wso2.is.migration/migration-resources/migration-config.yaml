@@ -508,6 +508,5 @@ versions:
    - name: "ClaimDataMigrator"
      order: 6
      parameters:
-       name: "GroupsVsRolesSeparationImprovementsClaimDataMigrator"
        overrideExistingClaims: "true"
-       useOwnDataFile: "true"
+       useOwnClaimDataFile: "true"

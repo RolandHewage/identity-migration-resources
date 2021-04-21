@@ -83,7 +83,7 @@ public class Constant {
 
     public static class ClaimDataMigratorConstants {
 
-        public static final String MIGRATOR_PARAMETER_USE_OWN_DATA_FILE = "useOwnDataFile";
+        public static final String MIGRATOR_PARAMETER_USE_OWN_CLAIM_DATA_FILE = "useOwnClaimDataFile";
         public static final String MIGRATOR_PARAMETER_OVERRIDE_EXISTING_CLAIMS = "overrideExistingClaims";
     }
 }

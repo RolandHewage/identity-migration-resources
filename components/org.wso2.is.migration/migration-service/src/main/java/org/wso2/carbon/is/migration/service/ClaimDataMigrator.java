@@ -183,9 +183,8 @@ public class ClaimDataMigrator extends Migrator {
                         continue;
                     }
                     addLocalClaimMapping(tenantId, primaryDomainName, claimURI, claimMapping);
+                    existingLocalClaimURIs.add(claimURI);
                 }
-
-                existingLocalClaimURIs.add(claimURI);
             } else {
                 externalClaims.put(entry.getKey(), entry.getValue());
             }
@@ -349,7 +348,7 @@ public class ClaimDataMigrator extends Migrator {
         boolean isUseOwnDataFile = false;
         if (getMigratorConfig() != null && getMigratorConfig().getParameters() != null) {
             isUseOwnDataFile = Boolean.parseBoolean(getMigratorConfig().getParameters().getProperty(Constant
-                            .ClaimDataMigratorConstants.MIGRATOR_PARAMETER_USE_OWN_DATA_FILE));
+                            .ClaimDataMigratorConstants.MIGRATOR_PARAMETER_USE_OWN_CLAIM_DATA_FILE));
         }
 
         return isUseOwnDataFile ?
