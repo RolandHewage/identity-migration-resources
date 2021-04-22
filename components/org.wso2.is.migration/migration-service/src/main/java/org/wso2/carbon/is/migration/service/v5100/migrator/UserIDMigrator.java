@@ -168,7 +168,12 @@ public class UserIDMigrator extends Migrator {
                 // If the domains are provided in config, use them. Otherwise update all the available domains.
                 String[] domains;
                 if (migratingDomains != null) {
-                    domains = migratingDomains.split(",");
+                    if (migratingDomains.isEmpty()) {
+                        domains = new String[0];
+                        log.info("User store domain list is empty");
+                    } else {
+                        domains = migratingDomains.split(",");
+                    }
                 } else {
                     domains = getAllDomainNames((AbstractUserStoreManager) userStoreManager);
                 }
