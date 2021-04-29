@@ -18,7 +18,6 @@ package org.wso2.carbon.is.migration.service.v5100.migrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
