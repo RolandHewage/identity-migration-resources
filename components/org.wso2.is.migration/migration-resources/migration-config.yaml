@@ -510,3 +510,9 @@ versions:
      parameters:
        overrideExistingClaims: "true"
        useOwnClaimDataFile: "true"
+
+   - name: "SchemaMigrator"
+     order: 7
+     parameters:
+       location: "step5"
+       schema: "identity"
