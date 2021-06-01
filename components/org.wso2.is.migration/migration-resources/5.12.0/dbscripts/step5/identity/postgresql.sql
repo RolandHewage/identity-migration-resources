@@ -1,7 +1,5 @@
-DROP TABLE IF EXISTS IDN_FED_USER_TOTP_SECRET_KEY;
-CREATE TABLE IDN_FED_USER_TOTP_SECRET_KEY (
-            USER_ID VARCHAR (255) NOT NULL,
-            SECRET_KEY VARCHAR(1024) NOT NULL,
-            FOREIGN KEY (USER_ID) REFERENCES IDN_AUTH_USER(USER_ID) ON DELETE CASCADE,
-            PRIMARY KEY (USER_ID)
-);
+CREATE OR REPLACE FUNCTION skip_index_if_exists(nameOfTheIndex varchar(64), tableName varchar(64), tableColumns varchar(64)) RETURNS void AS $$ declare s varchar(1000); declare result INTEGER; begin SELECT COUNT(1) into result FROM pg_indexes WHERE indexname = nameOfTheIndex; IF result = 0 THEN s :=  CONCAT('CREATE INDEX ' , nameOfTheIndex , ' ON ' , tableName, tableColumns); execute s; end if; END;$$ LANGUAGE plpgsql;
+
+SELECT skip_index_if_exists('idx_tk_value_type','idn_oauth2_token_binding','(token_binding_value, token_binding_type)');
+
+DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
