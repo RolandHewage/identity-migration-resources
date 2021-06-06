@@ -1,7 +1,15 @@
-CREATE TABLE IDN_FED_USER_TOTP_SECRET_KEY (
-            USER_ID VARCHAR (255) NOT NULL,
-            SECRET_KEY VARCHAR(1024) NOT NULL,
-            FOREIGN KEY (USER_ID) REFERENCES IDN_AUTH_USER(USER_ID) ON DELETE CASCADE,
-            PRIMARY KEY (USER_ID)
-)
+CREATE OR REPLACE PROCEDURE add_index_if_not_exists (query IN VARCHAR2)
+  IS
+BEGIN
+  execute immediate query;
+  dbms_output.put_line(query);
+exception WHEN OTHERS THEN
+  dbms_output.put_line('Skipped');
+END;
+/
+
+CALL add_index_if_not_exists('CREATE INDEX IDX_TK_VALUE_TYPE ON IDN_OAUTH2_TOKEN_BINDING(TOKEN_BINDING_VALUE, TOKEN_BINDING_TYPE)')
+/
+
+DROP PROCEDURE add_index_if_not_exists
 /
