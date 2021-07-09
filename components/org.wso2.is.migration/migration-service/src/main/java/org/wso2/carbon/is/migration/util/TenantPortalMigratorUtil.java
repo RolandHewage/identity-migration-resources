@@ -48,7 +48,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.identity.apps.common.util.AppPortalConstants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -93,8 +92,8 @@ public class TenantPortalMigratorUtil {
         UserRealm userRealm = ISMigrationServiceDataHolder.getRegistryService().getUserRealm(tenantId);
         String adminUsername = userRealm.getRealmConfiguration().getAdminUserName();
 
-        for (AppPortalConstants.AppPortal appPortal : AppPortalConstants.AppPortal.values()) {
-            if (appPortal.equals(AppPortalConstants.AppPortal.ADMIN_PORTAL)) {
+        for (AppPortal appPortal : AppPortal.values()) {
+            if (appPortal.equals(AppPortal.ADMIN_PORTAL)) {
                 String productVersion = CarbonUtils.getServerConfiguration().getFirstProperty("Version");
                 // Skip admin portal creation for IS 5.10.0.
                 if (StringUtils.isBlank(productVersion) || !productVersion.startsWith("5.11.0")) {
