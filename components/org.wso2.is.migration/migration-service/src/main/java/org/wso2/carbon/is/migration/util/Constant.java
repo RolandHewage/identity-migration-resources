@@ -48,7 +48,7 @@ public class Constant {
     public static final String DELIMITER = "DELIMITER";
 
     public static final String EMAIL_TEMPLATE_PATH = "/identity/email";
-    public static final String SKIP_SUPER_TENANT_EMAIL_TEMPLATE_MIGRATION = "skipSuperTenantMigration";
+    public static final String SKIP_SUPER_TENANT_EMAIL_TEMPLATE_MIGRATION = "skipSuperTenantEmailTemplateMigration";
     public static final String TEMPLATE_TYPE = "type";
     public static final String TEMPLATE_TYPE_DISPLAY_NAME = "display";
     public static final String TEMPLATE_LOCALE = "locale";
