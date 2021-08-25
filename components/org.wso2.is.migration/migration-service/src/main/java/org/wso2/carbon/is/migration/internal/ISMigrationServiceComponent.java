@@ -20,7 +20,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.base.api.ServerConfigurationService;
-import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.core.migrate.MigrationClient;
 import org.wso2.carbon.is.migration.MigrationClientImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -35,8 +34,6 @@ import org.wso2.carbon.user.core.service.RealmService;
  * cardinality="1..1" policy="dynamic"  bind="setServerConfigurationService" unbind="unsetServerConfigurationService"
  * @scr.reference name="registry.service" interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic"  bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="application.mgt.service" interface="org.wso2.carbon.identity.application.mgt.ApplicationManagementService"
- * cardinality="1..1" policy="dynamic"  bind="setApplicationManagementService" unbind="unsetApplicationManagementService"
  */
 public class ISMigrationServiceComponent {
 
@@ -59,7 +56,6 @@ public class ISMigrationServiceComponent {
         } catch (Throwable e) {
             log.error("Error while initiating Config component", e);
         }
-
     }
 
     /**
@@ -118,15 +114,5 @@ public class ISMigrationServiceComponent {
     protected void unsetRegistryService(RegistryService registryService) {
 
         ISMigrationServiceDataHolder.setRegistryService(null);
-    }
-
-    protected void setApplicationManagementService(ApplicationManagementService applicationManagementService) {
-
-        ISMigrationServiceDataHolder.setApplicationManagementService(applicationManagementService);
-    }
-
-    protected void unsetApplicationManagementService(ApplicationManagementService applicationManagementService) {
-
-        ISMigrationServiceDataHolder.setApplicationManagementService(null);
     }
 }
