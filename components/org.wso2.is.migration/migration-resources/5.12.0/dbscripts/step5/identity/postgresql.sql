@@ -3,3 +3,23 @@ CREATE OR REPLACE FUNCTION skip_index_if_exists(nameOfTheIndex varchar(64), tabl
 SELECT skip_index_if_exists('idx_tk_value_type','idn_oauth2_token_binding','(token_binding_value, token_binding_type)');
 
 DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
+
+-- --------------------------- INDEX CREATION -----------------------------
+
+-- IDN_OIDC_PROPERTY --
+
+CREATE INDEX IDX_IOP_CK ON IDN_OIDC_PROPERTY(CONSUMER_KEY);
+
+-- --------------------------- REMOVE UNUSED INDICES -----------------------------
+
+-- IDN_OAUTH2_ACCESS_TOKEN --
+DROP INDEX IDX_AT_CK_AU ON IDN_OAUTH2_ACCESS_TOKEN;
+
+DROP INDEX IDX_AT_AU_TID_UD_TS_CKID ON IDN_OAUTH2_ACCESS_TOKEN;
+
+DROP INDEX IDX_AT_AU_CKID_TS_UT ON IDN_OAUTH2_ACCESS_TOKEN;
+
+DROP INDEX IDX_IOAT_UT ON IDN_OAUTH2_ACCESS_TOKEN;
+
+-- IDN_OIDC_PROPERTY --
+DROP INDEX IDX_IOP_TID_CK ON IDN_OIDC_PROPERTY;
