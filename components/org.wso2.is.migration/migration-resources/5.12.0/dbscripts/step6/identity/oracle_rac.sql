@@ -7,3 +7,7 @@ exception WHEN OTHERS THEN
     dbms_output.put_line('skipped');
 END;
 /
+
+UPDATE IDP_METADATA SET NAME = 'account.lock.handler.lock.on.max.failed.attempts.enable'
+WHERE NAME = 'account.lock.handler.enable'
+/
