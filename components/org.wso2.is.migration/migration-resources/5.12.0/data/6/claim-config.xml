@@ -51,6 +51,12 @@
                 <AttributeID>userSourceId</AttributeID>
                 <Description>Claim to represent the provisioned IDP ID of the user.</Description>
             </Claim>
+            <Claim>
+                <ClaimURI>http://wso2.org/claims/websiteurl</ClaimURI>
+                <DisplayName>Website URL</DisplayName>
+                <AttributeID>websiteUrl</AttributeID>
+                <Description>Website URL</Description>
+            </Claim>
         </Dialect>
         <Dialect dialectURI="urn:ietf:params:scim:schemas:core:2.0:User">
             <Claim>
@@ -81,6 +87,15 @@
                 <DisplayOrder>13</DisplayOrder>
                 <SupportedByDefault />
                 <MappedLocalClaim>http://wso2.org/claims/roles</MappedLocalClaim>
+            </Claim>
+            <Claim>
+                <ClaimURI>website</ClaimURI>
+                <DisplayName>Website URL</DisplayName>
+                <AttributeID>websiteUrl</AttributeID>
+                <Description>URL of the End-User's Web page or blog. This Web page SHOULD contain information published by the End-User or an organization that the End-User is affiliated with.</Description>
+                <DisplayOrder>10</DisplayOrder>
+                <SupportedByDefault />
+                <MappedLocalClaim>http://wso2.org/claims/websiteurl</MappedLocalClaim>
             </Claim>
         </Dialect>
         <Dialect dialectURI="urn:ietf:params:scim:schemas:extension:enterprise:2.0:User">
