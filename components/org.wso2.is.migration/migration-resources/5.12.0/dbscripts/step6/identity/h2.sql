@@ -25,3 +25,8 @@ void migrateIdnOauthDeviceFlow(final Connection conn) throws SQLException {
 }
 $$;
 --<![CDATA[End of Procedure]]>--
+
+BEGIN TRANSACTION;
+UPDATE IDP_METADATA SET NAME = 'account.lock.handler.lock.on.max.failed.attempts.enable'
+WHERE NAME = 'account.lock.handler.enable';
+COMMIT;

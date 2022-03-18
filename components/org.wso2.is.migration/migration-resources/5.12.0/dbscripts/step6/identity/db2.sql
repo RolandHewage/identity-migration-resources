@@ -24,3 +24,7 @@ CALL ALTER_IDN_OAUTH2_DEVICE_FLOW
 
 DROP PROCEDURE ALTER_IDN_OAUTH2_DEVICE_FLOW
 /
+
+UPDATE IDP_METADATA SET NAME = 'account.lock.handler.lock.on.max.failed.attempts.enable'
+WHERE NAME = 'account.lock.handler.enable'
+/
