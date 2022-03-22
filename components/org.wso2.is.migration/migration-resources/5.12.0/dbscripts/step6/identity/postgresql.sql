@@ -4,3 +4,7 @@ BEGIN TRANSACTION;
 UPDATE IDP_METADATA SET NAME = 'account.lock.handler.lock.on.max.failed.attempts.enable'
 WHERE NAME = 'account.lock.handler.enable';
 COMMIT;
+
+INSERT INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION)
+VALUES ('669b99ca-cdb0-44a6-8cae-babed3b585df', 'Publisher', 'A resource type to keep the event publisher configurations')
+ON CONFLICT DO NOTHING;
