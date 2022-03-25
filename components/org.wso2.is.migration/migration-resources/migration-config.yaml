@@ -522,3 +522,21 @@ versions:
      parameters:
        location: "step6"
        schema: "identity"
+
+   - name: "SchemaMigrator"
+     order: 9
+     parameters:
+       location: "step7"
+       schema: "identity"
+
+   - name: "SchemaMigrator"
+     order: 10
+     parameters:
+       location: "step7"
+       schema: "consent"
+
+   - name: "SchemaMigrator"
+     order: 11
+     parameters:
+       location: "step7"
+       schema: "um"
