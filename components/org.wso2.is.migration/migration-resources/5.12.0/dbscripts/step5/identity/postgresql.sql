@@ -10,8 +10,6 @@ DROP FUNCTION skip_index_if_exists(varchar,varchar,varchar);
 
 CREATE INDEX IDX_IOP_CK ON IDN_OIDC_PROPERTY(CONSUMER_KEY);
 
-CREATE INDEX INDEX_UM_USERNAME_UM_TENANT_ID ON UM_USER(UM_USER_NAME, UM_TENANT_ID);
-
 -- --------------------------- REMOVE UNUSED INDICES -----------------------------
 
 -- IDN_OAUTH2_ACCESS_TOKEN --
