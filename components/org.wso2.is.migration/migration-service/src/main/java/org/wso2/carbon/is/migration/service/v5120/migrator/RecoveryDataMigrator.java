@@ -34,13 +34,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TimeZone;
 
+/**
+ * Migration implementation for migrating recovery data.
+ */
 public class RecoveryDataMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(RecoveryDataMigrator.class);
     private static final String UPDATE_TIMESTAMP_SQL =
-            "UPDATE IDN_RECOVERY_DATA " +
-                    "SET TIME_CREATED = ? " +
-                    "WHERE CODE = ? AND TIME_CREATED = ?";
+            "UPDATE IDN_RECOVERY_DATA SET TIME_CREATED = ? WHERE CODE = ? AND TIME_CREATED = ?";
     private static final String GET_TIMESTAMPS = "SELECT CODE, TIME_CREATED FROM IDN_RECOVERY_DATA";
     private static final String UTC = "UTC";
 
