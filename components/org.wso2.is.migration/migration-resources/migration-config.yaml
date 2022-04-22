@@ -546,3 +546,6 @@ versions:
      parameters:
        location: "step7"
        schema: "um"
+
+   - name: "RecoveryDataMigrator"
+     order: 13
