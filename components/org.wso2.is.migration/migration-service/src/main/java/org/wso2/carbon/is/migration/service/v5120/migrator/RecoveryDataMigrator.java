@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.is.migration.service.Migrator;
+import org.wso2.carbon.is.migration.service.v530.util.JDBCPersistenceUtil;
 import org.wso2.carbon.is.migration.util.Schema;
 
 import java.sql.Connection;
@@ -84,18 +85,26 @@ public class RecoveryDataMigrator extends Migrator {
         if (!timestamps.isEmpty()) {
             log.info("Converting timestamps to UTC timestamps in the Recovery Data table.");
         }
-        for (String code : timestamps.keySet()) {
-            Timestamp localTimestamp = timestamps.get(code);
-
-            try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TIMESTAMP_SQL)) {
-                preparedStatement.setTimestamp(1, localTimestamp, Calendar.getInstance(TimeZone.getTimeZone(UTC)));
-                preparedStatement.setString(2, code);
-                preparedStatement.setTimestamp(3, localTimestamp);
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new MigrationClientException("An error occurred while updating recovery data.", e);
+        try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
+            boolean autoCommitStatus = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            for (String code : timestamps.keySet()) {
+                Timestamp localTimestamp = timestamps.get(code);
+                try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TIMESTAMP_SQL)) {
+                    preparedStatement.setTimestamp(1, localTimestamp,
+                            Calendar.getInstance(TimeZone.getTimeZone(UTC)));
+                    preparedStatement.setString(2, code);
+                    preparedStatement.setTimestamp(3, localTimestamp);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    JDBCPersistenceUtil.rollbackTransaction(connection);
+                    throw new MigrationClientException("An error occurred while updating recovery data.", e);
+                }
             }
+            JDBCPersistenceUtil.commitTransaction(connection);
+            connection.setAutoCommit(autoCommitStatus);
+        } catch (SQLException e) {
+            throw new MigrationClientException("An error occurred while updating recovery data.", e);
         }
     }
 }
