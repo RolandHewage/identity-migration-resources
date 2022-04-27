@@ -480,6 +480,8 @@ versions:
      parameters:
        location: "step1"
        schema: "identity"
+       # Absolute path for the dry report. This is required in the dry run mode.
+       # reportPath:
 
    - name: "SchemaMigrator"
      order: 2
@@ -549,3 +551,11 @@ versions:
 
    - name: "RecoveryDataMigrator"
      order: 13
+
+   - name: "SCIMGroupSchemaMigrator"
+     order: 14
+     parameters:
+       location: "step8"
+       schema: "identity"
+       # Absolute path for the dry report. This is required in the dry run mode.
+       # reportPath:

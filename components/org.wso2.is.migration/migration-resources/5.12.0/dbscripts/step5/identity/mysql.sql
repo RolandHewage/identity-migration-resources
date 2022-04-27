@@ -11,7 +11,6 @@ DROP PROCEDURE IF EXISTS skip_index_if_exists;
 -- IDN_OIDC_PROPERTY --
 CREATE INDEX IDX_IOP_CK ON IDN_OIDC_PROPERTY(CONSUMER_KEY);
 
-
 -- --------------------------- REMOVE UNUSED INDICES -----------------------------
 
 -- IDN_OAUTH2_ACCESS_TOKEN --
