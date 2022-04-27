@@ -39,7 +39,7 @@ public class SCIMGroupSchemaMigrator extends SchemaMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(SCIMGroupSchemaMigrator.class);
     private static final String GET_IDN_SCIM_GROUP_DUPLICATE_ENTRIES =
-            "SELECT TENANT_ID, ROLE_NAME, ATTR_NAME, COUNT(*) FROM IDN_SCIM_GROUP " +
+            "SELECT TENANT_ID, ROLE_NAME, ATTR_NAME, COUNT(*) AS COUNT FROM IDN_SCIM_GROUP " +
                     "GROUP BY TENANT_ID, ROLE_NAME, ATTR_NAME HAVING COUNT(*) > 1";
     private static final String TENANT_ID = "tenant_id";
     private static final String ROLE_NAME = "role_name";
