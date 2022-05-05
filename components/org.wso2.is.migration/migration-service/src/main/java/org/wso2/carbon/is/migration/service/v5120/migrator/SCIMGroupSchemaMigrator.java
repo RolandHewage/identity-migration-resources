@@ -64,7 +64,8 @@ public class SCIMGroupSchemaMigrator extends SchemaMigrator {
             log.info(Constant.MIGRATION_LOG + "Started the dry run for IDN_SCIM_GROUP schema migration.");
 
             try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection();
-                 Statement statement = connection.createStatement();
+                 Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                         ResultSet.CONCUR_READ_ONLY);
                  ResultSet resultSet = statement.executeQuery(GET_IDN_SCIM_GROUP_DUPLICATE_ENTRIES)) {
                 if (!resultSet.isBeforeFirst()) {
                     reportUtil.writeMessage("No issues detected with Schema Migration for the IDN_SCIM_GROUP table.");
