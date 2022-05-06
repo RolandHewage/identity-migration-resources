@@ -15,7 +15,7 @@ void migrateIdnOauthDeviceFlow(final Connection conn) throws SQLException {
     }
 
     if (!isExists) {
-        ps = conn.prepareStatement("ALTER TABLE IDN_OAUTH2_DEVICE_FLOW ADD QUANTIFIER INTEGER DEFAULT 0");
+        ps = conn.prepareStatement("ALTER TABLE IDN_OAUTH2_DEVICE_FLOW ADD QUANTIFIER INTEGER DEFAULT 0 NOT NULL");
         ps.execute();
         ps = conn.prepareStatement("ALTER TABLE IDN_OAUTH2_DEVICE_FLOW DROP CONSTRAINT USER_CODE");
         ps.execute();
