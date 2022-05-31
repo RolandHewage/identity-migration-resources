@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.is.migration.service.v5120.dao;
+package org.wso2.carbon.is.migration.service.v600.dao;
 
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;

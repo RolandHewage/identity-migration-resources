@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.is.migration.service.v5120.migrator;
+package org.wso2.carbon.is.migration.service.v600.migrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

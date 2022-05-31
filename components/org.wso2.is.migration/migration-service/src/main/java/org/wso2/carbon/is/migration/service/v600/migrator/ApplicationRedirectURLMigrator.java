@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.is.migration.service.v5120.migrator;
+package org.wso2.carbon.is.migration.service.v600.migrator;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +32,7 @@ import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.is.migration.service.Migrator;
-import org.wso2.carbon.is.migration.service.v5120.dao.ApplicationDAO;
+import org.wso2.carbon.is.migration.service.v600.dao.ApplicationDAO;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.ReportUtil;
 import org.wso2.carbon.is.migration.util.Schema;

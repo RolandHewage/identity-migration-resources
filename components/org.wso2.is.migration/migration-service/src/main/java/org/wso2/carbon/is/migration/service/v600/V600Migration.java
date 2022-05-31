@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.wso2.carbon.is.migration.service.v5120;
+package org.wso2.carbon.is.migration.service.v600;
 
 import org.wso2.carbon.is.migration.VersionMigration;
 
 /**
  * Version Migration class.
  */
-public class V5120Migration extends VersionMigration {
+public class V600Migration extends VersionMigration {
 
     @Override
     public String getPreviousVersion() {
@@ -31,6 +31,6 @@ public class V5120Migration extends VersionMigration {
     @Override
     public String getCurrentVersion() {
 
-        return "5.12.0";
+        return "6.0.0";
     }
 }
