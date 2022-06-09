@@ -59,9 +59,9 @@ import static org.wso2.carbon.identity.application.authentication.framework.util
 import static org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants.DEFAULT_SP_CONFIG;
 import static org.wso2.carbon.is.migration.util.Constant.REPORT_PATH;
 
-public class ApplicationRedirectURLMigrator extends Migrator {
+public class ApplicationAccessURLMigrator extends Migrator {
 
-    private static final Logger log = LoggerFactory.getLogger(ApplicationRedirectURLMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationAccessURLMigrator.class);
     private static final String SP_REDIRECT_URL_RESOURCE_PATH = "/identity/config/relyingPartyRedirectUrls";
     private ReportUtil reportUtil;
 
