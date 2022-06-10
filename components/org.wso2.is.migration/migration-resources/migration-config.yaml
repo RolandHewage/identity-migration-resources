@@ -475,7 +475,7 @@ versions:
    version: "6.0.0"
    migratorConfigs:
    -
-     name: "ApplicationRedirectURLMigrator"
+     name: "ApplicationAccessURLMigrator"
      order: 1
      parameters:
        location: "step1"
