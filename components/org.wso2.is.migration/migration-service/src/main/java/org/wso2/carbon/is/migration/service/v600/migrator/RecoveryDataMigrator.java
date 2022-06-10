@@ -98,6 +98,7 @@ public class RecoveryDataMigrator extends Migrator {
                     preparedStatement.executeUpdate();
                 } catch (SQLException e) {
                     JDBCPersistenceUtil.rollbackTransaction(connection);
+                    connection.setAutoCommit(autoCommitStatus);
                     throw new MigrationClientException("An error occurred while updating recovery data.", e);
                 }
             }
