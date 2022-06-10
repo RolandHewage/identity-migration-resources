@@ -478,8 +478,6 @@ versions:
      name: "ApplicationAccessURLMigrator"
      order: 1
      parameters:
-       location: "step1"
-       schema: "identity"
        # Absolute path for the dry report. This is required in the dry run mode.
        # reportPath:
 
@@ -559,3 +557,9 @@ versions:
        schema: "identity"
        # Absolute path for the dry report. This is required in the dry run mode.
        # reportPath:
+
+   - name: "SystemAppRedirectURLMigrator"
+     order: 15
+     parameters:
+        consoleRedirectUrl: "regexp=(https://localhost:9443/console|https://localhost:9443/t/(.*)/console)"
+        myaccountRedirectUrl: "regexp=(https://localhost:9443/myaccount|https://localhost:9443/t/(.*)/myaccount)"
