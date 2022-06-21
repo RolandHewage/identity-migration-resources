@@ -36,6 +36,8 @@ public class ISMigrationServiceDataHolder {
 
     private static ServerConfigurationService serverConfigurationService;
 
+    private static CryptoService cryptoService;
+
     //Tenant registry loader which is used to load tenant registry
     private static TenantRegistryLoader tenantRegLoader;
 
