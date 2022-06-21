@@ -20,6 +20,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.crypto.api.CryptoService;
 import org.wso2.carbon.identity.core.migrate.MigrationClient;
 import org.wso2.carbon.is.migration.MigrationClientImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -34,6 +35,8 @@ import org.wso2.carbon.user.core.service.RealmService;
  * cardinality="1..1" policy="dynamic"  bind="setServerConfigurationService" unbind="unsetServerConfigurationService"
  * @scr.reference name="registry.service" interface="org.wso2.carbon.registry.core.service.RegistryService"
  * cardinality="1..1" policy="dynamic"  bind="setRegistryService" unbind="unsetRegistryService"
+ * @scr.reference name="crypto.service" interface="org.wso2.carbon.crypto.api.CryptoService"
+ * cardinality="1..1" policy="dynamic"  bind="setCryptoService" unbind="unsetCryptoService"
  */
 public class ISMigrationServiceComponent {
 
@@ -104,6 +107,16 @@ public class ISMigrationServiceComponent {
     protected void unsetServerConfigurationService(ServerConfigurationService serverConfigurationService) {
 
         ISMigrationServiceDataHolder.setServerConfigurationService(null);
+    }
+
+    protected void setCryptoService(CryptoService cryptoService) {
+
+        ISMigrationServiceDataHolder.setCryptoService(cryptoService);
+    }
+
+    protected void unsetCryptoService(CryptoService cryptoService) {
+
+        ISMigrationServiceDataHolder.setCryptoService(null);
     }
 
     protected void setRegistryService(RegistryService registryService) {
