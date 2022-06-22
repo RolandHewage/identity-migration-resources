@@ -80,14 +80,16 @@ public class CryptoUtil {
      * after the server is properly initialized, or else, use the overloaded method,
      * CryptoUtil#getDefaultCryptoUtil(ServerConfigurationService).
      *
-     * @return
+     * @return CrytpoUtil instance.
      */
     public static CryptoUtil getDefaultCryptoUtil() {
+
         return getDefaultCryptoUtil(ISMigrationServiceDataHolder.getServerConfigurationService(),
                 lookupRegistryService());
     }
 
     public static RegistryService lookupRegistryService() {
+
         try {
             return ISMigrationServiceDataHolder.getRegistryService();
         } catch (Exception e) {
@@ -110,6 +112,7 @@ public class CryptoUtil {
     public synchronized static CryptoUtil getDefaultCryptoUtil(
             ServerConfigurationService serverConfigService,
             RegistryService registryService) {
+
         if (instance == null) {
             instance = new CryptoUtil(serverConfigService, registryService);
         }
@@ -118,6 +121,7 @@ public class CryptoUtil {
 
     private CryptoUtil(ServerConfigurationService serverConfigService,
                        RegistryService registryService) {
+
         this.serverConfigService = serverConfigService;
         this.registryService = registryService;
         this.keyAlias = this.serverConfigService.getFirstProperty("Security.KeyStore.KeyAlias");
@@ -160,7 +164,8 @@ public class CryptoUtil {
      * @throws CryptoException On error during encryption
      */
     public byte[] encrypt(byte[] plainTextBytes) throws CryptoException {
-        //encrypt with transformation configured in carbon.properties as self contained ciphertext
+
+        // Encrypt with transformation configured in carbon.properties as self-contained ciphertext
         return encrypt(plainTextBytes, System.getProperty(CIPHER_TRANSFORMATION_SYSTEM_PROPERTY), true);
     }
 
@@ -174,6 +179,7 @@ public class CryptoUtil {
      */
     public String encryptAndBase64Encode(byte[] plainText) throws
             CryptoException {
+
         return Base64.encode(encrypt(plainText));
     }
 
@@ -199,7 +205,8 @@ public class CryptoUtil {
             } else {
                 Cipher keyStoreCipher;
                 KeyStoreManager keyMan = KeyStoreManager
-                        .getInstance(MultitenantConstants.SUPER_TENANT_ID, this.getServerConfigService(), this.getRegistryService());
+                        .getInstance(MultitenantConstants.SUPER_TENANT_ID, this.getServerConfigService(),
+                                this.getRegistryService());
                 KeyStore keyStore = keyMan.getPrimaryKeyStore();
                 PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyAlias, keyPass.toCharArray());
                 if (cipherTransformation != null) {
@@ -229,7 +236,8 @@ public class CryptoUtil {
      * Base64 decode the given value and decrypt using the WSO2 WSAS key.
      *
      * IMPORTANT: Since this decrypt method is provided to force required transformation, this will not decrypt
-     * self-contained ciphertexts. To decrypt self-contained ciphertext use base64DecodeAndDecrypt(byte[] cipherTextBytes)
+     * self-contained ciphertexts. To decrypt self-contained ciphertext use base64DecodeAndDecrypt(byte[]
+     * cipherTextBytes)
      *
      * @param base64CipherText Base64 encoded cipher text
      * @param transformation The transformation used for encryption
@@ -238,6 +246,7 @@ public class CryptoUtil {
      */
     public byte[] base64DecodeAndDecrypt(String base64CipherText, String transformation) throws
             CryptoException {
+
         return decrypt(Base64.decode(base64CipherText), transformation);
     }
 
@@ -248,6 +257,7 @@ public class CryptoUtil {
      * @return true if provided cipher is encripted using custom transformation, false if it is RSA
      */
     public boolean isSelfContainedCipherText(byte[] cipherBytes) {
+
         return cipherTextToCipherHolder(cipherBytes) != null;
     }
 
@@ -259,6 +269,7 @@ public class CryptoUtil {
      */
     public boolean base64DecodeAndIsSelfContainedCipherText(String base64CipherText) throws
             CryptoException {
+
         return isSelfContainedCipherText(Base64.decode(base64CipherText));
     }
 
@@ -269,8 +280,8 @@ public class CryptoUtil {
      * @param transformation transformation used to encrypt ciphertext
      * @param certificate certificate that holds relevant keys used to encrypt
      * @return setf-contained ciphertext
-     * @throws CertificateEncodingException
-     * @throws NoSuchAlgorithmException
+     * @throws CertificateEncodingException Error when encoding certificates
+     * @throws NoSuchAlgorithmException Error if invalid algorithm provided
      */
     public byte[] createSelfContainedCiphertext(byte[] originalCipher, String transformation, Certificate certificate)
             throws CertificateEncodingException, NoSuchAlgorithmException {
@@ -307,7 +318,7 @@ public class CryptoUtil {
 
     /**
      * Returns true if the Crypto Service is enabled in the configuration file.
-     * @return
+     * @return True if the Crypto Service is enabled.
      */
     private boolean isCryptoServiceEnabled() {
 
@@ -319,15 +330,16 @@ public class CryptoUtil {
      *
      * Encrypts data, directly using Carbon KeyStoreManager
      *
-     *
-     * @param plainTextBytes
-     * @param cipherTransformation
-     * @param returnSelfContainedCipherText
-     * @return
-     * @throws CryptoException
+     * @param plainTextBytes The plaintext bytes to be encrypted.
+     * @param cipherTransformation The transformation that need to decrypt.
+     * @param returnSelfContainedCipherText Create self-contained cipher text if true, return simple encrypted
+     *                                      ciphertext otherwise.
+     * @return Byte array on the encrypted text.
+     * @throws CryptoException Error when encrypting.
      */
     private byte[] encryptUsingOldImplementation(byte[] plainTextBytes, String cipherTransformation,
                                                  boolean returnSelfContainedCipherText) throws CryptoException {
+
         byte[] encryptedKey;
         SymmetricEncryption encryption = SymmetricEncryption.getInstance();
 
@@ -381,11 +393,12 @@ public class CryptoUtil {
      *
      * Encrypts data using the Carbon Crypto Service
      *
-     * @param plainTextBytes
-     * @param cipherTransformation
-     * @param returnSelfContainedCipherText
-     * @return
-     * @throws CryptoException
+     * @param plainTextBytes The plaintext bytes to be encrypted.
+     * @param cipherTransformation The transformation that need to decrypt.
+     * @param returnSelfContainedCipherText Create self-contained cipher text if true, return simple encrypted
+     *                                      ciphertext otherwise.
+     * @return Byte array on the encrypted text.
+     * @throws CryptoException Error when encrypting.
      */
     private byte[] encryptUsingCryptoService(byte[] plainTextBytes, String cipherTransformation,
                                              boolean returnSelfContainedCipherText) throws CryptoException {
@@ -446,7 +459,7 @@ public class CryptoUtil {
         messageDigest.update(certificate.getEncoded());
         byte[] digestByteArray = messageDigest.digest();
 
-        // convert digest in form of byte array to hex format
+        // Convert digest in form of byte array to hex format.
         StringBuffer strBuffer = new StringBuffer();
 
         for (int i = 0; i < digestByteArray.length; i++) {
