@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.identity.migration.resources</groupId>
     <artifactId>identity-migration-resources</artifactId>
-    <version>1.0.170-SNAPSHOT</version>
+    <version>1.0.189-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 IS Migration Client</name>
     <description>Unified migration client of WSO2 IS</description>
@@ -225,11 +225,11 @@
     <properties>
 
         <!--Carbon Identity Framework Version-->
-        <carbon.identity.framework.version>5.18.195</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.20.424</carbon.identity.framework.version>
         <carbon.identity.framework.version.range>[5.11.0, 6.0.0]</carbon.identity.framework.version.range>
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
         <identity.inbound.auth.oauth.version>6.4.111</identity.inbound.auth.oauth.version>
-        <carbon.kernel.version>4.6.1</carbon.kernel.version>
+        <carbon.kernel.version>4.7.0-m3</carbon.kernel.version>
         <version.commons.logging>1.1.1</version.commons.logging>
         <axiom.impl.version>1.2.12</axiom.impl.version>
         <axiom.version>1.2.11-wso2v6</axiom.version>
