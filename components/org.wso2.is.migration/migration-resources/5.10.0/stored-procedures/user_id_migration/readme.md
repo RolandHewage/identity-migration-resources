@@ -1,5 +1,6 @@
-1. Execute the relevent stored procedure "<migration-resources>/5.10.0/stored-procedures/user_id_migration/<db_type>.sql" to migrate the userids mannually. (This is required only if the "UserIDMigrator" step takes too long via the migration client.)
-2. Comment out the UserIDMigrator section as shown below in the <identity-migration-resources>/components/org.wso2.is.migration/migration-resources/migration-config.yaml file
+The following steps are required only if the "UserIDMigrator" step takes too long via the migration client.
+
+1. Comment out the UserIDMigrator section as shown below in the <identity-migration-resources>/components/org.wso2.is.migration/migration-resources/migration-config.yaml file
 ```
 version: "5.10.0"
    migratorConfigs:
@@ -32,4 +33,5 @@ version: "5.10.0"
  -
    version: "5.11.0"
 ```
-3. Then run the migration
+2. Then run the migration
+3. Execute the relevent stored procedure "<migration-resources>/5.10.0/stored-procedures/user_id_migration/<db_type>.sql" to migrate the userids mannually.
