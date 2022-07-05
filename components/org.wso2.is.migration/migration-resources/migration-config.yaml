@@ -471,7 +471,7 @@ versions:
      parameters:
        location: "step6"
        schema: "um"
-   - name: "SCIMGroupApplicationRoleMigrator"
+   - name: "SCIMGroupRoleMigrator"
      order: 18
  -
    version: "6.0.0"
