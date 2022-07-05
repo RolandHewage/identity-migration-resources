@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.is.migration.service.v5110.migrator;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -38,11 +39,11 @@ import java.util.stream.Collectors;
 import static org.wso2.carbon.is.migration.util.Constant.SUPER_TENANT_ID;
 
 /**
- * Migrator for adding SCIM group data for Application Roles.
+ * Migrator for adding SCIM group data for Hybrid Roles.
  */
-public class SCIMGroupApplicationRoleMigrator extends Migrator {
+public class SCIMGroupRoleMigrator extends Migrator {
 
-    private static final Logger log = LoggerFactory.getLogger(SCIMGroupApplicationRoleMigrator.class);
+    private static final Logger log = LoggerFactory.getLogger(SCIMGroupRoleMigrator.class);
 
     @Override
     public void dryRun() throws MigrationClientException {
@@ -53,21 +54,21 @@ public class SCIMGroupApplicationRoleMigrator extends Migrator {
     @Override
     public void migrate() throws MigrationClientException {
 
-        log.info("Starting to migrate SCIM group data for Application Roles.");
+        log.info("Starting to migrate SCIM group data for Roles.");
         migrateSuperTenantRoles();
         migrateTenantRoles();
-        log.info("Successfully migrated SCIM group data for Application Roles.");
+        log.info("Successfully migrated SCIM group data for Roles.");
     }
 
     private void migrateSuperTenantRoles() throws MigrationClientException {
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Migrating SCIM group data of Application Roles of the Super Tenant.");
+                log.debug("Migrating SCIM group data of Roles of the Super Tenant.");
             }
             addSCIMGroupData(SUPER_TENANT_ID);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new MigrationClientException("Error while migrating Application Roles SCIM Group data.");
+            throw new MigrationClientException("Error while migrating Roles SCIM Group data.");
         }
     }
 
@@ -79,21 +80,21 @@ public class SCIMGroupApplicationRoleMigrator extends Migrator {
 
             for (Tenant tenant : tenantList) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Migrating SCIM group data of Application Roles of the Tenant: " + tenant.getDomain());
+                    log.debug("Migrating SCIM group data of Roles of the Tenant: " + tenant.getDomain());
                 }
                 addSCIMGroupData(tenant.getId());
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            throw new MigrationClientException("Error while migrating Application Roles SCIM Group data.");
+            throw new MigrationClientException("Error while migrating Roles SCIM Group data.");
         }
     }
 
-    private List<String> getApplicationRolesListOfTenant(int tenantID) throws MigrationClientException {
+    private List<String> getRolesListOfTenant(int tenantID) throws MigrationClientException {
 
         try (Connection connection = getDataSource(Schema.UM.getName()).getConnection()) {
             List<String> fullRoleNamesListOfTenant = RoleDAO.getInstance()
                     .getRoleNamesListOfTenant(connection, tenantID);
-            return fullRoleNamesListOfTenant.stream().filter(roleName -> roleName.startsWith("Application"))
+            return fullRoleNamesListOfTenant.stream().filter(roleName -> !StringUtils.equals(roleName, "everyone"))
                     .collect(Collectors.toList());
         } catch (SQLException e) {
             throw new MigrationClientException("Error retrieving roles list of the tenant.", e);
@@ -104,14 +105,14 @@ public class SCIMGroupApplicationRoleMigrator extends Migrator {
             throws MigrationClientException, UserStoreException {
 
         SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(tenantID);
-        List<String> applicationRolesList = getApplicationRolesListOfTenant(tenantID);
+        List<String> rolesList = getRolesListOfTenant(tenantID);
 
-        for (String applicationRole : applicationRolesList) {
+        for (String role : rolesList) {
             try {
-                if (!scimGroupHandler.isGroupExisting(applicationRole)) {
+                if (!scimGroupHandler.isGroupExisting(role)) {
                     // If no attributes - i.e: group added via mgt console, not via SCIM endpoint.
                     // Add META.
-                    scimGroupHandler.addMandatoryAttributes(applicationRole);
+                    scimGroupHandler.addMandatoryAttributes(role);
                 }
             } catch (IdentitySCIMException e) {
                 throw new UserStoreException("Error retrieving group information from SCIM Tables.", e);
