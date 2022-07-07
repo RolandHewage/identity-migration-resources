@@ -55,7 +55,7 @@ public class RoleDAO {
 
     public static final String RETRIEVE_UM_DOMAIN_ID = "SELECT UM_DOMAIN_ID FROM UM_DOMAIN WHERE UM_DOMAIN_NAME=?";
 
-    public static final String GET_ROLES_BY_TENANT = "SELECT UM_ROLE_NAME FROM UM_HYBRID_ROLE WHERE UM_TENANT_ID = ?;";
+    public static final String GET_ROLES_BY_TENANT = "SELECT UM_ROLE_NAME FROM UM_HYBRID_ROLE WHERE UM_TENANT_ID = ?";
 
     public static final String UM_ROLE_NAME = "UM_ROLE_NAME";
     public static final String UM_TENANT_ID = "UM_TENANT_ID";
