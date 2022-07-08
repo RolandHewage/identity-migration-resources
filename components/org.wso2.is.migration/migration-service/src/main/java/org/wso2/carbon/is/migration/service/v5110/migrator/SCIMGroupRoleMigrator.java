@@ -33,10 +33,12 @@ import org.wso2.carbon.user.core.UserStoreException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.wso2.carbon.is.migration.util.Constant.SUPER_TENANT_ID;
+import static org.wso2.carbon.user.core.UserCoreConstants.DOMAIN_SEPARATOR;
+import static org.wso2.carbon.user.core.UserCoreConstants.INTERNAL_DOMAIN;
 
 /**
  * Migrator for adding SCIM group data for Hybrid Roles.
@@ -94,8 +96,18 @@ public class SCIMGroupRoleMigrator extends Migrator {
         try (Connection connection = getDataSource(Schema.UM.getName()).getConnection()) {
             List<String> fullRoleNamesListOfTenant = RoleDAO.getInstance()
                     .getRoleNamesListOfTenant(connection, tenantID);
-            return fullRoleNamesListOfTenant.stream().filter(roleName -> !StringUtils.equals(roleName, "everyone"))
-                    .collect(Collectors.toList());
+            List<String> filteredRolesWithDomain = new ArrayList<>();
+            for (String roleName : fullRoleNamesListOfTenant) {
+                if (StringUtils.equals(roleName, "everyone")) {
+                    continue;
+                }
+                if (!roleName.contains(DOMAIN_SEPARATOR)) {
+                    // Append "Internal" domain to roles without domains.
+                    roleName = INTERNAL_DOMAIN + DOMAIN_SEPARATOR + roleName;
+                }
+                filteredRolesWithDomain.add(roleName);
+            }
+            return filteredRolesWithDomain;
         } catch (SQLException e) {
             throw new MigrationClientException("Error retrieving roles list of the tenant.", e);
         }
