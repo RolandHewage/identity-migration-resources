@@ -57,6 +57,13 @@
                 <AttributeID>websiteUrl</AttributeID>
                 <Description>Website URL</Description>
             </Claim>
+            <Claim>
+                <ClaimURI>http://wso2.org/claims/metadata.version</ClaimURI>
+                <DisplayName>User Metadata - Version</DisplayName>
+                <AttributeID>meta.version</AttributeID>
+                <Description>User Account Metadata - Version</Description>
+                <ReadOnly />
+            </Claim>
         </Dialect>
         <Dialect dialectURI="urn:ietf:params:scim:schemas:core:2.0:User">
             <Claim>
