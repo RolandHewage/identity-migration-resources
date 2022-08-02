@@ -21,6 +21,7 @@ package org.wso2.carbon.is.migration.service.v5110.migrator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.scim2.common.exceptions.IdentitySCIMException;
 import org.wso2.carbon.identity.scim2.common.group.SCIMGroupHandler;
@@ -28,6 +29,7 @@ import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.service.Migrator;
 import org.wso2.carbon.is.migration.service.v5110.dao.RoleDAO;
 import org.wso2.carbon.is.migration.util.Schema;
+import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.core.UserStoreException;
 
@@ -81,10 +83,15 @@ public class SCIMGroupRoleMigrator extends Migrator {
                     .getTenantManager().getAllTenants();
 
             for (Tenant tenant : tenantList) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Migrating SCIM group data of Roles of the Tenant: " + tenant.getDomain());
+                try {
+                    Utility.startTenantFlow(tenant);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Migrating SCIM group data of Roles of the Tenant: " + tenant.getDomain());
+                    }
+                    addSCIMGroupData(tenant.getId());
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
-                addSCIMGroupData(tenant.getId());
             }
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             throw new MigrationClientException("Error while migrating Roles SCIM Group data.");

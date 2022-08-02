@@ -17,6 +17,7 @@ package org.wso2.carbon.is.migration.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.is.migration.config.Config;
@@ -312,5 +313,18 @@ public class Utility {
             // Major versions are equal. Compare minor versions.
             return Integer.compare(version1MinorVersion, version2MinorVersion);
         }
+    }
+
+    /**
+     * Start tenant flow.
+     *
+     * @param tenant Tenant object.
+     */
+    public static void startTenantFlow(Tenant tenant) {
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        carbonContext.setTenantId(tenant.getId());
+        carbonContext.setTenantDomain(tenant.getDomain());
     }
 }
