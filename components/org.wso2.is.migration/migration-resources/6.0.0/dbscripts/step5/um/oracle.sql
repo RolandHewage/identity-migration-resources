@@ -1,15 +1,15 @@
 DECLARE
-	con_name0    VARCHAR2(100);
-	con_name1    VARCHAR2(100);
-	command      VARCHAR2(200);
-	databasename VARCHAR2(100);
+    con_name0    VARCHAR2(100);
+    con_name1    VARCHAR2(100);
+    command      VARCHAR2(200);
+    databasename VARCHAR2(100);
 
 BEGIN
     SELECT sys_context('userenv', 'current_schema')
-  	INTO databasename
-  	FROM dual;
+    INTO databasename
+    FROM dual;
 
-  	BEGIN
+    BEGIN
   	    SELECT a.constraint_name
   	    INTO con_name0
 		FROM all_cons_columns a
@@ -38,7 +38,7 @@ BEGIN
 
     	EXCEPTION WHEN NO_DATA_FOUND THEN
     	    EXECUTE IMMEDIATE 'ALTER TABLE UM_USER ADD UNIQUE(UM_USER_NAME,UM_TENANT_ID)';
-  	END;
+    END;
  END;
  /
 

@@ -1,16 +1,16 @@
 DECLARE
-	con_name0    VARCHAR2(100);
-	con_name1    VARCHAR2(100);
-	command      VARCHAR2(200);
-	databasename VARCHAR2(100);
+    con_name0    VARCHAR2(100);
+    con_name1    VARCHAR2(100);
+    command      VARCHAR2(200);
+    databasename VARCHAR2(100);
 
 BEGIN
     SELECT sys_context('userenv', 'current_schema')
-  	INTO databasename
-  	FROM dual;
+    INTO databasename
+    FROM dual;
 
-  	BEGIN
-  	    SELECT a.constraint_name
+    BEGIN
+        SELECT a.constraint_name
     	INTO con_name0
 		FROM all_cons_columns a
 		JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
@@ -27,8 +27,8 @@ BEGIN
     END;
 
     BEGIN
- 	    SELECT a.constraint_name
-    	INTO con_name1
+        SELECT a.constraint_name
+        INTO con_name1
 	    FROM all_cons_columns a
 	    JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
 	    WHERE c.constraint_type = 'U' AND a.table_name = 'UM_USER' AND UPPER(a.OWNER) = UPPER(databasename) AND a.column_name='UM_USER_NAME';
