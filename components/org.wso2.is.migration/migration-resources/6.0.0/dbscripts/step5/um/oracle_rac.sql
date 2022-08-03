@@ -5,7 +5,7 @@ DECLARE
 	databasename VARCHAR2(100);
 
 BEGIN
-	SELECT sys_context('userenv', 'current_schema')
+    SELECT sys_context('userenv', 'current_schema')
   	INTO databasename
   	FROM dual;
 
@@ -26,7 +26,7 @@ BEGIN
     	    dbms_output.Put_line('Unique key not found');
     END;
 
- 	BEGIN
+    BEGIN
  	    SELECT a.constraint_name
     	INTO con_name1
 	    FROM all_cons_columns a
@@ -39,7 +39,7 @@ BEGIN
 
     	EXCEPTION WHEN NO_DATA_FOUND THEN
     	    EXECUTE IMMEDIATE 'ALTER TABLE UM_USER ADD UNIQUE(UM_USER_NAME,UM_TENANT_ID)';
-  	END;
+    END;
  END;
  /
 
