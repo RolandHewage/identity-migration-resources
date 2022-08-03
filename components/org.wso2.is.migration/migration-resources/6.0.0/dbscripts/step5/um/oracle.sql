@@ -5,9 +5,7 @@ DECLARE
 	databasename VARCHAR2(100);
 
 BEGIN
-	SELECT sys_context('userenv', 'current_schema')
-	INTO databasename
-	FROM dual;
+	SELECT sys_context('userenv', 'current_schema') INTO databasename FROM dual;
 	
 	BEGIN
 		SELECT a.constraint_name
@@ -23,7 +21,7 @@ BEGIN
 		END IF;
 		EXCEPTION WHEN NO_DATA_FOUND THEN
 			dbms_output.Put_line('Unique key not found');
-    END;
+	END;
 	
 	BEGIN
 		SELECT a.constraint_name
