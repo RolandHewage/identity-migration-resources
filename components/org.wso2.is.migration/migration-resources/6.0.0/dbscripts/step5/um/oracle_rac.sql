@@ -10,10 +10,10 @@ BEGIN
   	FROM dual;
 
   	BEGIN
-		SELECT a.constraint_name
+  	    SELECT a.constraint_name
     	INTO con_name0
 		FROM all_cons_columns a
-			JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
+		JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
 		WHERE c.constraint_type = 'U' AND a.table_name = 'UM_USER' AND UPPER(a.OWNER) = UPPER(databasename) AND a.column_name='UM_USER_ID';
 
   		IF con_name0 IS NOT NULL THEN
@@ -21,29 +21,24 @@ BEGIN
       		dbms_output.Put_line(command);
      		EXECUTE IMMEDIATE command;
     	END IF;
-  		EXCEPTION
-    	WHEN NO_DATA_FOUND
-    	THEN
-    	dbms_output.Put_line('Unique key not found');
+
+    	EXCEPTION WHEN NO_DATA_FOUND THEN
+    	    dbms_output.Put_line('Unique key not found');
     END;
 
  	BEGIN
-  		SELECT a.constraint_name
-    		INTO con_name1
-	    	FROM all_cons_columns a
-	      		JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
-	    	WHERE
-	      	c.constraint_type = 'U' AND a.table_name = 'UM_USER' AND UPPER(a.OWNER) = UPPER(databasename)
-	      	AND a.column_name='UM_USER_NAME';
+ 	    SELECT a.constraint_name
+    	INTO con_name1
+	    FROM all_cons_columns a
+	    JOIN all_constraints c ON a.owner = c.owner AND a.constraint_name = c.constraint_name
+	    WHERE c.constraint_type = 'U' AND a.table_name = 'UM_USER' AND UPPER(a.OWNER) = UPPER(databasename) AND a.column_name='UM_USER_NAME';
 
 	    IF TRIM(con_name1) IS NOT NULL THEN
       		dbms_output.Put_line('Unique key (UM_USER_NAME,UM_TENANT_ID) is already exists');
     	END IF;
 
-    	EXCEPTION
-    	WHEN NO_DATA_FOUND
-    	THEN
-    	EXECUTE IMMEDIATE 'ALTER TABLE UM_USER ADD UNIQUE(UM_USER_NAME,UM_TENANT_ID)';
+    	EXCEPTION WHEN NO_DATA_FOUND THEN
+    	    EXECUTE IMMEDIATE 'ALTER TABLE UM_USER ADD UNIQUE(UM_USER_NAME,UM_TENANT_ID)';
   	END;
  END;
  /
