@@ -1,6 +1,6 @@
 DROP ALIAS IF EXISTS ALTER_UM_USER;
 
-CREATE ALIAS ALTER_UM_USER AS $$ void alterUmUser(final Connection conn) throws SQLException {
+CREATE ALIAS ALTER_UM_USER AS ' void alterUmUser(final Connection conn) throws SQLException {
     String const_name = "";
     PreparedStatement ps = conn.prepareStatement("SELECT tc.CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME WHERE tc.TABLE_NAME ='UM_USER' AND tc.CONSTRAINT_TYPE = 'UNIQUE' AND kcu.COLUMN_NAME ='UM_USER_ID'");
     ResultSet results =  ps.executeQuery();
