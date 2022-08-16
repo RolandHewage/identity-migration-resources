@@ -2,12 +2,18 @@ CREATE OR ALTER PROCEDURE change_primary_key @TableName NVARCHAR(30)
 AS
     begin
         DECLARE @PkConstraintName NVARCHAR(255);
+        DECLARE @DropPrimaryKeyQuery NVARCHAR(50);
+        DECLARE @AddPrimaryKeyQuery NVARCHAR(50);
+
         SELECT @PkConstraintName = NAME FROM SYSOBJECTS WHERE XTYPE = 'PK' AND PARENT_OBJ = OBJECT_ID(@TableName);
         IF @PkConstraintName IS NOT NULL
         begin
-            EXEC('ALTER TABLE ' + @TableName + ' DROP CONSTRAINT ' + @PkConstraintName);
+            SET @DropPrimaryKeyQuery = 'ALTER TABLE ' + @TableName + ' DROP CONSTRAINT ' + @PkConstraintName;
+            EXEC(@DropPrimaryKeyQuery);
         end
-        EXEC('ALTER TABLE ' + @TableName +  ' ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY');
+
+        SET @AddPrimaryKeyQuery = 'ALTER TABLE ' + @TableName +  ' ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY';
+        EXEC(@AddPrimaryKeyQuery);
     end
 
 EXEC change_primary_key @TableName = 'REG_RESOURCE_COMMENT';
