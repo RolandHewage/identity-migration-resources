@@ -2,8 +2,8 @@ CREATE OR ALTER PROCEDURE change_primary_key @TableName NVARCHAR(30)
 AS
     begin
         DECLARE @PkConstraintName NVARCHAR(255);
-        DECLARE @DropPrimaryKeyQuery NVARCHAR(50);
-        DECLARE @AddPrimaryKeyQuery NVARCHAR(50);
+        DECLARE @DropPrimaryKeyQuery NVARCHAR(255);
+        DECLARE @AddPrimaryKeyQuery NVARCHAR(255);
 
         SELECT @PkConstraintName = NAME FROM SYSOBJECTS WHERE XTYPE = 'PK' AND PARENT_OBJ = OBJECT_ID(@TableName);
         IF @PkConstraintName IS NOT NULL
