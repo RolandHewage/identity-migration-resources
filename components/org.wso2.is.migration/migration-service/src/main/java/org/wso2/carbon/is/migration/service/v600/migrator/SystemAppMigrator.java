@@ -106,7 +106,8 @@ public class SystemAppMigrator extends Migrator {
         log.info("System application redirect url migration complete.");
     }
 
-    private void updateAccessTokenBindingType(Connection connection, boolean autoCommitStatus) throws MigrationClientException {
+    private void updateAccessTokenBindingType(Connection connection, boolean autoCommitStatus)
+            throws MigrationClientException {
 
         log.info("Started migrating system application access token binding type.");
         String accessTokenBindingType = getMigratorConfig().getParameters().getProperty(ACCESS_TOKEN_BINDING_TYPE);
