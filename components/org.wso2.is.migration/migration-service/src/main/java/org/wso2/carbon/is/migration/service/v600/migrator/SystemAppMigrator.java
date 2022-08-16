@@ -77,6 +77,7 @@ public class SystemAppMigrator extends Migrator {
     }
 
     private void updateRedirectUrl(Connection connection, boolean autoCommitStatus) throws MigrationClientException {
+
         log.info("Started updating System application redirect URLs.");
         String consoleRedirectUrl = getMigratorConfig().getParameters().getProperty(CONSOLE_REDIRECT_URL);
         String myaccountRedirectUrl = getMigratorConfig().getParameters().getProperty(MYACCOUNT_REDIRECT_URL);
