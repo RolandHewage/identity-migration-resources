@@ -30,6 +30,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Migration implementation for updating the redirect URLs and access token binding type of System Applications.
+ */
 public class SystemAppMigrator extends Migrator {
 
     private static final Logger log = LoggerFactory.getLogger(SystemAppMigrator.class);
