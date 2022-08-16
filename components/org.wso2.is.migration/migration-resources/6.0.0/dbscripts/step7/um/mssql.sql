@@ -1,23 +1,21 @@
-CREATE OR ALTER PROCEDURE ChangePrimaryKey @TableName NVARCHAR(255)
+CREATE OR ALTER PROCEDURE change_primary_key @TableName NVARCHAR(30)
 AS
     begin
         DECLARE @PkConstraintName NVARCHAR(255);
         SELECT @PkConstraintName = NAME FROM SYSOBJECTS WHERE XTYPE = 'PK' AND PARENT_OBJ = OBJECT_ID(@TableName);
         IF @PkConstraintName IS NOT NULL
-		begin
+        begin
             EXEC('ALTER TABLE ' + @TableName + ' DROP CONSTRAINT ' + @PkConstraintName);
-		end
+        end
         EXEC('ALTER TABLE ' + @TableName +  ' ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY');
     end
 
-GO
+EXEC change_primary_key @TableName = 'REG_RESOURCE_COMMENT';
 
-EXEC ChangePrimaryKey @TableName = 'REG_RESOURCE_COMMENT';
+EXEC change_primary_key @TableName = 'REG_RESOURCE_RATING';
 
-EXEC ChangePrimaryKey @TableName = 'REG_RESOURCE_RATING';
+EXEC change_primary_key @TableName = 'REG_RESOURCE_TAG';
 
-EXEC ChangePrimaryKey @TableName = 'REG_RESOURCE_TAG';
+EXEC change_primary_key @TableName = 'REG_RESOURCE_PROPERTY';
 
-EXEC ChangePrimaryKey @TableName = 'REG_RESOURCE_PROPERTY';
-
-EXEC ChangePrimaryKey @TableName = 'UM_SHARED_USER_ROLE';
+EXEC change_primary_key @TableName = 'UM_SHARED_USER_ROLE';
