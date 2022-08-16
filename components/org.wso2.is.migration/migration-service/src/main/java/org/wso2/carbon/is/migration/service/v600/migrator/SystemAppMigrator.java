@@ -116,11 +116,10 @@ public class SystemAppMigrator extends Migrator {
                 if (StringUtils.isNotBlank(accessTokenBindingType)) {
                     preparedStatement.setString(1, accessTokenBindingType);
                     preparedStatement.setString(2, "tokenBindingType");
+
                     preparedStatement.setString(3, "CONSOLE");
                     preparedStatement.executeUpdate();
 
-                    preparedStatement.setString(1, accessTokenBindingType);
-                    preparedStatement.setString(2, "tokenBindingType");
                     preparedStatement.setString(3, "MY_ACCOUNT");
                     preparedStatement.executeUpdate();
                 }
