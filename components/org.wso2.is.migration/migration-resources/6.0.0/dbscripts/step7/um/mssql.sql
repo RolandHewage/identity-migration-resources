@@ -1,9 +1,27 @@
-ALTER TABLE REG_RESOURCE_COMMENT ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY;
+CREATE OR ALTER PROCEDURE change_primary_key @TableName NVARCHAR(30)
+AS
+    begin
+        DECLARE @PkConstraintName NVARCHAR(255);
+        DECLARE @DropPrimaryKeyQuery NVARCHAR(255);
+        DECLARE @AddPrimaryKeyQuery NVARCHAR(255);
 
-ALTER TABLE REG_RESOURCE_RATING ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY;
+        SELECT @PkConstraintName = NAME FROM SYSOBJECTS WHERE XTYPE = 'PK' AND PARENT_OBJ = OBJECT_ID(@TableName);
+        IF @PkConstraintName IS NOT NULL
+        begin
+            SET @DropPrimaryKeyQuery = 'ALTER TABLE ' + @TableName + ' DROP CONSTRAINT ' + @PkConstraintName;
+            EXEC(@DropPrimaryKeyQuery);
+        end
 
-ALTER TABLE REG_RESOURCE_TAG ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY;
+        SET @AddPrimaryKeyQuery = 'ALTER TABLE ' + @TableName +  ' ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY';
+        EXEC(@AddPrimaryKeyQuery);
+    end
 
-ALTER TABLE REG_RESOURCE_PROPERTY ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY;
+EXEC change_primary_key @TableName = 'REG_RESOURCE_COMMENT';
 
-ALTER TABLE UM_SHARED_USER_ROLE ADD ID INTEGER NOT NULL IDENTITY PRIMARY KEY;
+EXEC change_primary_key @TableName = 'REG_RESOURCE_RATING';
+
+EXEC change_primary_key @TableName = 'REG_RESOURCE_TAG';
+
+EXEC change_primary_key @TableName = 'REG_RESOURCE_PROPERTY';
+
+EXEC change_primary_key @TableName = 'UM_SHARED_USER_ROLE';
