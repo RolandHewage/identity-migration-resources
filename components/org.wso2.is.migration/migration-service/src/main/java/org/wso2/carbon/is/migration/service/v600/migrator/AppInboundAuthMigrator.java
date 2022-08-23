@@ -45,7 +45,7 @@ public class AppInboundAuthMigrator extends Migrator {
     private static final String GET_AUTH_DATA = "SELECT PROP_NAME FROM SP_INBOUND_AUTH " +
             "WHERE APP_ID = ? AND INBOUND_AUTH_TYPE = ?";
     private static final String DELETE_MULTIPLE_AUTH_ENTRIES =
-            "DELETE FROM SP_INBOUND_AUTH WHERE APP_ID = ? AND INBOUND_AUTH_TYPE = ? OR INBOUND_AUTH_TYPE = ?";
+            "DELETE FROM SP_INBOUND_AUTH WHERE APP_ID = ? AND (INBOUND_AUTH_TYPE = ? OR INBOUND_AUTH_TYPE = ?)";
     private static final String DELETE_AUTH_ENTRY = "DELETE from SP_INBOUND_AUTH WHERE APP_ID = ? AND " +
             "INBOUND_AUTH_TYPE = ?";
 
@@ -129,7 +129,7 @@ public class AppInboundAuthMigrator extends Migrator {
                                 try (PreparedStatement preparedStatement =
                                              connection.prepareStatement(DELETE_AUTH_ENTRY)) {
                                     preparedStatement.setInt(1, code);
-                                    preparedStatement.setString(2, OPENID);
+                                    preparedStatement.setString(2, PASSIVESTS);
                                     preparedStatement.executeUpdate();
                                 } catch (SQLException e) {
                                     JDBCPersistenceUtil.rollbackTransaction(connection);
