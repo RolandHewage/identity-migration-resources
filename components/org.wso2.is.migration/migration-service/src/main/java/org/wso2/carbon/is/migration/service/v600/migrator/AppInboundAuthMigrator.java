@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.is.migration.service.v600.migrator;
 
-import org.apache.commons.lang3.ObjectUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -27,12 +27,10 @@ import org.wso2.carbon.is.migration.service.v530.util.JDBCPersistenceUtil;
 import org.wso2.carbon.is.migration.util.Schema;
 
 import java.sql.*;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 /**
- * Migration implementation for migrating recovery data.
+ * Migration implementation for migrating app inbound auth data.
  */
 public class AppInboundAuthMigrator extends Migrator {
 
@@ -41,7 +39,10 @@ public class AppInboundAuthMigrator extends Migrator {
     private static final String OPENID = "openid";
     private static final String GET_APP_ID_COUNT =
             "SELECT APP_ID, COUNT(APP_ID) as count FROM SP_INBOUND_AUTH GROUP BY APP_ID HAVING COUNT(APP_ID) >= 2";
-    private static final String ERROR_DELETING_AUTH_DATA = "An error occurred while deleting auth data.";
+    private static final String ERROR_DELETING_AUTH_DATA =
+            "An error occurred while deleting service provider inbound auth data.";
+    private static final String ERROR_RETRIEVING_AUTH_DATA =
+            "An error occurred while retrieving service provider inbound auth data.";
     private static final String GET_AUTH_DATA = "SELECT PROP_NAME FROM SP_INBOUND_AUTH " +
             "WHERE APP_ID = ? AND INBOUND_AUTH_TYPE = ?";
     private static final String DELETE_MULTIPLE_AUTH_ENTRIES =
@@ -60,12 +61,14 @@ public class AppInboundAuthMigrator extends Migrator {
 
         log.info("Started migrating app inbound authentication data.");
         HashMap<Integer, Integer> appids = getAppIDCountFromSPInboundAuthTable();
-        deleteDuplicateData(appids);
+        deleteStaleInboundAuthEntries(appids);
         log.info("Inbound authentication data migration complete.");
     }
 
-    // Function to retrieve app ID's along with their corresponding count.
-    private HashMap<Integer, Integer>  getAppIDCountFromSPInboundAuthTable() throws MigrationClientException {
+    /**
+     * Function to retrieve app ID's along with their corresponding count.
+     */
+    private HashMap<Integer, Integer> getAppIDCountFromSPInboundAuthTable() throws MigrationClientException {
 
         log.info("Reading data from SP Auth table.");
         HashMap<Integer, Integer> appids = new HashMap<>();
@@ -80,71 +83,72 @@ public class AppInboundAuthMigrator extends Migrator {
             }
             return appids;
         } catch (SQLException e) {
-            throw new MigrationClientException("An error occurred while reading auth data.", e);
+            throw new MigrationClientException(ERROR_RETRIEVING_AUTH_DATA, e);
         }
     }
 
-    // Function that contains the logic to delete duplicate data entries
-    private void deleteDuplicateData(HashMap<Integer, Integer>  appids) throws MigrationClientException {
+    /**
+     * Function that contains the logic to delete stale inbound auth entries
+     */
+    private void deleteStaleInboundAuthEntries(HashMap<Integer, Integer> appids) throws MigrationClientException {
 
-        if (!appids.isEmpty()) {
-            log.info("Removing duplicate service provider entries.");
-        }
-        try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
-            boolean autoCommitStatus = connection.getAutoCommit();
-            connection.setAutoCommit(false);
-            for (Integer code : appids.keySet()) {
-                Integer count = appids.get(code);
-                if (count == 3){
-                    try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_MULTIPLE_AUTH_ENTRIES)) {
-                        preparedStatement.setInt(1, code);
-                        preparedStatement.setString(2,PASSIVESTS);
-                        preparedStatement.setString(3,OPENID);
-                        preparedStatement.executeUpdate();
-                    } catch (SQLException e) {
-                        JDBCPersistenceUtil.rollbackTransaction(connection);
-                        connection.setAutoCommit(autoCommitStatus);
-                        throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
-                    }
-                }
-                else if (count == 2) {
-                    try (PreparedStatement retrieveAuthData = connection.prepareStatement(GET_AUTH_DATA)) {
-                        retrieveAuthData.setInt(1,code);
-                        retrieveAuthData.setString(2,PASSIVESTS);
-                        ResultSet resultSet = retrieveAuthData.executeQuery();
-                        if (resultSet.next()) {
-                            String propName = resultSet.getString("PROP_NAME");
-                            if ("passiveSTSWReply".equalsIgnoreCase(propName)) {
+        if (appids.isEmpty()) {
+            log.info("There are no stale entries.");
+        } else {
+            log.info("Removing stale inbound auth entries.");
+            try (Connection connection = getDataSource(Schema.IDENTITY.getName()).getConnection()) {
+                boolean autoCommitStatus = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                for (Integer code : appids.keySet()) {
+                    Integer count = appids.get(code);
+                    if (count == 3) {
+                        try (PreparedStatement preparedStatement =
+                                     connection.prepareStatement(DELETE_MULTIPLE_AUTH_ENTRIES)) {
+                            preparedStatement.setInt(1, code);
+                            preparedStatement.setString(2, PASSIVESTS);
+                            preparedStatement.setString(3, OPENID);
+                            preparedStatement.executeUpdate();
+                        } catch (SQLException e) {
+                            JDBCPersistenceUtil.rollbackTransaction(connection);
+                            connection.setAutoCommit(autoCommitStatus);
+                            throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
+                        }
+                    } else if (count == 2) {
+                        try (PreparedStatement retrieveAuthData = connection.prepareStatement(GET_AUTH_DATA)) {
+                            retrieveAuthData.setInt(1, code);
+                            retrieveAuthData.setString(2, PASSIVESTS);
+                            ResultSet resultSet = retrieveAuthData.executeQuery();
+                            if (resultSet.next()) {
+                                String propName = resultSet.getString("PROP_NAME");
                                 try (PreparedStatement preparedStatement =
                                              connection.prepareStatement(DELETE_AUTH_ENTRY)) {
-                                    preparedStatement.setInt(1, code);
-                                    preparedStatement.setString(2, OPENID);
-                                    preparedStatement.executeUpdate();
-                                } catch (SQLException e) {
-                                    JDBCPersistenceUtil.rollbackTransaction(connection);
-                                    connection.setAutoCommit(autoCommitStatus);
-                                    throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
-                                }
-                            } else {
-                                try (PreparedStatement preparedStatement =
-                                             connection.prepareStatement(DELETE_AUTH_ENTRY)) {
-                                    preparedStatement.setInt(1, code);
-                                    preparedStatement.setString(2, PASSIVESTS);
-                                    preparedStatement.executeUpdate();
+                                    if ("passiveSTSWReply".equalsIgnoreCase(propName)) {
+                                        preparedStatement.setInt(1, code);
+                                        preparedStatement.setString(2, OPENID);
+                                        preparedStatement.executeUpdate();
+                                    } else {
+                                        preparedStatement.setInt(1, code);
+                                        preparedStatement.setString(2, PASSIVESTS);
+                                        preparedStatement.executeUpdate();
+                                    }
                                 } catch (SQLException e) {
                                     JDBCPersistenceUtil.rollbackTransaction(connection);
                                     connection.setAutoCommit(autoCommitStatus);
                                     throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
                                 }
                             }
+                        } catch (SQLException e) {
+                            JDBCPersistenceUtil.rollbackTransaction(connection);
+                            connection.setAutoCommit(autoCommitStatus);
+                            throw new MigrationClientException(ERROR_RETRIEVING_AUTH_DATA, e);
                         }
                     }
                 }
+                JDBCPersistenceUtil.commitTransaction(connection);
+                connection.setAutoCommit(autoCommitStatus);
+            } catch(SQLException e){
+                throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
             }
-            JDBCPersistenceUtil.commitTransaction(connection);
-            connection.setAutoCommit(autoCommitStatus);
-        } catch (SQLException e) {
-            throw new MigrationClientException(ERROR_DELETING_AUTH_DATA, e);
         }
     }
 }
