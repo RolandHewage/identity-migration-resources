@@ -110,6 +110,16 @@
         </Dialect>
         <Dialect dialectURI="http://wso2.org/oidc/claim">
             <Claim>
+                <ClaimURI>username</ClaimURI>
+                <DisplayName>Username</DisplayName>
+                <AttributeID>uid</AttributeID>
+                <Description>Username of the End-User</Description>
+                <Required />
+                <DisplayOrder>1</DisplayOrder>
+                <SupportedByDefault />
+                <MappedLocalClaim>http://wso2.org/claims/username</MappedLocalClaim>
+            </Claim>
+            <Claim>
                 <ClaimURI>groups</ClaimURI>
                 <DisplayName>User Groups</DisplayName>
                 <AttributeID>role</AttributeID>
