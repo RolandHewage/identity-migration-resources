@@ -74,7 +74,7 @@ public class ApplicationAccessURLMigrator extends Migrator {
 
         try {
             reportUtil = new ReportUtil(reportPath);
-            reportUtil.writeMessage("\n--- Summery of the report - Relying party Urls Migration ---\n");
+            reportUtil.writeMessage("\n--- Summary of the report - Relying party Urls Migration ---\n");
             reportUtil.writeMessage(
                     String.format("%40s | %40s | %40s | %40s", "Application ", "RelyingParty", "RedirectURL",
                             "Tenant Domain"));
