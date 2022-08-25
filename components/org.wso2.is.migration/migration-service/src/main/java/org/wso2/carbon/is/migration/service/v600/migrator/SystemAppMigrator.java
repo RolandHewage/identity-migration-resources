@@ -28,7 +28,11 @@ import org.wso2.carbon.is.migration.util.Schema;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import static org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID;
 
 /**
  * Migration implementation for updating the redirect URLs and access token binding type of System Applications.
@@ -41,10 +45,18 @@ public class SystemAppMigrator extends Migrator {
             "UPDATE IDN_OAUTH_CONSUMER_APPS SET CALLBACK_URL = ? WHERE CONSUMER_KEY = ?";
     private static final String UPDATE_ACCESS_TOKEN_BINDING_TYPE =
             "UPDATE IDN_OIDC_PROPERTY SET PROPERTY_VALUE = ? WHERE PROPERTY_KEY = ? AND CONSUMER_KEY = ?";
+    private static final String GET_SP_CLAIMS = "SELECT SP.ID, SP_CLAIM FROM SP_APP AS SP JOIN SP_CLAIM_MAPPING AS SCM " +
+            "ON SP.ID = SCM.APP_ID WHERE SP.TENANT_ID = ? AND SP.APP_NAME = ?";
+    private static final String ADD_SP_CLAIM = "INSERT INTO SP_CLAIM_MAPPING (TENANT_ID, IDP_CLAIM, SP_CLAIM, APP_ID, " +
+            "IS_REQUESTED, IS_MANDATORY) VALUES (?,?,?,?,?,?)";
 
     private static final String CONSOLE_REDIRECT_URL = "consoleRedirectUrl";
     private static final String MYACCOUNT_REDIRECT_URL = "myaccountRedirectUrl";
     private static final String ACCESS_TOKEN_BINDING_TYPE = "accessTokenBindingType";
+
+    private static final String USERNAME_CLAIM_URI = "http://wso2.org/claims/username";
+    private static final String CONSOLE_APP_NAME = "Console";
+    private static final String MYACCOUNT_APP_NAME = "My Account";
 
     @Override
     public void dryRun() throws MigrationClientException {
@@ -67,6 +79,9 @@ public class SystemAppMigrator extends Migrator {
             log.info("Started updating System application.");
             updateRedirectUrl(connection, autoCommitStatus);
             updateAccessTokenBindingType(connection, autoCommitStatus);
+            updateSPClaim(CONSOLE_APP_NAME, USERNAME_CLAIM_URI, connection, autoCommitStatus);
+            updateSPClaim(MYACCOUNT_APP_NAME, USERNAME_CLAIM_URI, connection, autoCommitStatus);
+
             log.info("System application migration complete.");
 
             JDBCPersistenceUtil.commitTransaction(connection);
@@ -135,5 +150,62 @@ public class SystemAppMigrator extends Migrator {
                     " access token binding type", e);
         }
         log.info("System application access token binding type migration complete.");
+    }
+
+    private void updateSPClaim(String appName, String claim, Connection connection, boolean autoCommitStatus)
+            throws MigrationClientException {
+
+        int appId = -1;
+        ArrayList<String> spClaims = new ArrayList<>();
+
+        try {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(GET_SP_CLAIMS)) {
+                preparedStatement.setInt(1, SUPER_TENANT_ID);
+                preparedStatement.setString(2, appName);
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        appId = resultSet.getInt("ID");
+                        spClaims.add(resultSet.getString("SP_CLAIM"));
+                    }
+                }
+                if (appId > 0 && !spClaims.contains(claim)) {
+                    addUsernameClaimMapping(appId, claim, connection, autoCommitStatus);
+                } else if (appId == -1) {
+                    log.info(String.format("Application %s does not exist.", appName));
+                }
+            } catch (SQLException e) {
+                JDBCPersistenceUtil.rollbackTransaction(connection);
+                connection.setAutoCommit(autoCommitStatus);
+                throw new MigrationClientException("An error occurred while retrieving claims for application "
+                        + appName, e);
+            }
+        } catch (SQLException e) {
+            throw new MigrationClientException("An error occurred while retrieving claims for application "
+                    + appName, e);
+        }
+    }
+
+    private void addUsernameClaimMapping(int appId, String claim, Connection connection, boolean autoCommitStatus)
+            throws MigrationClientException {
+
+        try {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(ADD_SP_CLAIM)) {
+                    preparedStatement.setInt(1, SUPER_TENANT_ID);
+                    preparedStatement.setString(2, claim);
+                    preparedStatement.setString(3, claim);
+                    preparedStatement.setInt(4, appId);
+                    preparedStatement.setString(5, "1");
+                    preparedStatement.setString(6, "0");
+                    preparedStatement.executeUpdate();
+
+            } catch (SQLException e) {
+                JDBCPersistenceUtil.rollbackTransaction(connection);
+                connection.setAutoCommit(autoCommitStatus);
+                throw new MigrationClientException("An error occurred while updating claims of application.", e);
+            }
+        } catch (SQLException e) {
+            throw new MigrationClientException("An error occurred while updating claims of application.", e);
+        }
     }
 }
