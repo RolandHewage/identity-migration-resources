@@ -120,6 +120,16 @@
                 <MappedLocalClaim>http://wso2.org/claims/username</MappedLocalClaim>
             </Claim>
             <Claim>
+                <ClaimURI>sub</ClaimURI>
+                <DisplayName>Subject</DisplayName>
+                <AttributeID>scimId</AttributeID>
+                <Description>Identifier for the End-User at the Issuer</Description>
+                <Required />
+                <DisplayOrder>1</DisplayOrder>
+                <SupportedByDefault />
+                <MappedLocalClaim>http://wso2.org/claims/userid</MappedLocalClaim>
+            </Claim>
+            <Claim>
                 <ClaimURI>groups</ClaimURI>
                 <DisplayName>User Groups</DisplayName>
                 <AttributeID>role</AttributeID>
