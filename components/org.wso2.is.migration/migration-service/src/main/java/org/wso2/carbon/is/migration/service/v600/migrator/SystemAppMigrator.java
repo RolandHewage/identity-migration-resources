@@ -45,7 +45,7 @@ public class SystemAppMigrator extends Migrator {
             "UPDATE IDN_OAUTH_CONSUMER_APPS SET CALLBACK_URL = ? WHERE CONSUMER_KEY = ?";
     private static final String UPDATE_ACCESS_TOKEN_BINDING_TYPE =
             "UPDATE IDN_OIDC_PROPERTY SET PROPERTY_VALUE = ? WHERE PROPERTY_KEY = ? AND CONSUMER_KEY = ?";
-    private static final String GET_SP_CLAIMS = "SELECT SP.ID, SP_CLAIM FROM SP_APP AS SP JOIN SP_CLAIM_MAPPING AS SCM " +
+    private static final String GET_SP_CLAIMS = "SELECT SP.ID, SP_CLAIM FROM SP_APP SP JOIN SP_CLAIM_MAPPING SCM " +
             "ON SP.ID = SCM.APP_ID WHERE SP.TENANT_ID = ? AND SP.APP_NAME = ?";
     private static final String ADD_SP_CLAIM = "INSERT INTO SP_CLAIM_MAPPING (TENANT_ID, IDP_CLAIM, SP_CLAIM, APP_ID, " +
             "IS_REQUESTED, IS_MANDATORY) VALUES (?,?,?,?,?,?)";
