@@ -281,7 +281,7 @@ public class UserIDMigrator extends Migrator {
                     throw new MigrationClientException("Error occurred while running the dry run.", e);
                 }
             }
-            reportUtil.writeMessage("\n--- Summery of the report ---\n");
+            reportUtil.writeMessage("\n--- Summary of the report ---\n");
             reportUtil.writeMessage(String.format("Number of tenants: %d \nNumber of domains: %d \n" +
                     "Number of warnings: %d ", numberOfTenants, numberOfDomains, numberOfWarnings));
             reportUtil.commit();
