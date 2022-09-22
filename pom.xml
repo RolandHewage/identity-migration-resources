@@ -240,7 +240,7 @@
         <axiom.version>1.2.11-wso2v6</axiom.version>
         <identity.governance.version>1.3.52</identity.governance.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-        <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
+        <snakeyaml.version>1.31.0.wso2v1</snakeyaml.version>
         <json.version>3.0.0.wso2v1</json.version>
 
         <identity.apps.version>1.0.72</identity.apps.version>
@@ -251,7 +251,7 @@
 
         <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
         <osgi.service.component.imp.pkg.version.range>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
-        <snakeyaml.version.range>[1.16.0, 1.17.0)</snakeyaml.version.range>
+        <snakeyaml.version.range>[1.16.0, 1.33.0)</snakeyaml.version.range>
         <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
     </properties>
 </project>
