@@ -61,7 +61,10 @@ public class SchemaMigrator extends Migrator {
         try {
             conn = getDataSource().getConnection();
             migrateWithConnection(conn);
-            if (isSeparateRegDB() && Objects.equals(getSchema(), "reg")) {
+            /* To support migration of registry and primary JDBC userstores separate, i.e., the migration client
+                 should provide configurations for a Registry datasource and Primary JDBC userstore datasources
+                 and handle their migrations separately. */
+            if (isSeparateRegDB() && Objects.equals(getSchema(), "um")) {
                 conn = getDataSource("reg").getConnection();
                 migrateWithConnection(conn);
             }
