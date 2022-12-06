@@ -8,6 +8,7 @@ migrateVersion: "6.x.x"
 continueOnError: "false"
 batchUpdate: "true"
 ignoreForInactiveTenants: "true"
+isSeparateRegDB: "false"
 
 migrateTenantRange: "false"
 migrationStartingTenantID: "0"

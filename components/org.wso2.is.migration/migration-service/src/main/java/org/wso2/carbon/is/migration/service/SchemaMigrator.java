@@ -35,6 +35,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.Objects;
 import java.util.StringTokenizer;
 
 import static org.wso2.carbon.is.migration.util.Constant.IDENTITY_DB_SCRIPT;
@@ -57,10 +58,22 @@ public class SchemaMigrator extends Migrator {
     public void migrate() throws MigrationClientException {
 
         this.location = getMigratorConfig().getParameterValue(Constant.LOCATION);
+        try {
+            conn = getDataSource().getConnection();
+            migrateWithConnection(conn);
+            if (isSeparateRegDB() && Objects.equals(getSchema(), "reg")) {
+                conn = getDataSource("reg").getConnection();
+                migrateWithConnection(conn);
+            }
+        } catch (SQLException e) {
+            throw new MigrationClientException(e.getMessage(), e);
+        }
+    }
+
+    private void migrateWithConnection(Connection conn) throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Executing Identity Migration Scripts.");
         try {
-            conn = getDataSource().getConnection();
             conn.setAutoCommit(false);
             String databaseType = DatabaseCreator.getDatabaseType(this.conn);
             if ("mysql".equals(databaseType)) {
