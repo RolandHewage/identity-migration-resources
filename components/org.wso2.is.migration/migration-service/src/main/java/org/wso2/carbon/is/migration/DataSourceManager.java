@@ -16,8 +16,10 @@
 package org.wso2.carbon.is.migration;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.consent.mgt.core.util.ConsentConfigParser;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.migrate.MigrationClientException;
@@ -27,8 +29,12 @@ import org.wso2.carbon.is.migration.internal.ISMigrationServiceDataHolder;
 import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Schema;
 import org.wso2.carbon.user.core.util.DatabaseUtil;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -37,6 +43,9 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * Class for datasource management.
@@ -47,6 +56,7 @@ public class DataSourceManager {
     private static DataSourceManager dataSourceManager = null;
     private DataSource dataSource;
     private DataSource umDataSource;
+    private DataSource regDataSource;
     private DataSource consentDataSource;
 
     private DataSourceManager() {
@@ -55,6 +65,7 @@ public class DataSourceManager {
             initIdentityDataSource();
             initUMDataSource();
             initConsentDataSource();
+            initRegDataSource();
         } catch (MigrationClientException e) {
             log.error("Error while initializing datasource manager.", e);
         }
@@ -80,7 +91,7 @@ public class DataSourceManager {
         } else if (schema.getName().equals(Schema.UMA.getName())) {
             return dataSource;
         } else if (schema.getName().equals(Schema.REG.getName())) {
-            return dataSource;
+            return regDataSource;
         }
         throw new MigrationClientException("DataSource is not available for " + schema);
     }
@@ -96,7 +107,7 @@ public class DataSourceManager {
         } else if (schema.equals(Schema.UMA.getName())) {
             return dataSource;
         } else if (schema.equals(Schema.REG.getName())) {
-            return dataSource;
+            return regDataSource;
         }
         throw new MigrationClientException("DataSource is not available for " + schema);
     }
@@ -212,6 +223,55 @@ public class DataSourceManager {
         } catch (NamingException e) {
             String errorMsg = "Error when looking up the Identity Data Source.";
             throw new MigrationClientException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Initialize the registry datasource.
+     *
+     * @throws MigrationClientException
+     */
+    private void initRegDataSource() throws MigrationClientException {
+
+        try {
+            File registryConfigXml;
+            registryConfigXml = new File(CarbonUtils.getCarbonConfigDirPath(), "registry.xml");
+            InputStream inStream = null;
+            if (registryConfigXml.exists()) {
+                inStream = new FileInputStream(registryConfigXml);
+            }
+
+            if (inStream == null) {
+                throw new MigrationClientException("Error when initiating the Registry Data Source.");
+            }
+            StAXOMBuilder builder = new StAXOMBuilder(CarbonUtils.replaceSystemVariablesInXml(inStream));
+            OMElement configElement = builder.getDocumentElement();
+
+            Iterator dbConfigs = configElement.getChildrenWithName(new QName("dbConfig"));
+            // Read Database configurations
+            while (dbConfigs.hasNext()) {
+                OMElement dbConfig = (OMElement) dbConfigs.next();
+                String dbName = dbConfig.getAttributeValue(new QName("name"));
+                if (dbName.equals("govregistry")) {
+                    // or the datasource name can be hard-coded to WSO2REG_DB
+                    OMElement dataSource = dbConfig.getFirstChildWithName(new QName("dataSource"));
+                    if (dataSource != null) {
+                        String dataSourceName = dataSource.getText();
+                        Context ctx;
+                        try {
+                            ctx = new InitialContext();
+                            regDataSource = (DataSource) ctx.lookup(dataSourceName);
+                            break;
+                        } catch (NamingException e) {
+                            throw new MigrationClientException("Error when initiating Registry Data Source.", e);
+                        }
+                    }
+                }
+            }
+        } catch (CarbonException | XMLStreamException e) {
+            throw new MigrationClientException("Error when initiating the Registry Data Source.");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
