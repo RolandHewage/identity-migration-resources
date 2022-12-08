@@ -22,8 +22,7 @@ public enum Schema {
     IDENTITY("identity"),
     UM("um"),
     CONSENT("consent"),
-    UMA("uma"),
-    REG("reg");
+    UMA("uma");
 
     private String schemaName;
 

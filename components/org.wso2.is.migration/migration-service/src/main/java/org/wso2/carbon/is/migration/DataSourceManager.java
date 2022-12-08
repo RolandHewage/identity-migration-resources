@@ -45,7 +45,9 @@ import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Class for datasource management.
@@ -56,7 +58,7 @@ public class DataSourceManager {
     private static DataSourceManager dataSourceManager = null;
     private DataSource dataSource;
     private DataSource umDataSource;
-    private DataSource regDataSource;
+    private static Map<String, DataSource> regDataSources;
     private DataSource consentDataSource;
 
     private DataSourceManager() {
@@ -65,7 +67,7 @@ public class DataSourceManager {
             initIdentityDataSource();
             initUMDataSource();
             initConsentDataSource();
-            initRegDataSource();
+            initRegDataSources();
         } catch (MigrationClientException e) {
             log.error("Error while initializing datasource manager.", e);
         }
@@ -90,8 +92,6 @@ public class DataSourceManager {
             return consentDataSource;
         } else if (schema.getName().equals(Schema.UMA.getName())) {
             return dataSource;
-        } else if (schema.getName().equals(Schema.REG.getName())) {
-            return regDataSource;
         }
         throw new MigrationClientException("DataSource is not available for " + schema);
     }
@@ -106,10 +106,15 @@ public class DataSourceManager {
             return consentDataSource;
         } else if (schema.equals(Schema.UMA.getName())) {
             return dataSource;
-        } else if (schema.equals(Schema.REG.getName())) {
-            return regDataSource;
         }
         throw new MigrationClientException("DataSource is not available for " + schema);
+    }
+
+    /**
+     * Return registry datasources.
+     */
+    public Map<String, DataSource> getRegistryDataSources() throws MigrationClientException {
+        return regDataSources;
     }
 
     /**
@@ -231,9 +236,10 @@ public class DataSourceManager {
      *
      * @throws MigrationClientException
      */
-    private void initRegDataSource() throws MigrationClientException {
+    private void initRegDataSources() throws MigrationClientException {
 
         try {
+            regDataSources = new HashMap<>();
             File registryConfigXml;
             registryConfigXml = new File(CarbonUtils.getCarbonConfigDirPath(), "registry.xml");
             InputStream inStream = null;
@@ -251,27 +257,21 @@ public class DataSourceManager {
             // Read Database configurations
             while (dbConfigs.hasNext()) {
                 OMElement dbConfig = (OMElement) dbConfigs.next();
-                String dbName = dbConfig.getAttributeValue(new QName("name"));
-                if (dbName.equals("wso2registry")) {
-                    // Separating only wso2 registry. Or else the datasource name can be hard-coded to WSO2REG_DB
-                    OMElement dataSource = dbConfig.getFirstChildWithName(new QName("dataSource"));
-                    if (dataSource != null) {
-                        String dataSourceName = dataSource.getText();
-                        Context ctx;
-                        try {
-                            ctx = new InitialContext();
-                            regDataSource = (DataSource) ctx.lookup(dataSourceName);
-                            break;
-                        } catch (NamingException e) {
-                            throw new MigrationClientException("Error when initiating Registry Data Source.", e);
-                        }
+                OMElement dataSource = dbConfig.getFirstChildWithName(new QName("dataSource"));
+                if (dataSource != null) {
+                    String dataSourceName = dataSource.getText();
+                    Context ctx;
+                    try {
+                        ctx = new InitialContext();
+                        DataSource regDataSource = (DataSource) ctx.lookup(dataSourceName);
+                        regDataSources.put(dataSourceName, regDataSource);
+                    } catch (NamingException e) {
+                        throw new MigrationClientException("Error when initiating Registry Data Source.", e);
                     }
                 }
             }
-        } catch (CarbonException | XMLStreamException e) {
+        } catch (CarbonException | XMLStreamException | FileNotFoundException e) {
             throw new MigrationClientException("Error when initiating the Registry Data Source.");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 

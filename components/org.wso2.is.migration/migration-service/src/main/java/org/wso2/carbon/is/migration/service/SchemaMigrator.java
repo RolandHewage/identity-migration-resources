@@ -23,6 +23,7 @@ import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +36,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringTokenizer;
 
@@ -62,11 +64,14 @@ public class SchemaMigrator extends Migrator {
             conn = getDataSource().getConnection();
             migrateWithConnection(conn);
             /* To support migration of registry and primary JDBC userstores separate, i.e., the migration client
-                 should provide configurations for a Registry datasource and Primary JDBC userstore datasources
-                 and handle their migrations separately. */
+            should provide configurations for a Registry datasource and Primary JDBC userstore datasources and handle
+            their migrations separately. */
             if (isSeparateRegDB() && Objects.equals(getSchema(), "um")) {
-                conn = getDataSource("reg").getConnection();
-                migrateWithConnection(conn);
+                Map<String, DataSource> regDatasources = getRegistryDataSources();
+                for (Map.Entry<String, DataSource> dataSource : regDatasources.entrySet()) {
+                    conn = dataSource.getValue().getConnection();
+                     migrateWithConnection(conn);
+                }
             }
         } catch (SQLException e) {
             throw new MigrationClientException(e.getMessage(), e);

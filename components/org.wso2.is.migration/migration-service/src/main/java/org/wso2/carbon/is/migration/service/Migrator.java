@@ -23,6 +23,7 @@ import org.wso2.carbon.is.migration.config.MigratorConfig;
 import org.wso2.carbon.is.migration.config.Version;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Abstract class for Migrator contract. All migration implementation should be implemented from this class.
@@ -58,6 +59,11 @@ public abstract class Migrator {
 
         DataSource dataSource = DataSourceManager.getInstance().getDataSource(getSchema());
         return dataSource;
+    }
+
+    public Map<String, DataSource> getRegistryDataSources() throws MigrationClientException {
+
+        return DataSourceManager.getInstance().getRegistryDataSources();
     }
 
     public boolean isContinueOnError() {
