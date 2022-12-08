@@ -252,8 +252,8 @@ public class DataSourceManager {
             while (dbConfigs.hasNext()) {
                 OMElement dbConfig = (OMElement) dbConfigs.next();
                 String dbName = dbConfig.getAttributeValue(new QName("name"));
-                if (dbName.equals("govregistry")) {
-                    // or the datasource name can be hard-coded to WSO2REG_DB
+                if (dbName.equals("wso2registry")) {
+                    // Separating only wso2 registry. Or else the datasource name can be hard-coded to WSO2REG_DB
                     OMElement dataSource = dbConfig.getFirstChildWithName(new QName("dataSource"));
                     if (dataSource != null) {
                         String dataSourceName = dataSource.getText();
