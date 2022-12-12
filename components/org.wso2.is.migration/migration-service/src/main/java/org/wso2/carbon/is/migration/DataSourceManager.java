@@ -264,6 +264,10 @@ public class DataSourceManager {
                     try {
                         ctx = new InitialContext();
                         DataSource regDataSource = (DataSource) ctx.lookup(dataSourceName);
+                        if (regDataSource == null) {
+                            throw new MigrationClientException(Constant.MIGRATION_LOG + "Error when initiating " +
+                                    "registry datasource.");
+                        }
                         regDataSources.put(dataSourceName, regDataSource);
                     } catch (NamingException e) {
                         throw new MigrationClientException("Error when reading Registry Data Source configurations.",

@@ -62,15 +62,20 @@ public class SchemaMigrator extends Migrator {
         this.location = getMigratorConfig().getParameterValue(Constant.LOCATION);
         try {
             conn = getDataSource().getConnection();
-            migrateWithDBConnection(conn);
+            String connURL = conn.getMetaData().getURL();
+            migrateWithDBConnection();
             /* To support migration of registry and primary JDBC userstores separate, i.e., the migration client
             should provide configurations for a Registry datasource and Primary JDBC userstore datasources and handle
             their migrations separately. */
             if (isSeparateRegDB() && Objects.equals(getSchema(), "um")) {
                 Map<String, DataSource> regDatasources = getRegistryDataSources();
                 for (Map.Entry<String, DataSource> dataSource : regDatasources.entrySet()) {
+                    // Updating the 'conn' object for migration of registry data sources.
                     conn = dataSource.getValue().getConnection();
-                     migrateWithDBConnection(conn);
+                    if (!Objects.equals(connURL, conn.getMetaData().getURL())) {
+                        // This is to skip the duplicate data-source migration already done for um data-source.
+                        migrateWithDBConnection();
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -78,7 +83,7 @@ public class SchemaMigrator extends Migrator {
         }
     }
 
-    private void migrateWithDBConnection(Connection conn) throws MigrationClientException {
+    private void migrateWithDBConnection() throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Executing Identity Migration Scripts.");
         try {
