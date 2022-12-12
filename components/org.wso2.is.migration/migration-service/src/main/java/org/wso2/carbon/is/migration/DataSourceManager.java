@@ -35,8 +35,12 @@ import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -44,10 +48,6 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Class for datasource management.
@@ -248,7 +248,7 @@ public class DataSourceManager {
             }
 
             if (inStream == null) {
-                throw new MigrationClientException("Error when initiating the Registry Data Source.");
+                throw new MigrationClientException("Error when reading the Registry Data Source configurations.");
             }
             StAXOMBuilder builder = new StAXOMBuilder(CarbonUtils.replaceSystemVariablesInXml(inStream));
             OMElement configElement = builder.getDocumentElement();
@@ -266,7 +266,8 @@ public class DataSourceManager {
                         DataSource regDataSource = (DataSource) ctx.lookup(dataSourceName);
                         regDataSources.put(dataSourceName, regDataSource);
                     } catch (NamingException e) {
-                        throw new MigrationClientException("Error when initiating Registry Data Source.", e);
+                        throw new MigrationClientException("Error when reading Registry Data Source configurations.",
+                                e);
                     }
                 }
             }
