@@ -114,6 +114,7 @@ public class DataSourceManager {
      * Return registry datasources.
      */
     public Map<String, DataSource> getRegistryDataSources() throws MigrationClientException {
+
         return regDataSources;
     }
 

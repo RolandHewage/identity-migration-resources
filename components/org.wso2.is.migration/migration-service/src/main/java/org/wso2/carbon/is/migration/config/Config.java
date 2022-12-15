@@ -45,7 +45,7 @@ public class Config {
     private String currentEncryptionAlgorithm;
     private String migratedEncryptionAlgorithm;
 
-    private boolean isSeparateRegDB;
+    private boolean isSeparateRegistryDB;
 
     private Config() {
 
@@ -213,11 +213,11 @@ public class Config {
         this.migratedEncryptionAlgorithm = migratedEncryptionAlgorithm;
     }
 
-    public boolean isSeparateRegDB() {
-        return isSeparateRegDB;
+    public boolean isSeparateRegistryDB() {
+        return isSeparateRegistryDB;
     }
 
-    public void setSeparateRegDB(boolean separateRegDB) {
-        isSeparateRegDB = separateRegDB;
+    public void setSeparateRegistryDB(boolean separateRegistryDB) {
+        isSeparateRegistryDB = separateRegistryDB;
     }
 }

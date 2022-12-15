@@ -34,7 +34,7 @@ public abstract class Migrator {
     public static final String CONTINUE_ON_ERROR = "continueOnError";
     public static final String BATCH_UPDATE = "batchUpdate";
     public static final String IGNORE_FOR_INACTIVE_TENANTS = "ignoreForInactiveTenants";
-    public static final String IS_SEPARATE_REG_DB = "isSeparateRegDB";
+    public static final String IS_SEPARATE_REGISTRY_DB = "isSeparateRegistryDB";
 
     private MigratorConfig migratorConfig;
     private Version versionConfig;
@@ -93,13 +93,13 @@ public abstract class Migrator {
         return Boolean.parseBoolean(ignoreForInactiveTenants);
     }
 
-    public boolean isSeparateRegDB() {
+    public boolean isSeparateRegistryDB() {
 
-        String isSeparateRegDB = getMigratorConfig().getParameterValue(IS_SEPARATE_REG_DB);
-        if (StringUtils.isBlank(isSeparateRegDB)) {
-            return Config.getInstance().isSeparateRegDB();
+        String isSeparateRegistryDB = getMigratorConfig().getParameterValue(IS_SEPARATE_REGISTRY_DB);
+        if (StringUtils.isBlank(isSeparateRegistryDB)) {
+            return Config.getInstance().isSeparateRegistryDB();
         }
-        return Boolean.parseBoolean(isSeparateRegDB);
+        return Boolean.parseBoolean(isSeparateRegistryDB);
     }
 
     public String getSchema() {

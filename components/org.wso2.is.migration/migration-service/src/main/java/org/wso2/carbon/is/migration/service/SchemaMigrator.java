@@ -67,7 +67,7 @@ public class SchemaMigrator extends Migrator {
             /* To support migration of registry and primary JDBC userstores separate, i.e., the migration client
             should provide configurations for a Registry datasource and Primary JDBC userstore datasources and handle
             their migrations separately. */
-            if (isSeparateRegDB() && Objects.equals(getSchema(), "um")) {
+            if (isSeparateRegistryDB() && Objects.equals(getSchema(), "um")) {
                 Map<String, DataSource> regDatasources = getRegistryDataSources();
                 for (Map.Entry<String, DataSource> dataSource : regDatasources.entrySet()) {
                     // Updating the 'conn' object for migration of registry data sources.
