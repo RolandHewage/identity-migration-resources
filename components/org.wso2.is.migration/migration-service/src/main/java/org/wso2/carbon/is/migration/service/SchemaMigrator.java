@@ -23,6 +23,7 @@ import org.wso2.carbon.is.migration.util.Constant;
 import org.wso2.carbon.is.migration.util.Utility;
 import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +36,8 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.Map;
+import java.util.Objects;
 import java.util.StringTokenizer;
 
 import static org.wso2.carbon.is.migration.util.Constant.IDENTITY_DB_SCRIPT;
@@ -57,10 +60,33 @@ public class SchemaMigrator extends Migrator {
     public void migrate() throws MigrationClientException {
 
         this.location = getMigratorConfig().getParameterValue(Constant.LOCATION);
+        try {
+            conn = getDataSource().getConnection();
+            String connURL = conn.getMetaData().getURL();
+            migrateWithDBConnection();
+            /* To support migration of registry and primary JDBC userstores separate, i.e., the migration client
+            should provide configurations for a Registry datasource and Primary JDBC userstore datasources and handle
+            their migrations separately. */
+            if (isSeparateRegistryDB() && Objects.equals(getSchema(), "um")) {
+                Map<String, DataSource> regDatasources = getRegistryDataSources();
+                for (Map.Entry<String, DataSource> dataSource : regDatasources.entrySet()) {
+                    // Updating the 'conn' object for migration of registry data sources.
+                    conn = dataSource.getValue().getConnection();
+                    if (!Objects.equals(connURL, conn.getMetaData().getURL())) {
+                        // This is to skip the duplicate data-source migration already done for um data-source.
+                        migrateWithDBConnection();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new MigrationClientException(e.getMessage(), e);
+        }
+    }
+
+    private void migrateWithDBConnection() throws MigrationClientException {
 
         log.info(Constant.MIGRATION_LOG + "Executing Identity Migration Scripts.");
         try {
-            conn = getDataSource().getConnection();
             conn.setAutoCommit(false);
             String databaseType = DatabaseCreator.getDatabaseType(this.conn);
             if ("mysql".equals(databaseType)) {

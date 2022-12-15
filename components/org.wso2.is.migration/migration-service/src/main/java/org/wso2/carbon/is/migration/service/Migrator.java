@@ -23,6 +23,7 @@ import org.wso2.carbon.is.migration.config.MigratorConfig;
 import org.wso2.carbon.is.migration.config.Version;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * Abstract class for Migrator contract. All migration implementation should be implemented from this class.
@@ -33,6 +34,7 @@ public abstract class Migrator {
     public static final String CONTINUE_ON_ERROR = "continueOnError";
     public static final String BATCH_UPDATE = "batchUpdate";
     public static final String IGNORE_FOR_INACTIVE_TENANTS = "ignoreForInactiveTenants";
+    public static final String IS_SEPARATE_REGISTRY_DB = "isSeparateRegistryDB";
 
     private MigratorConfig migratorConfig;
     private Version versionConfig;
@@ -57,6 +59,11 @@ public abstract class Migrator {
 
         DataSource dataSource = DataSourceManager.getInstance().getDataSource(getSchema());
         return dataSource;
+    }
+
+    public Map<String, DataSource> getRegistryDataSources() throws MigrationClientException {
+
+        return DataSourceManager.getInstance().getRegistryDataSources();
     }
 
     public boolean isContinueOnError() {
@@ -84,6 +91,15 @@ public abstract class Migrator {
             return Config.getInstance().isIgnoreForInactiveTenants();
         }
         return Boolean.parseBoolean(ignoreForInactiveTenants);
+    }
+
+    public boolean isSeparateRegistryDB() {
+
+        String isSeparateRegistryDB = getMigratorConfig().getParameterValue(IS_SEPARATE_REGISTRY_DB);
+        if (StringUtils.isBlank(isSeparateRegistryDB)) {
+            return Config.getInstance().isSeparateRegistryDB();
+        }
+        return Boolean.parseBoolean(isSeparateRegistryDB);
     }
 
     public String getSchema() {
