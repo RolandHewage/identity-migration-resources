@@ -74,7 +74,12 @@ public class SchemaMigrator extends Migrator {
                     conn = dataSource.getValue().getConnection();
                     if (!Objects.equals(connURL, conn.getMetaData().getURL())) {
                         // This is to skip the duplicate data-source migration already done for um data-source.
-                        migrateWithDBConnection();
+                        if(!dataSource.getKey().equals("jdbc/WSO2CarbonDB")) {
+                            System.out.println("the datasources for migration: " + dataSource.getKey());
+                            /* Since IS recommends the carbon-db to be H2 embedded DB, and since we skip migration,
+                            if any other DBs are used, have to re-create the DBs again. */
+                            migrateWithDBConnection();
+                        }
                     }
                 }
             }
