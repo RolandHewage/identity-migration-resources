@@ -74,7 +74,12 @@ public class SchemaMigrator extends Migrator {
                     conn = dataSource.getValue().getConnection();
                     if (!Objects.equals(connURL, conn.getMetaData().getURL())) {
                         // This is to skip the duplicate data-source migration already done for um data-source.
-                        migrateWithDBConnection();
+                        if(!dataSource.getKey().equals("jdbc/WSO2CarbonDB")) {
+                            /* The new embedded H2 DB in the target migration pack can be used without migrating.
+                            In case an external DB has been configured for WSO2CarbonDB, the DB needs to be recreated
+                            with the new DB scripts available in the target IS pack. */
+                            migrateWithDBConnection();
+                        }
                     }
                 }
             }
